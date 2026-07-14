@@ -17,6 +17,7 @@ import {
   X,
   Leaf,
 } from 'lucide-react';
+import { ROLE_LABELS } from '../../utils/constants';
 
 const iconMap = {
   LayoutDashboard,
@@ -180,7 +181,7 @@ export default function Sidebar({
                   {user?.displayName || 'User'}
                 </p>
                 <p className="text-xs text-white/50 truncate">
-                  {user?.role || 'Staff'}
+                  {ROLE_LABELS[user?.role] || user?.role || 'Staff'}
                 </p>
               </motion.div>
             )}

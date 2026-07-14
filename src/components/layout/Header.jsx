@@ -10,7 +10,9 @@ import {
   Settings,
   LogOut,
   X,
+  Shield,
 } from 'lucide-react';
+import { ROLE_LABELS } from '../../utils/constants';
 
 const dropdownVariants = {
   hidden: { opacity: 0, y: -8, scale: 0.95 },
@@ -248,6 +250,12 @@ export default function Header({
                       {user.displayName || 'User'}
                     </p>
                     <p className="text-xs text-text-secondary truncate">{user.email}</p>
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <Shield className="w-3 h-3 text-primary" />
+                      <span className="text-xs font-medium text-primary">
+                        {ROLE_LABELS[user.role] || user.role || 'Staff'}
+                      </span>
+                    </div>
                   </div>
                 )}
                 <div className="py-1">

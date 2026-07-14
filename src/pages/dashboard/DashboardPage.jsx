@@ -11,7 +11,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { useAuth } from "../../contexts/AuthContext";
-import { ROLES } from "../../utils/constants";
+import { ROLES, ROLE_LABELS } from "../../utils/constants";
 
 const monthlyCollectionData = [
   { month: "Jan", collected: 32000, target: 30000 },
@@ -63,14 +63,6 @@ const inventoryData = [
   { name: "Fannings", stock: 1800, threshold: 600 },
 ];
 
-const ROLE_LABELS = {
-  [ROLES.ADMIN]: "Administrator",
-  [ROLES.FACTORY_MANAGER]: "Factory Manager",
-  [ROLES.COLLECTION_OFFICER]: "Collection Officer",
-  [ROLES.PRODUCTION_OFFICER]: "Production Officer",
-  [ROLES.STORE_KEEPER]: "Store Keeper",
-  [ROLES.ACCOUNTANT]: "Accountant",
-};
 
 function getGreeting() {
   const hour = new Date().getHours();
