@@ -53,6 +53,8 @@ import Badge from "../../components/ui/Badge";
 import Select from "../../components/ui/Select";
 import Input from "../../components/ui/Input";
 import { useToast } from "../../components/ui/Toast";
+import { useAuth } from "../../contexts/AuthContext";
+import { ROLE_REPORTS } from "../../utils/constants";
 
 const COLORS = {
   primary: "#2E7D32",
@@ -91,15 +93,6 @@ const staggerItem = {
   initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
-
-const reportTypes = [
-  { id: "collection", label: "Collection Report", icon: Coffee, description: "Tea collection data and farmer contributions" },
-  { id: "production", label: "Production Report", icon: Factory, description: "Manufacturing output and batch tracking" },
-  { id: "sales", label: "Sales Report", icon: ShoppingCart, description: "Revenue, invoices, and customer orders" },
-  { id: "expense", label: "Expense Report", icon: Receipt, description: "Expenditure breakdown and category analysis" },
-  { id: "financial", label: "Financial Summary", icon: Landmark, description: "P&L overview and key financial metrics" },
-  { id: "inventory", label: "Inventory Report", icon: Package, description: "Stock levels, alerts, and valuations" },
-];
 
 const datePresets = [
   { value: "today", label: "Today" },
@@ -275,9 +268,9 @@ function StatCard({ icon: Icon, label, value, change, changeLabel, color = "prim
   );
 }
 
-function ReportTypeSelector({ selected, onSelect }) {
+function ReportTypeSelector({ selected, onSelect, reportTypes }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className={`grid gap-3 ${reportTypes.length <= 3 ? "grid-cols-1 md:grid-cols-3" : reportTypes.length <= 4 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-6"}`}>
       {reportTypes.map((rt) => {
         const isActive = selected === rt.id;
         return (
@@ -907,7 +900,12 @@ const reportComponents = {
 
 export default function ReportsPage() {
   const { success, info } = useToast();
-  const [selectedReport, setSelectedReport] = useState("collection");
+  const { userProfile } = useAuth();
+  const role = userProfile?.role || "admin";
+  const allowedReportIds = ROLE_REPORTS[role] || [];
+  const reportTypes = allReportTypes.filter((r) => allowedReportIds.includes(r.id));
+
+  const [selectedReport, setSelectedReport] = useState(reportTypes[0]?.id || "collection");
   const [datePreset, setDatePreset] = useState("month");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -961,7 +959,7 @@ export default function ReportsPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
-          <ReportTypeSelector selected={selectedReport} onSelect={setSelectedReport} />
+          <ReportTypeSelector selected={selectedReport} onSelect={setSelectedReport} reportTypes={reportTypes} />
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}>

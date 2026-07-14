@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { ROLE_PERMISSIONS } from '../../utils/constants';
 
-const defaultMenuItems = [
-  { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },
-  { label: 'Farmers', path: '/farmers', icon: 'Users' },
-  { label: 'Tea Collection', path: '/collections', icon: 'Coffee' },
-  { label: 'Production', path: '/production', icon: 'Factory' },
-  { label: 'Inventory', path: '/inventory', icon: 'Package' },
-  { label: 'Sales', path: '/sales', icon: 'ShoppingCart' },
-  { label: 'Expenses', path: '/expenses', icon: 'Receipt' },
-  { label: 'Reports', path: '/reports', icon: 'BarChart3' },
-  { label: 'Employees', path: '/employees', icon: 'UserCog' },
-  { label: 'Settings', path: '/settings', icon: 'Settings' },
-  { label: 'Admin Panel', path: '/admin', icon: 'Shield' },
+const allMenuItems = [
+  { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard', permission: 'dashboard' },
+  { label: 'Farmers', path: '/farmers', icon: 'Users', permission: 'farmers' },
+  { label: 'Tea Collection', path: '/collections', icon: 'Coffee', permission: 'collections' },
+  { label: 'Production', path: '/production', icon: 'Factory', permission: 'production' },
+  { label: 'Inventory', path: '/inventory', icon: 'Package', permission: 'inventory' },
+  { label: 'Sales', path: '/sales', icon: 'ShoppingCart', permission: 'sales' },
+  { label: 'Expenses', path: '/expenses', icon: 'Receipt', permission: 'expenses' },
+  { label: 'Reports', path: '/reports', icon: 'BarChart3', permission: 'reports' },
+  { label: 'Employees', path: '/employees', icon: 'UserCog', permission: 'employees' },
+  { label: 'Settings', path: '/settings', icon: 'Settings', permission: 'settings' },
+  { label: 'Admin Panel', path: '/admin', icon: 'Shield', permission: 'admin' },
 ];
 
 function useIsDesktop() {
@@ -36,26 +37,10 @@ export default function DashboardLayout({ children, user, onLogout, notification
   const [mobileOpen, setMobileOpen] = useState(false);
   const isDesktop = useIsDesktop();
 
-  const menuItems = defaultMenuItems.filter((item) => {
-    const role = user?.role;
-    if (role === 'admin') return true;
-    if (role === 'factory_manager') {
-      return !['Admin Panel'].includes(item.label);
-    }
-    if (role === 'collection_officer') {
-      return ['Dashboard', 'Farmers', 'Tea Collection'].includes(item.label);
-    }
-    if (role === 'production_officer') {
-      return ['Dashboard', 'Production', 'Inventory'].includes(item.label);
-    }
-    if (role === 'store_keeper') {
-      return ['Dashboard', 'Inventory'].includes(item.label);
-    }
-    if (role === 'accountant') {
-      return ['Dashboard', 'Sales', 'Expenses', 'Reports'].includes(item.label);
-    }
-    return ['Dashboard'].includes(item.label);
-  });
+  const role = user?.role;
+  const permissions = ROLE_PERMISSIONS[role] || [];
+
+  const menuItems = allMenuItems.filter((item) => permissions.includes(item.permission));
 
   const marginLeft = isDesktop ? (collapsed ? 72 : 260) : 0;
 

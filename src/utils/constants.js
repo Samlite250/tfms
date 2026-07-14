@@ -18,54 +18,43 @@ export const ROLE_LABELS = {
 
 export const ROLE_PERMISSIONS = {
   [ROLES.ADMIN]: [
-    'dashboard',
-    'farmers',
-    'employees',
-    'collections',
-    'production',
-    'inventory',
-    'customers',
-    'sales',
-    'expenses',
-    'departments',
-    'reports',
-    'settings',
-    'users',
-    'activity_logs',
+    'dashboard', 'farmers', 'employees', 'collections', 'production',
+    'inventory', 'customers', 'sales', 'expenses', 'reports', 'settings', 'admin',
   ],
   [ROLES.FACTORY_MANAGER]: [
-    'dashboard',
-    'farmers',
-    'employees',
-    'collections',
-    'production',
-    'inventory',
-    'customers',
-    'sales',
-    'expenses',
-    'departments',
-    'reports',
+    'dashboard', 'farmers', 'employees', 'collections', 'production',
+    'inventory', 'customers', 'sales', 'expenses', 'reports',
   ],
   [ROLES.COLLECTION_OFFICER]: [
-    'dashboard',
-    'farmers',
-    'collections',
+    'dashboard', 'farmers', 'collections',
   ],
   [ROLES.PRODUCTION_OFFICER]: [
-    'dashboard',
-    'production',
-    'inventory',
+    'dashboard', 'production', 'inventory',
   ],
   [ROLES.STORE_KEEPER]: [
-    'dashboard',
-    'inventory',
+    'dashboard', 'inventory',
   ],
   [ROLES.ACCOUNTANT]: [
-    'dashboard',
-    'sales',
-    'expenses',
-    'reports',
+    'dashboard', 'sales', 'expenses', 'reports',
   ],
+};
+
+export const ROLE_REPORTS = {
+  [ROLES.ADMIN]: ['collection', 'production', 'sales', 'expense', 'financial', 'inventory'],
+  [ROLES.FACTORY_MANAGER]: ['collection', 'production', 'sales', 'expense', 'financial', 'inventory'],
+  [ROLES.COLLECTION_OFFICER]: ['collection'],
+  [ROLES.PRODUCTION_OFFICER]: ['production', 'inventory'],
+  [ROLES.STORE_KEEPER]: ['inventory'],
+  [ROLES.ACCOUNTANT]: ['sales', 'expense', 'financial'],
+};
+
+export const ROLE_SETTINGS_TABS = {
+  [ROLES.ADMIN]: ['profile', 'factory', 'departments', 'grades', 'centers', 'notifications'],
+  [ROLES.FACTORY_MANAGER]: ['profile', 'notifications'],
+  [ROLES.COLLECTION_OFFICER]: ['profile', 'notifications'],
+  [ROLES.PRODUCTION_OFFICER]: ['profile', 'notifications'],
+  [ROLES.STORE_KEEPER]: ['profile', 'notifications'],
+  [ROLES.ACCOUNTANT]: ['profile', 'notifications'],
 };
 
 export const COLLECTIONS = {

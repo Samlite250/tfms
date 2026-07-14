@@ -34,8 +34,10 @@ import Input from "../../components/ui/Input";
 import Badge from "../../components/ui/Badge";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
+import { useAuth } from "../../contexts/AuthContext";
+import { ROLE_SETTINGS_TABS } from "../../utils/constants";
 
-const tabs = [
+const allTabs = [
   { id: "profile", label: "Profile", icon: User },
   { id: "factory", label: "Factory", icon: Factory },
   { id: "departments", label: "Departments", icon: Building2 },
@@ -946,6 +948,10 @@ function NotificationsSection() {
 
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
+  const { userProfile } = useAuth();
+  const role = userProfile?.role || "admin";
+  const allowedTabs = ROLE_SETTINGS_TABS[role] || ["profile"];
+  const tabs = allTabs.filter((t) => allowedTabs.includes(t.id));
 
   const renderContent = () => {
     switch (activeTab) {
