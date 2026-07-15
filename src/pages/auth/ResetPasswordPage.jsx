@@ -75,7 +75,7 @@ function ResetPasswordPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-card rounded-2xl shadow-lg p-8">
+        <div className="bg-card rounded-2xl shadow-lg border border-border p-8">
           <AnimatePresence mode="wait">
             {success ? (
               <motion.div

@@ -646,6 +646,15 @@ function InventoryReport() {
   );
 }
 
+const allReportTypes = [
+  { id: "collection", label: "Collection", icon: Coffee, description: "Tea collection records and farmer participation" },
+  { id: "production", label: "Production", icon: Factory, description: "Production batches and output metrics" },
+  { id: "sales", label: "Sales", icon: ShoppingCart, description: "Sales invoices, revenue, and trends" },
+  { id: "expense", label: "Expenses", icon: Receipt, description: "Expense records and category breakdown" },
+  { id: "financial", label: "Financial", icon: DollarSign, description: "Revenue, expenses, and profit summary" },
+  { id: "inventory", label: "Inventory", icon: Package, description: "Stock levels, valuation, and alerts" },
+];
+
 const reportComponents = {
   collection: CollectionReport,
   production: ProductionReport,

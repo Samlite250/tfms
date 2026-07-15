@@ -169,6 +169,8 @@ export default function RegisterPage() {
           <h2 className="text-3xl font-bold text-text-primary">Create Account</h2>
           <p className="text-text-secondary mt-2 mb-8">Fill in your details to register</p>
 
+          <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
+
           {authError && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -346,6 +348,8 @@ export default function RegisterPage() {
               )}
             </button>
           </form>
+
+          </div>
 
           <p className="text-center text-sm text-text-secondary mt-6">
             Already have an account?{' '}

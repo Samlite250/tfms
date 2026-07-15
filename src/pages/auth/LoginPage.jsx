@@ -143,6 +143,8 @@ function LoginPage() {
           <h2 className="text-3xl font-bold text-text-primary">Welcome Back</h2>
           <p className="text-text-secondary mt-2 mb-8">Sign in to your account</p>
 
+          <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
+
           {authError && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -238,6 +240,8 @@ function LoginPage() {
               )}
             </button>
           </form>
+
+          </div>
 
           <p className="text-center text-sm text-text-secondary mt-8">
             Don't have an account?{' '}
