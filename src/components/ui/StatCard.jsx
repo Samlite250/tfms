@@ -21,7 +21,7 @@ export default function StatCard({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.4, ease: "easeOut" }}
         className="rounded-xl bg-white shadow-sm transition-all duration-200 hover:shadow-md"
-        style={{ borderTop: `3px solid ${borderColor}` }}
+        style={{ borderTop: `2px solid ${borderColor}` }}
       >
         <div className="flex items-center gap-4 border border-gray-100 border-t-0 rounded-b-xl p-4">
           <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${bg}`}>
@@ -42,7 +42,7 @@ export default function StatCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4, ease: "easeOut" }}
       className="rounded-xl bg-white shadow-sm transition-all duration-200 hover:shadow-md"
-      style={{ borderTop: `3px solid ${borderColor}` }}
+      style={{ borderTop: `2px solid ${borderColor}` }}
     >
       <div className="flex items-start justify-between border border-gray-100 border-t-0 rounded-b-xl p-5">
         <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${bg}`}>
