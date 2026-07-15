@@ -20,10 +20,10 @@ export default function StatCard({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.4, ease: "easeOut" }}
-        className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md"
+        className="rounded-xl bg-white shadow-sm transition-all duration-200 hover:shadow-md"
+        style={{ borderTop: `3px solid ${borderColor}` }}
       >
-        <div className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: borderColor }} />
-        <div className="flex items-center gap-4 pt-1">
+        <div className="flex items-center gap-4 border border-gray-100 border-t-0 rounded-b-xl p-4">
           <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${bg}`}>
             <Icon className={`h-5 w-5 ${color}`} />
           </div>
@@ -41,10 +41,10 @@ export default function StatCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4, ease: "easeOut" }}
-      className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md"
+      className="rounded-xl bg-white shadow-sm transition-all duration-200 hover:shadow-md"
+      style={{ borderTop: `3px solid ${borderColor}` }}
     >
-      <div className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: borderColor }} />
-      <div className="flex items-start justify-between pt-1">
+      <div className="flex items-start justify-between border border-gray-100 border-t-0 rounded-b-xl p-5">
         <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${bg}`}>
           <Icon className={`h-5 w-5 ${color}`} />
         </div>
@@ -59,7 +59,7 @@ export default function StatCard({
           </span>
         )}
       </div>
-      <div className="mt-3">
+      <div className="px-5 pb-5">
         <p className="text-2xl font-bold text-gray-900">{value}</p>
         <p className="mt-0.5 text-sm text-gray-500">{label}</p>
       </div>
