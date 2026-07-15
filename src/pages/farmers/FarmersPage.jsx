@@ -20,6 +20,7 @@ import Modal from "../../components/ui/Modal";
 import SearchInput from "../../components/ui/SearchInput";
 import EmptyState from "../../components/ui/EmptyState";
 import StatCard from "../../components/ui/StatCard";
+import Select from "../../components/ui/Select";
 import { useToast } from "../../components/ui/Toast";
 
 const collectionCenterOptions = [
