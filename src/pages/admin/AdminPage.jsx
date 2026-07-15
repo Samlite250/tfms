@@ -55,7 +55,6 @@ import { ROLES, ROLE_LABELS, DEPARTMENTS } from "../../utils/constants";
 
 const ROLE_BADGE_VARIANT = {
   [ROLES.ADMIN]: "danger",
-  [ROLES.FACTORY_MANAGER]: "info",
   [ROLES.COLLECTION_OFFICER]: "success",
   [ROLES.PRODUCTION_OFFICER]: "warning",
   [ROLES.STORE_KEEPER]: "default",
@@ -96,9 +95,9 @@ const TIMEZONE_OPTIONS = [
 
 const mockUsers = [
   { id: "USR001", name: "Dissanayake Bandara", email: "d.bandara@tfms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000001", status: "active", lastLogin: "2026-07-14 09:15", avatar: "DB" },
-  { id: "USR002", name: "Kamal Perera", email: "k.perera@tfms.com", role: ROLES.FACTORY_MANAGER, department: "Management", phone: "0771000002", status: "active", lastLogin: "2026-07-14 08:30", avatar: "KP" },
+  { id: "USR002", name: "Kamal Perera", email: "k.perera@tfms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000002", status: "active", lastLogin: "2026-07-14 08:30", avatar: "KP" },
   { id: "USR003", name: "Nimal Silva", email: "n.silva@tfms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000003", status: "active", lastLogin: "2026-07-14 07:45", avatar: "NS" },
-  { id: "USR004", name: "Anita Jayawardena", email: "a.jayawardena@tfms.com", role: ROLES.FACTORY_MANAGER, department: "Management", phone: "0771000004", status: "active", lastLogin: "2026-07-13 17:20", avatar: "AJ" },
+  { id: "USR004", name: "Anita Jayawardena", email: "a.jayawardena@tfms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000004", status: "active", lastLogin: "2026-07-13 17:20", avatar: "AJ" },
   { id: "USR005", name: "Ravi Wickrama", email: "r.wickrama@tfms.com", role: ROLES.ACCOUNTANT, department: "Finance & Accounts", phone: "0771000005", status: "active", lastLogin: "2026-07-14 08:00", avatar: "RW" },
   { id: "USR006", name: "Dilani Herath", email: "d.herath@tfms.com", role: ROLES.PRODUCTION_OFFICER, department: "Processing", phone: "0771000006", status: "active", lastLogin: "2026-07-14 06:30", avatar: "DH" },
   { id: "USR007", name: "Chaminda Rajapaksa", email: "c.rajapaksa@tfms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000007", status: "active", lastLogin: "2026-07-13 14:10", avatar: "CR" },
@@ -109,7 +108,7 @@ const mockUsers = [
   { id: "USR012", name: "Sanduni Ranasinghe", email: "s.ranasinghe@tfms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000012", status: "active", lastLogin: "2026-07-14 06:00", avatar: "SR" },
   { id: "USR013", name: "Wasantha Jayasuriya", email: "w.jayasuriya@tfms.com", role: ROLES.PRODUCTION_OFFICER, department: "Processing", phone: "0771000013", status: "active", lastLogin: "2026-07-14 08:45", avatar: "WJ" },
   { id: "USR014", name: "Kavisha Dissanayake", email: "k.dissanayake@tfms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000014", status: "inactive", lastLogin: "2026-05-10 09:30", avatar: "KD" },
-  { id: "USR015", name: "Mahinda Gamage", email: "m.gamage@tfms.com", role: ROLES.FACTORY_MANAGER, department: "Processing", phone: "0771000015", status: "active", lastLogin: "2026-07-14 07:00", avatar: "MG" },
+  { id: "USR015", name: "Mahinda Gamage", email: "m.gamage@tfms.com", role: ROLES.ADMIN, department: "Processing", phone: "0771000015", status: "active", lastLogin: "2026-07-14 07:00", avatar: "MG" },
   { id: "USR016", name: "Lakshman Peris", email: "l.peris@tfms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000016", status: "active", lastLogin: "2026-07-13 12:00", avatar: "LP" },
 ];
 

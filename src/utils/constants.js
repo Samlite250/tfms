@@ -1,6 +1,5 @@
 export const ROLES = {
   ADMIN: 'admin',
-  FACTORY_MANAGER: 'factory_manager',
   COLLECTION_OFFICER: 'collection_officer',
   PRODUCTION_OFFICER: 'production_officer',
   STORE_KEEPER: 'store_keeper',
@@ -9,7 +8,6 @@ export const ROLES = {
 
 export const ROLE_LABELS = {
   [ROLES.ADMIN]: 'Administrator',
-  [ROLES.FACTORY_MANAGER]: 'Factory Manager',
   [ROLES.COLLECTION_OFFICER]: 'Collection Officer',
   [ROLES.PRODUCTION_OFFICER]: 'Production Officer',
   [ROLES.STORE_KEEPER]: 'Store Keeper',
@@ -20,10 +18,6 @@ export const ROLE_PERMISSIONS = {
   [ROLES.ADMIN]: [
     'dashboard', 'farmers', 'employees', 'collections', 'production',
     'inventory', 'customers', 'sales', 'expenses', 'reports', 'settings', 'admin',
-  ],
-  [ROLES.FACTORY_MANAGER]: [
-    'dashboard', 'farmers', 'employees', 'collections', 'production',
-    'inventory', 'customers', 'sales', 'expenses', 'reports',
   ],
   [ROLES.COLLECTION_OFFICER]: [
     'dashboard', 'farmers', 'collections',
@@ -41,7 +35,6 @@ export const ROLE_PERMISSIONS = {
 
 export const ROLE_REPORTS = {
   [ROLES.ADMIN]: ['collection', 'production', 'sales', 'expense', 'financial', 'inventory'],
-  [ROLES.FACTORY_MANAGER]: ['collection', 'production', 'sales', 'expense', 'financial', 'inventory'],
   [ROLES.COLLECTION_OFFICER]: ['collection'],
   [ROLES.PRODUCTION_OFFICER]: ['production', 'inventory'],
   [ROLES.STORE_KEEPER]: ['inventory'],
@@ -50,7 +43,6 @@ export const ROLE_REPORTS = {
 
 export const ROLE_SETTINGS_TABS = {
   [ROLES.ADMIN]: ['profile', 'factory', 'departments', 'grades', 'centers', 'notifications'],
-  [ROLES.FACTORY_MANAGER]: ['profile', 'notifications'],
   [ROLES.COLLECTION_OFFICER]: ['profile', 'notifications'],
   [ROLES.PRODUCTION_OFFICER]: ['profile', 'notifications'],
   [ROLES.STORE_KEEPER]: ['profile', 'notifications'],

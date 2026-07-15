@@ -7,7 +7,6 @@ const AuthContext = createContext(null);
 
 const DEMO_USERS = [
   { uid: 'admin-001', email: 'admin@tfms.com', password: 'admin123', displayName: 'James Mwangi', role: 'admin', status: 'active', department: 'Administration', phone: '+254 700 100 200' },
-  { uid: 'manager-001', email: 'manager@tfms.com', password: 'manager123', displayName: 'Sarah Wanjiku', role: 'factory_manager', status: 'active', department: 'Administration', phone: '+254 700 100 201' },
   { uid: 'collection-001', email: 'collection@tfms.com', password: 'collection123', displayName: 'Peter Kamau', role: 'collection_officer', status: 'active', department: 'Collection', phone: '+254 700 100 202' },
   { uid: 'production-001', email: 'production@tfms.com', password: 'production123', displayName: 'Mary Njeri', role: 'production_officer', status: 'active', department: 'Production', phone: '+254 700 100 203' },
   { uid: 'store-001', email: 'store@tfms.com', password: 'store123', displayName: 'David Omondi', role: 'store_keeper', status: 'active', department: 'Packaging', phone: '+254 700 100 204' },

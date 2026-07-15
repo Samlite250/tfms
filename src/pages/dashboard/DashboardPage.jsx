@@ -38,34 +38,6 @@ function getRoleConfig(role) {
   switch (role) {
     case ROLES.ADMIN:
       return {
-        subtitle: "Here's your factory overview",
-        stats: [
-          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
-          { label: "Production Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
-          { label: "Inventory Available", value: "15,400 kg", change: "In stock", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
-          { label: "Total Sales", value: "$45,200", change: "+15%", up: true, icon: ShoppingCart, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20" },
-          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10",           borderColor: "#F9A825" },
-        ],
-        quickActions: [
-          { label: "Record Collection", icon: Coffee, to: "/collections/new", color: "bg-primary" },
-          { label: "New Production", icon: Factory, to: "/production/new", color: "bg-secondary" },
-          { label: "Add Farmer", icon: UserPlus, to: "/farmers/new", color: "bg-info" },
-          { label: "Record Sale", icon: ShoppingCart, to: "/sales/new", color: "bg-accent-dark" },
-          { label: "Add Expense", icon: Receipt, to: "/expenses/new", color: "bg-danger" },
-          { label: "Admin Panel", icon: Users, to: "/admin", color: "bg-purple-600" },
-        ],
-        activities: [
-          { id: 1, icon: Coffee, description: "Collection recorded: 450 kg from Kigali cooperative", time: "12 min ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
-          { id: 2, icon: UserPlus, description: "New farmer registered: Jean Mugabo", time: "1 hr ago", module: "Farmers", color: "text-info", bg: "bg-info/10" },
-          { id: 3, icon: Factory, description: "Batch #1042 completed: 320 kg green tea", time: "2 hrs ago", module: "Production", color: "text-secondary", bg: "bg-secondary/10" },
-          { id: 4, icon: ShoppingCart, description: "Invoice #2087 issued: $4,200 to Nairobi Traders", time: "3 hrs ago", module: "Sales", color: "text-accent-dark", bg: "bg-accent/10" },
-          { id: 5, icon: Package, description: "Inventory alert: Black tea stock below threshold", time: "4 hrs ago", module: "Inventory", color: "text-warning", bg: "bg-warning/10" },
-          { id: 6, icon: Receipt, description: "Expense: $1,850 for machinery maintenance", time: "5 hrs ago", module: "Expenses", color: "text-danger", bg: "bg-danger/10" },
-        ],
-      };
-
-    case ROLES.FACTORY_MANAGER:
-      return {
         subtitle: "Here's your management overview",
         stats: [
           { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },

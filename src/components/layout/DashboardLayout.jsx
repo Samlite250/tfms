@@ -14,7 +14,6 @@ const allMenuItems = [
   { label: 'Reports', path: '/reports', icon: 'BarChart3', permission: 'reports' },
   { label: 'Employees', path: '/employees', icon: 'UserCog', permission: 'employees' },
   { label: 'Settings', path: '/settings', icon: 'Settings', permission: 'settings' },
-  { label: 'Admin Panel', path: '/admin', icon: 'Shield', permission: 'admin' },
 ];
 
 function useIsDesktop() {
