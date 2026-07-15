@@ -49,6 +49,7 @@ import SearchInput from "../../components/ui/SearchInput";
 import Pagination from "../../components/ui/Pagination";
 import EmptyState from "../../components/ui/EmptyState";
 import { useToast } from "../../components/ui/Toast";
+import { useAuth } from "../../contexts/AuthContext";
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from "../../utils/constants";
 
 const ROLE_BADGE_VARIANT = {
@@ -250,7 +251,8 @@ export default function AdminPage() {
   const [pendingLoading, setPendingLoading] = useState(false);
   const [pendingSearch, setPendingSearch] = useState("");
 
-  const { success, error: toastError, info, approveUser, rejectUser: rejectUserAuth } = useAuth();
+  const { success, error: toastError, info } = useToast();
+  const { approveUser, rejectUser: rejectUserAuth } = useAuth();
 
   const {
     register,

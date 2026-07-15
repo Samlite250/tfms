@@ -19,6 +19,7 @@ import Badge from "../../components/ui/Badge";
 import SearchInput from "../../components/ui/SearchInput";
 import DataTable from "../../components/ui/DataTable";
 import Modal from "../../components/ui/Modal";
+import { useToast } from "../../components/ui/Toast";
 
 const TEA_GRADES = ["PF1", "PF2", "PF3", "PD", "Dust", "Fannings"];
 
@@ -126,6 +127,8 @@ const itemVariants = {
 };
 
 function CollectionPage() {
+  const { success } = useToast();
+  const [collectionsList, setCollectionsList] = useState(COLLECTIONS);
   const [search, setSearch] = useState("");
   const [gradeFilter, setGradeFilter] = useState("");
   const [farmerFilter, setFarmerFilter] = useState("");
@@ -135,7 +138,7 @@ function CollectionPage() {
   const [deleteModal, setDeleteModal] = useState(null);
 
   const filteredCollections = useMemo(() => {
-    return COLLECTIONS.filter((c) => {
+    return collectionsList.filter((c) => {
       if (search) {
         const q = search.toLowerCase();
         if (
@@ -151,7 +154,7 @@ function CollectionPage() {
       if (dateTo && c.date > dateTo) return false;
       return true;
     });
-  }, [search, gradeFilter, farmerFilter, dateFrom, dateTo]);
+  }, [collectionsList, search, gradeFilter, farmerFilter, dateFrom, dateTo]);
 
   const columns = [
     {
@@ -378,7 +381,11 @@ function CollectionPage() {
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleteModal(null)}>Cancel</Button>
-            <Button variant="danger" onClick={() => setDeleteModal(null)}>Delete</Button>
+            <Button variant="danger" onClick={() => {
+              setCollectionsList((prev) => prev.filter((c) => c.id !== deleteModal.id));
+              success(`Collection record ${deleteModal.receiptNumber} has been deleted.`);
+              setDeleteModal(null);
+            }}>Delete</Button>
           </>
         }
       >

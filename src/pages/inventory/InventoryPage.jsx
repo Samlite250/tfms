@@ -80,12 +80,13 @@ const staggerContainer = { visible: { transition: { staggerChildren: 0.05 } } };
 function InventoryPage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const [itemsList, setItemsList] = useState(MOCK_ITEMS);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [deleteModal, setDeleteModal] = useState({ open: false, item: null });
 
   const filteredItems = useMemo(() => {
-    let items = MOCK_ITEMS;
+    let items = itemsList;
     if (activeCategory !== "All") {
       items = items.filter((i) => i.category === activeCategory);
     }
@@ -99,21 +100,22 @@ function InventoryPage() {
       );
     }
     return items;
-  }, [search, activeCategory]);
+  }, [itemsList, search, activeCategory]);
 
   const stats = useMemo(() => {
-    const total = MOCK_ITEMS.length;
-    const lowStock = MOCK_ITEMS.filter((i) => i.quantity <= i.minStock && i.quantity > 0).length;
-    const totalValue = MOCK_ITEMS.reduce((sum, i) => sum + i.quantity * i.costPerUnit, 0);
-    const cats = new Set(MOCK_ITEMS.map((i) => i.category)).size;
+    const total = itemsList.length;
+    const lowStock = itemsList.filter((i) => i.quantity <= i.minStock && i.quantity > 0).length;
+    const totalValue = itemsList.reduce((sum, i) => sum + i.quantity * i.costPerUnit, 0);
+    const cats = new Set(itemsList.map((i) => i.category)).size;
     return { total, lowStock, totalValue, cats };
-  }, []);
+  }, [itemsList]);
 
   function handleDelete(item) {
     setDeleteModal({ open: true, item });
   }
 
   function confirmDelete() {
+    setItemsList((prev) => prev.filter((i) => i.id !== deleteModal.item.id));
     toast.success(`"${deleteModal.item.name}" has been deleted.`);
     setDeleteModal({ open: false, item: null });
   }

@@ -107,13 +107,14 @@ const staggerContainer = { visible: { transition: { staggerChildren: 0.05 } } };
 function SalesPage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const [salesList, setSalesList] = useState(MOCK_SALES);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
   const [dateFilter, setDateFilter] = useState("");
   const [deleteModal, setDeleteModal] = useState({ open: false, sale: null });
 
   const filteredSales = useMemo(() => {
-    let sales = MOCK_SALES;
+    let sales = salesList;
     if (statusFilter) {
       sales = sales.filter((s) => s.status === statusFilter);
     }
@@ -129,29 +130,30 @@ function SalesPage() {
       );
     }
     return sales;
-  }, [search, statusFilter, dateFilter]);
+  }, [salesList, search, statusFilter, dateFilter]);
 
   const stats = useMemo(() => {
-    const totalSales = MOCK_SALES.reduce((s, sale) => s + sale.total, 0);
-    const pending = MOCK_SALES
+    const totalSales = salesList.reduce((s, sale) => s + sale.total, 0);
+    const pending = salesList
       .filter((s) => s.status === "Pending" || s.status === "Overdue")
       .reduce((s, sale) => s + sale.total, 0);
-    const thisMonth = MOCK_SALES
+    const thisMonth = salesList
       .filter((s) => s.date.startsWith("2026-07"))
       .reduce((s, sale) => s + sale.total, 0);
     return {
       total: totalSales,
       pending,
-      invoices: MOCK_SALES.length,
+      invoices: salesList.length,
       thisMonth,
     };
-  }, []);
+  }, [salesList]);
 
   function handleDelete(sale) {
     setDeleteModal({ open: true, sale });
   }
 
   function confirmDelete() {
+    setSalesList((prev) => prev.filter((s) => s.id !== deleteModal.sale.id));
     toast.success(`Invoice ${deleteModal.sale.invoiceNo} has been deleted.`);
     setDeleteModal({ open: false, sale: null });
   }

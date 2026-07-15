@@ -19,6 +19,8 @@ import Badge from "../../components/ui/Badge";
 import DataTable from "../../components/ui/DataTable";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
+import Modal from "../../components/ui/Modal";
+import { useToast } from "../../components/ui/Toast";
 
 const teaGrades = [
   { value: "all", label: "All Grades" },
@@ -140,13 +142,16 @@ const itemVariants = {
 
 function ProductionPage() {
   const navigate = useNavigate();
+  const { success } = useToast();
+  const [dataList, setDataList] = useState(mockData);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [gradeFilter, setGradeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [deleteModal, setDeleteModal] = useState(null);
 
   const filteredData = useMemo(() => {
-    return mockData.filter((row) => {
+    return dataList.filter((row) => {
       const matchesSearch =
         !searchTerm ||
         row.batchNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -156,7 +161,7 @@ function ProductionPage() {
       const matchesStatus = statusFilter === "all" || row.status === statusFilter;
       return matchesSearch && matchesDate && matchesGrade && matchesStatus;
     });
-  }, [searchTerm, dateFilter, gradeFilter, statusFilter]);
+  }, [dataList, searchTerm, dateFilter, gradeFilter, statusFilter]);
 
   const statusBadge = (status) => {
     const map = {
@@ -343,7 +348,10 @@ function ProductionPage() {
                   <Edit size={16} />
                 </button>
                 <button
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteModal(row);
+                  }}
                   className="p-1.5 rounded-lg text-text-secondary hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer"
                   title="Delete"
                 >
@@ -354,6 +362,30 @@ function ProductionPage() {
           />
         </Card>
       </motion.div>
+
+      <Modal
+        isOpen={!!deleteModal}
+        onClose={() => setDeleteModal(null)}
+        title="Delete Production Batch"
+        size="sm"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setDeleteModal(null)}>Cancel</Button>
+            <Button variant="danger" onClick={() => {
+              setDataList((prev) => prev.filter((d) => d.id !== deleteModal.id));
+              success(`Batch ${deleteModal.batchNumber} has been deleted.`);
+              setDeleteModal(null);
+            }}>Delete</Button>
+          </>
+        }
+      >
+        {deleteModal && (
+          <p className="text-text-secondary">
+            Are you sure you want to delete batch <strong className="text-text-primary">{deleteModal.batchNumber}</strong>?
+            This action cannot be undone.
+          </p>
+        )}
+      </Modal>
     </motion.div>
   );
 }

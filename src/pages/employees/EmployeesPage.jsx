@@ -72,6 +72,7 @@ function StatCard({ icon: Icon, label, value, color, delay }) {
 }
 
 export default function EmployeesPage() {
+  const [employeesList, setEmployeesList] = useState(mockEmployees);
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -79,15 +80,15 @@ export default function EmployeesPage() {
   const { success } = useToast();
 
   const stats = useMemo(() => {
-    const total = mockEmployees.length;
-    const active = mockEmployees.filter((e) => e.status === "Active").length;
-    const departments = new Set(mockEmployees.map((e) => e.department)).size;
-    const onLeave = mockEmployees.filter((e) => e.status === "On Leave").length;
+    const total = employeesList.length;
+    const active = employeesList.filter((e) => e.status === "Active").length;
+    const departments = new Set(employeesList.map((e) => e.department)).size;
+    const onLeave = employeesList.filter((e) => e.status === "On Leave").length;
     return { total, active, departments, onLeave };
-  }, []);
+  }, [employeesList]);
 
   const filtered = useMemo(() => {
-    return mockEmployees.filter((emp) => {
+    return employeesList.filter((emp) => {
       const matchSearch =
         !search ||
         `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
@@ -97,10 +98,11 @@ export default function EmployeesPage() {
       const matchStatus = !statusFilter || emp.status === statusFilter;
       return matchSearch && matchDept && matchStatus;
     });
-  }, [search, deptFilter, statusFilter]);
+  }, [employeesList, search, deptFilter, statusFilter]);
 
   function handleDelete() {
-    success(`Employee ${deleteModal.id} deleted successfully`);
+    setEmployeesList((prev) => prev.filter((e) => e.id !== deleteModal.id));
+    success(`Employee ${deleteModal.firstName} ${deleteModal.lastName} deleted successfully`);
     setDeleteModal(null);
   }
 
@@ -271,7 +273,7 @@ export default function EmployeesPage() {
 
           {filtered.length > 0 && (
             <div className="px-4 py-3 border-t border-border text-sm text-text-secondary">
-              Showing {filtered.length} of {mockEmployees.length} employees
+              Showing {filtered.length} of {employeesList.length} employees
             </div>
           )}
         </Card>

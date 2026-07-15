@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   motion,
   useInView,
@@ -423,6 +424,7 @@ const benefits = [
 ];
 
 export default function LandingPage() {
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const {
     register,
@@ -491,18 +493,29 @@ export default function LandingPage() {
             </div>
 
             <div className="hidden md:flex items-center gap-3">
-              <Link
-                to="/login"
-                className="text-sm font-medium text-gray-700 hover:text-primary px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                className="text-sm font-medium text-white bg-primary hover:bg-primary-dark px-5 py-2 rounded-lg transition-all shadow-sm hover:shadow-md"
-              >
-                Get Started
-              </Link>
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="text-sm font-medium text-white bg-primary hover:bg-primary-dark px-5 py-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-sm font-medium text-gray-700 hover:text-primary px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="text-sm font-medium text-white bg-primary hover:bg-primary-dark px-5 py-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
 
             <button
@@ -536,18 +549,29 @@ export default function LandingPage() {
                 </button>
               ))}
               <div className="pt-2 border-t border-gray-100 flex flex-col gap-2">
-                <Link
-                  to="/login"
-                  className="text-sm font-medium text-gray-700 text-center px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="text-sm font-medium text-white bg-primary text-center px-4 py-2 rounded-lg transition-all"
-                >
-                  Get Started
-                </Link>
+                {user ? (
+                  <Link
+                    to="/dashboard"
+                    className="text-sm font-medium text-white bg-primary text-center px-4 py-2 rounded-lg transition-all"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="text-sm font-medium text-gray-700 text-center px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="text-sm font-medium text-white bg-primary text-center px-4 py-2 rounded-lg transition-all"
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
@@ -625,20 +649,32 @@ export default function LandingPage() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="flex flex-wrap gap-4"
               >
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-2 bg-primary text-white px-7 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
-                >
-                  Get Started
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center gap-2 bg-white text-gray-700 px-7 py-3.5 rounded-xl font-semibold text-sm border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                >
-                  Login
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
+                {user ? (
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-2 bg-primary text-white px-7 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+                  >
+                    Go to Dashboard
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      to="/register"
+                      className="inline-flex items-center gap-2 bg-primary text-white px-7 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+                    >
+                      Get Started
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <Link
+                      to="/login"
+                      className="inline-flex items-center gap-2 bg-white text-gray-700 px-7 py-3.5 rounded-xl font-semibold text-sm border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                    >
+                      Login
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </>
+                )}
               </motion.div>
 
               <motion.div
@@ -1279,13 +1315,23 @@ export default function LandingPage() {
               <p className="text-sm text-gray-400 leading-relaxed mb-4">
                 Ready to digitize your tea factory? Get started today.
               </p>
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary transition-all shadow-sm hover:shadow-md"
-              >
-                Create Account
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary transition-all shadow-sm hover:shadow-md"
+                >
+                  Go to Dashboard
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary transition-all shadow-sm hover:shadow-md"
+                >
+                  Create Account
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
             </div>
           </div>
         </div>

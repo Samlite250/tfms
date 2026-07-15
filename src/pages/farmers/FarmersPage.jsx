@@ -77,13 +77,14 @@ const staggerItem = {
 function FarmersPage() {
   const navigate = useNavigate();
   const { success } = useToast();
+  const [farmersList, setFarmersList] = useState(farmers);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
   const [centerFilter, setCenterFilter] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, farmer: null });
 
   const filteredFarmers = useMemo(() => {
-    return farmers.filter((f) => {
+    return farmersList.filter((f) => {
       const matchesSearch =
         !search ||
         f.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -94,19 +95,19 @@ function FarmersPage() {
       const matchesCenter = !centerFilter || f.collectionCenter === centerFilter;
       return matchesSearch && matchesStatus && matchesCenter;
     });
-  }, [search, statusFilter, centerFilter]);
+  }, [farmersList, search, statusFilter, centerFilter]);
 
   const stats = useMemo(() => {
-    const total = farmers.length;
-    const active = farmers.filter((f) => f.status === "Active").length;
+    const total = farmersList.length;
+    const active = farmersList.filter((f) => f.status === "Active").length;
     const inactive = total - active;
     const now = new Date();
-    const newThisMonth = farmers.filter((f) => {
+    const newThisMonth = farmersList.filter((f) => {
       const d = new Date(f.joinedDate);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length;
     return { total, active, inactive, newThisMonth };
-  }, []);
+  }, [farmersList]);
 
   const statCards = [
     { label: "Total Farmers", value: stats.total, icon: Users, color: "text-primary", bg: "bg-primary/10" },
@@ -116,6 +117,7 @@ function FarmersPage() {
   ];
 
   function handleDelete() {
+    setFarmersList((prev) => prev.filter((f) => f.id !== deleteModal.farmer.id));
     success(`Farmer ${deleteModal.farmer.name} has been removed.`);
     setDeleteModal({ open: false, farmer: null });
   }

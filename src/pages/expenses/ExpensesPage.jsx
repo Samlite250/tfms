@@ -129,6 +129,7 @@ const itemVariants = {
 };
 
 export default function ExpensesPage() {
+  const [expensesList, setExpensesList] = useState(MOCK_EXPENSES);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -140,19 +141,19 @@ export default function ExpensesPage() {
   const { success } = useToast();
 
   const stats = useMemo(() => {
-    const total = MOCK_EXPENSES.reduce((s, e) => s + e.amount, 0);
+    const total = expensesList.reduce((s, e) => s + e.amount, 0);
     const now = new Date();
-    const thisMonth = MOCK_EXPENSES.filter((e) => {
+    const thisMonth = expensesList.filter((e) => {
       const d = new Date(e.date);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).reduce((s, e) => s + e.amount, 0);
-    const pending = MOCK_EXPENSES.filter((e) => e.status === "Pending").length;
-    const categories = new Set(MOCK_EXPENSES.map((e) => e.category)).size;
+    const pending = expensesList.filter((e) => e.status === "Pending").length;
+    const categories = new Set(expensesList.map((e) => e.category)).size;
     return { total, thisMonth, pending, categories };
-  }, []);
+  }, [expensesList]);
 
   const filtered = useMemo(() => {
-    return MOCK_EXPENSES.filter((e) => {
+    return expensesList.filter((e) => {
       if (search) {
         const q = search.toLowerCase();
         if (
@@ -167,12 +168,13 @@ export default function ExpensesPage() {
       if (dateTo && e.date > dateTo) return false;
       return true;
     });
-  }, [search, categoryFilter, dateFrom, dateTo]);
+  }, [expensesList, search, categoryFilter, dateFrom, dateTo]);
 
   const totalPages = Math.ceil(filtered.length / pageSize);
   const paginatedData = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   function handleDelete() {
+    setExpensesList((prev) => prev.filter((e) => e.id !== deleteModal.id));
     success(`Expense ${deleteModal.id} deleted successfully`);
     setDeleteModal(null);
   }
