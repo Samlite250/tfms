@@ -5,10 +5,6 @@ import teaBg from "../../assets/tea-bg.jpg";
 import {
   motion,
   useInView,
-  useAnimation,
-  useMotionValue,
-  useTransform,
-  animate,
 } from "framer-motion";
 import {
   Users,
@@ -33,7 +29,6 @@ import {
   Clock,
   TrendingUp,
   Zap,
-  Database,
   Sprout,
 } from "lucide-react";
 
@@ -275,14 +270,6 @@ const fadeUp = {
   }),
 };
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: (i = 0) => ({
-    opacity: 1,
-    transition: { duration: 0.6, delay: i * 0.1, ease: "easeOut" },
-  }),
-};
-
 const scaleUp = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: (i = 0) => ({
@@ -425,6 +412,7 @@ const benefits = [
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const {
     register,
     handleSubmit,
@@ -447,11 +435,19 @@ export default function LandingPage() {
   const aboutInView = useInView(aboutRef, { once: true, margin: "-100px" });
   const contactInView = useInView(contactRef, { once: true, margin: "-100px" });
 
-  const onSubmit = (data) => {
+  const onSubmit = () => {
     setFormSubmitted(true);
     reset();
     setTimeout(() => setFormSubmitted(false), 4000);
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 600);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "#home" },
@@ -691,6 +687,29 @@ export default function LandingPage() {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bg to-transparent" />
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={heroInView ? { opacity: 1 } : {}}
+          transition={{ delay: 1.2, duration: 0.6 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        >
+          <button
+            onClick={() => scrollTo("features")}
+            className="flex flex-col items-center gap-2 group"
+          >
+            <span className="text-xs font-medium text-white/60 uppercase tracking-widest group-hover:text-white/90 transition-colors">
+              Scroll Down
+            </span>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center pt-2 group-hover:border-white/70 transition-colors"
+            >
+              <div className="w-1 h-2 rounded-full bg-white/60" />
+            </motion.div>
+          </button>
+        </motion.div>
       </section>
 
       {/* Features Section */}
@@ -715,7 +734,7 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {features.map((feature, i) => (
               <motion.div
                 key={feature.title}
@@ -723,19 +742,20 @@ export default function LandingPage() {
                 animate={featuresInView ? "visible" : "hidden"}
                 variants={scaleUp}
                 custom={i}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="group bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg hover:border-gray-200 transition-all duration-300 cursor-default"
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="group relative bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-default overflow-hidden"
               >
-                <div className="flex items-start gap-4">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative flex flex-col items-start gap-4">
                   <div
-                    className={`flex-shrink-0 w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                    className={`flex-shrink-0 w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}
                   >
                     <feature.icon
                       className={`w-6 h-6 ${feature.iconColor}`}
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1.5">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1.5 group-hover:text-primary transition-colors">
                       {feature.title}
                     </h3>
                     <p className="text-sm text-gray-500 leading-relaxed">
@@ -774,9 +794,17 @@ export default function LandingPage() {
           </motion.div>
 
           <div className="relative">
-            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-secondary via-primary to-accent opacity-20 -translate-y-1/2" />
+            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 -translate-y-1/2">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={workflowInView ? { scaleX: 1 } : {}}
+                transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
+                className="h-full bg-gradient-to-r from-secondary via-primary to-accent origin-left"
+                style={{ opacity: 0.25 }}
+              />
+            </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 lg:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-4">
               {workflowSteps.map((step, i) => (
                 <motion.div
                   key={step.title}
@@ -787,23 +815,26 @@ export default function LandingPage() {
                   className="relative flex flex-col items-center text-center group"
                 >
                   <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="relative w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-md transition-shadow duration-300 group-hover:shadow-lg"
+                    whileHover={{ scale: 1.12, rotate: 5 }}
+                    className="relative w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-md transition-shadow duration-300 group-hover:shadow-xl"
                     style={{ backgroundColor: `${step.color}15` }}
                   >
                     <step.icon
                       className="w-7 h-7"
                       style={{ color: step.color }}
                     />
-                    <div
-                      className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={workflowInView ? { scale: 1 } : {}}
+                      transition={{ delay: 0.5 + i * 0.15, type: "spring", stiffness: 300 }}
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm"
                       style={{ backgroundColor: step.color }}
                     >
                       {i + 1}
-                    </div>
+                    </motion.div>
                   </motion.div>
 
-                  <h3 className="font-semibold text-gray-900 mb-1">
+                  <h3 className="font-semibold text-gray-900 mb-1 text-sm">
                     {step.title}
                   </h3>
                   <p className="text-xs text-gray-500 leading-relaxed max-w-[160px]">
@@ -811,9 +842,14 @@ export default function LandingPage() {
                   </p>
 
                   {i < workflowSteps.length - 1 && (
-                    <div className="hidden lg:block absolute top-8 -right-4 z-10">
+                    <motion.div
+                      initial={{ opacity: 0, x: -5 }}
+                      animate={workflowInView ? { opacity: 1, x: 0 } : {}}
+                      transition={{ delay: 0.8 + i * 0.1 }}
+                      className="hidden lg:block absolute top-8 -right-4 z-10"
+                    >
                       <ArrowRight className="w-5 h-5 text-gray-300" />
-                    </div>
+                    </motion.div>
                   )}
                 </motion.div>
               ))}
@@ -876,6 +912,92 @@ export default function LandingPage() {
                 </div>
                 <div className="text-sm text-white/70 font-medium">
                   {stat.label}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 bg-bg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeUp}
+            className="text-center mb-16"
+          >
+            <span className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-3">
+              Testimonials
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              What Our <span className="text-primary">Users</span> Say
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+              Trusted by factory managers and operators across the region
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                quote: "TFMS has completely transformed how we manage our daily tea collections. The real-time tracking saves us hours of manual work every day.",
+                name: "James Mwangi",
+                role: "Factory Manager, Kericho Tea Co.",
+                rating: 5,
+              },
+              {
+                quote: "The inventory management alone is worth it. We reduced waste by 30% in the first quarter of using TFMS. Highly recommended.",
+                name: "Priya Sharma",
+                role: "Operations Director, Highland Estates",
+                rating: 5,
+              },
+              {
+                quote: "Being able to generate sales reports instantly has given us better insights into our business. The team loves how easy it is to use.",
+                name: "David Nkomo",
+                role: "CEO, Southern Tea Industries",
+                rating: 5,
+              },
+            ].map((testimonial, i) => (
+              <motion.div
+                key={testimonial.name}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+                variants={scaleUp}
+                custom={i}
+                whileHover={{ y: -4 }}
+                className="relative bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <div className="absolute top-6 right-6 text-primary/10">
+                  <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                  </svg>
+                </div>
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: testimonial.rating }).map((_, j) => (
+                    <svg key={j} className="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed mb-6 italic">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    {testimonial.name.split(" ").map(n => n[0]).join("")}
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">
+                      {testimonial.name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {testimonial.role}
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -1027,7 +1149,7 @@ export default function LandingPage() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3"
+                  className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3"
                 >
                   <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
                   <span className="text-sm text-emerald-700 font-medium">
@@ -1037,27 +1159,27 @@ export default function LandingPage() {
                 </motion.div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <form onSubmit={handleSubmit(onSubmit)} className="bg-gray-50 rounded-3xl p-8 border border-gray-100 space-y-5">
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Name
                     </label>
                     <input
                       {...register("name", {
                         required: "Name is required",
                       })}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       placeholder="Your name"
                     />
                     {errors.name && (
-                      <p className="mt-1 text-xs text-red-500">
+                      <p className="mt-1.5 text-xs text-red-500">
                         {errors.name.message}
                       </p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Email
                     </label>
                     <input
@@ -1069,11 +1191,11 @@ export default function LandingPage() {
                         },
                       })}
                       type="email"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       placeholder="you@example.com"
                     />
                     {errors.email && (
-                      <p className="mt-1 text-xs text-red-500">
+                      <p className="mt-1.5 text-xs text-red-500">
                         {errors.email.message}
                       </p>
                     )}
@@ -1081,25 +1203,25 @@ export default function LandingPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Subject
                   </label>
                   <input
                     {...register("subject", {
                       required: "Subject is required",
                     })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     placeholder="How can we help?"
                   />
                   {errors.subject && (
-                    <p className="mt-1 text-xs text-red-500">
+                    <p className="mt-1.5 text-xs text-red-500">
                       {errors.subject.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Message
                   </label>
                   <textarea
@@ -1107,11 +1229,11 @@ export default function LandingPage() {
                       required: "Message is required",
                     })}
                     rows={5}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                    className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                     placeholder="Tell us more about your needs..."
                   />
                   {errors.message && (
-                    <p className="mt-1 text-xs text-red-500">
+                    <p className="mt-1.5 text-xs text-red-500">
                       {errors.message.message}
                     </p>
                   )}
@@ -1119,7 +1241,7 @@ export default function LandingPage() {
 
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 bg-primary text-white px-7 py-3 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary text-white px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
                 >
                   <Send className="w-4 h-4" />
                   Send Message
@@ -1166,8 +1288,8 @@ export default function LandingPage() {
                   custom={i}
                   initial="hidden"
                   animate={contactInView ? "visible" : "hidden"}
-                  whileHover={{ y: -2 }}
-                  className="flex items-start gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-md hover:bg-white transition-all duration-300"
+                  whileHover={{ y: -3, scale: 1.01 }}
+                  className="flex items-start gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-lg hover:bg-white transition-all duration-300"
                 >
                   <div
                     className={`flex-shrink-0 w-12 h-12 ${card.color} rounded-xl flex items-center justify-center`}
@@ -1262,16 +1384,32 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <h4 className="font-semibold text-white mb-4">Get Started</h4>
+              <h4 className="font-semibold text-white mb-4">Stay Updated</h4>
               <p className="text-sm text-gray-400 leading-relaxed mb-4">
-                Ready to digitize your tea factory? Get started today.
+                Get the latest news and updates about TFMS.
               </p>
+              <form
+                onSubmit={(e) => e.preventDefault()}
+                className="flex gap-2"
+              >
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
+                />
+                <button
+                  type="submit"
+                  className="flex-shrink-0 px-4 py-2.5 bg-secondary rounded-xl text-white text-sm font-semibold hover:bg-primary transition-all"
+                >
+                  Subscribe
+                </button>
+              </form>
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary transition-all shadow-sm hover:shadow-md"
+                className="inline-flex items-center gap-2 mt-5 text-sm text-primary hover:text-primary-dark font-medium transition-colors"
               >
-                Create Account
-                <ArrowRight className="w-4 h-4" />
+                Or create an account
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
@@ -1280,7 +1418,7 @@ export default function LandingPage() {
         <div className="border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500">
-              © 2024 TFMS. All rights reserved.
+              &copy; {new Date().getFullYear()} TFMS. All rights reserved.
             </p>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Leaf className="w-4 h-4 text-secondary" />
@@ -1289,6 +1427,22 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top */}
+      {showScrollTop && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed bottom-6 right-6 z-50 w-11 h-11 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center hover:bg-primary-dark hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          aria-label="Scroll to top"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M18 15l-6-6-6 6" />
+          </svg>
+        </motion.button>
+      )}
     </div>
   );
 }
