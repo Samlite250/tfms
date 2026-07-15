@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Coffee, Factory, Package, ShoppingCart, DollarSign, Users, TrendingUp,
-  ArrowUpRight, ArrowDownRight, Clock, FileText, ArrowRight,
+  Clock, FileText, ArrowRight,
   UserPlus, Receipt, ClipboardList, Tractor, AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROLES, ROLE_LABELS } from "../../utils/constants";
+import StatCard from "../../components/ui/StatCard";
 
 
 function getGreeting() {
@@ -210,26 +211,19 @@ export default function DashboardPage() {
 
       {/* Stat Cards */}
       <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${config.stats.length <= 4 ? "lg:grid-cols-4" : "lg:grid-cols-5"}`}>
-        {config.stats.map((card) => (
-          <motion.div
+        {config.stats.map((card, idx) => (
+          <StatCard
             key={card.label}
-            variants={itemVariants}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="group cursor-default rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md border-l-4"
-            style={{ borderLeftColor: card.borderColor || "#2E7D32" }}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${card.bg}`}>
-                <card.icon className={`h-5 w-5 ${card.color}`} />
-              </div>
-              <span className={`flex items-center gap-0.5 text-xs font-medium ${card.up ? "text-success" : "text-danger"}`}>
-                {card.up ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
-                {card.change}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-text-primary">{card.value}</p>
-            <p className="mt-1 text-sm text-text-secondary">{card.label}</p>
-          </motion.div>
+            icon={card.icon}
+            label={card.label}
+            value={card.value}
+            change={card.change}
+            up={card.up}
+            color={card.color}
+            bg={card.bg}
+            borderColor={card.borderColor}
+            delay={idx * 0.06}
+          />
         ))}
       </div>
 

@@ -26,6 +26,7 @@ import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import SearchInput from "../../components/ui/SearchInput";
 import Modal from "../../components/ui/Modal";
+import StatCard from "../../components/ui/StatCard";
 import { useToast } from "../../components/ui/Toast";
 
 const CATEGORIES = ["Electricity", "Fuel", "Maintenance", "Transport", "Water", "Salaries", "Other"];
@@ -210,24 +211,23 @@ export default function ExpensesPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Expenses", value: formatCurrency(stats.total), icon: DollarSign, color: "bg-primary/10 text-primary", borderColor: "#2E7D32" },
-          { label: "This Month", value: formatCurrency(stats.thisMonth), icon: Calendar, color: "bg-secondary/10 text-secondary", borderColor: "#1B5E20" },
-          { label: "Pending Approvals", value: stats.pending, icon: Clock, color: "bg-accent/10 text-accent", borderColor: "#F9A825" },
-          { label: "Categories", value: stats.categories, icon: Tag, color: "bg-blue-100 text-blue-600", borderColor: "#2563EB" },
-        ].map((stat, i) => (
-          <motion.div key={stat.label} variants={itemVariants}>
-            <Card hover className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                </div>
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${stat.color}`}>
-                  <stat.icon size={22} />
-                </div>
-              </div>
-            </Card>
-          </motion.div>
+          { label: "Total Expenses", value: formatCurrency(stats.total), icon: DollarSign, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32", change: "+12.5%", up: true },
+          { label: "This Month", value: formatCurrency(stats.thisMonth), icon: Calendar, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20", change: "+8.3%", up: true },
+          { label: "Pending Approvals", value: stats.pending, icon: Clock, color: "text-accent", bg: "bg-accent/10", borderColor: "#F9A825", change: "-3", up: false },
+          { label: "Categories", value: stats.categories, icon: Tag, color: "text-blue-600", bg: "bg-blue-100", borderColor: "#2563EB", change: "0", up: true },
+        ].map((stat, idx) => (
+          <StatCard
+            key={stat.label}
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            change={stat.change}
+            up={stat.up}
+            color={stat.color}
+            bg={stat.bg}
+            borderColor={stat.borderColor}
+            delay={idx * 0.06}
+          />
         ))}
       </div>
 

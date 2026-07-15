@@ -20,6 +20,7 @@ import SearchInput from "../../components/ui/SearchInput";
 import DataTable from "../../components/ui/DataTable";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
+import StatCard from "../../components/ui/StatCard";
 
 const TEA_GRADES = ["PF1", "PF2", "PF3", "PD", "Dust", "Fannings"];
 
@@ -83,36 +84,40 @@ const statsConfig = [
     label: "Today's Collection",
     value: "1,250 kg",
     icon: Weight,
-    color: "bg-primary/10 text-primary",
-    change: "+12% from yesterday",
-    changeColor: "text-secondary",
+    color: "text-primary",
+    bg: "bg-primary/10",
+    change: "+12%",
+    up: true,
     borderColor: "#2E7D32",
   },
   {
     label: "This Week",
     value: "8,400 kg",
     icon: Calendar,
-    color: "bg-secondary/10 text-secondary",
-    change: "+8% from last week",
-    changeColor: "text-secondary",
+    color: "text-secondary",
+    bg: "bg-secondary/10",
+    change: "+8%",
+    up: true,
     borderColor: "#1B5E20",
   },
   {
     label: "This Month",
     value: "32,000 kg",
     icon: TrendingUp,
-    color: "bg-accent/10 text-accent",
-    change: "+15% from last month",
-    changeColor: "text-secondary",
+    color: "text-accent-dark",
+    bg: "bg-accent/10",
+    change: "+15%",
+    up: true,
     borderColor: "#F9A825",
   },
   {
     label: "Avg per Delivery",
     value: "45 kg",
     icon: Users,
-    color: "bg-primary/10 text-primary",
+    color: "text-primary",
+    bg: "bg-primary/10",
     change: "Stable",
-    changeColor: "text-text-secondary",
+    up: true,
     borderColor: "#43A047",
   },
 ];
@@ -223,20 +228,18 @@ function CollectionPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {statsConfig.map((stat, i) => (
-          <motion.div key={stat.label} variants={itemVariants}>
-            <Card hover shadow="md" className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  <p className={`text-xs mt-1 ${stat.changeColor}`}>{stat.change}</p>
-                </div>
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${stat.color}`}>
-                  <stat.icon size={22} />
-                </div>
-              </div>
-            </Card>
-          </motion.div>
+          <StatCard
+            key={stat.label}
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            change={stat.change}
+            up={stat.up}
+            color={stat.color}
+            bg={stat.bg}
+            borderColor={stat.borderColor}
+            delay={i * 0.06}
+          />
         ))}
       </div>
 

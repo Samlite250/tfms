@@ -18,6 +18,7 @@ import Badge from "../../components/ui/Badge";
 import SearchInput from "../../components/ui/SearchInput";
 import Modal from "../../components/ui/Modal";
 import EmptyState from "../../components/ui/EmptyState";
+import StatCard from "../../components/ui/StatCard";
 import { useToast } from "../../components/ui/Toast";
 
 const DEPARTMENTS = ["Production", "Collection", "Packaging", "Administration", "Finance"];
@@ -48,28 +49,6 @@ const mockEmployees = [
   { id: "EMP016", firstName: "Nipuni", lastName: "Wijesinghe", department: "Finance", position: "Payroll Officer", phone: "0776677889", email: "nipuni.w@tfms.com", status: "Active", joinDate: "2021-09-05", gender: "Female", employmentType: "Full-time" },
   { id: "EMP017", firstName: "Duminda", lastName: "Senaratne", department: "Production", position: "Process Engineer", phone: "0777788990", email: "duminda.s@tfms.com", status: "Active", joinDate: "2022-03-15", gender: "Male", employmentType: "Full-time" },
 ];
-
-function StatCard({ icon: Icon, label, value, color, borderColor, delay }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-    >
-      <Card padding="md" hover className="border-l-4" style={{ borderLeftColor: borderColor }}>
-        <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
-            <Icon size={24} />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-text-primary">{value}</p>
-            <p className="text-sm text-text-secondary">{label}</p>
-          </div>
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
 
 export default function EmployeesPage() {
   const [employeesList, setEmployeesList] = useState(mockEmployees);
@@ -166,10 +145,10 @@ export default function EmployeesPage() {
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Users} label="Total Employees" value={stats.total} color="bg-primary/10 text-primary" borderColor="#2E7D32" delay={0} />
-        <StatCard icon={UserCheck} label="Active" value={stats.active} color="bg-green-100 text-green-600" borderColor="#16A34A" delay={0.1} />
-        <StatCard icon={Building2} label="Departments" value={stats.departments} color="bg-blue-100 text-blue-600" borderColor="#2563EB" delay={0.2} />
-        <StatCard icon={CalendarOff} label="On Leave" value={stats.onLeave} color="bg-amber-100 text-amber-600" borderColor="#D97706" delay={0.3} />
+        <StatCard icon={Users} label="Total Employees" value={stats.total} color="text-primary" bg="bg-primary/10" borderColor="#2E7D32" delay={0} />
+        <StatCard icon={UserCheck} label="Active" value={stats.active} color="text-green-600" bg="bg-green-100" borderColor="#16A34A" delay={0.1} />
+        <StatCard icon={Building2} label="Departments" value={stats.departments} color="text-blue-600" bg="bg-blue-100" borderColor="#2563EB" delay={0.2} />
+        <StatCard icon={CalendarOff} label="On Leave" value={stats.onLeave} color="text-amber-600" bg="bg-amber-100" borderColor="#D97706" delay={0.3} />
       </div>
 
       <motion.div

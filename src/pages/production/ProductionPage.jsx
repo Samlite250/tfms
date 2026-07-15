@@ -21,6 +21,7 @@ import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
+import StatCard from "../../components/ui/StatCard";
 
 const teaGrades = [
   { value: "all", label: "All Grades" },
@@ -90,9 +91,9 @@ const stats = [
     value: "320 kg",
     icon: Factory,
     color: "text-primary",
-    bgColor: "bg-primary/10",
+    bg: "bg-primary/10",
     change: "+12%",
-    changeColor: "text-success",
+    up: true,
     borderColor: "#2E7D32",
   },
   {
@@ -100,9 +101,9 @@ const stats = [
     value: "12,500 kg",
     icon: TrendingUp,
     color: "text-secondary",
-    bgColor: "bg-secondary/10",
+    bg: "bg-secondary/10",
     change: "+8%",
-    changeColor: "text-success",
+    up: true,
     borderColor: "#1B5E20",
   },
   {
@@ -110,9 +111,9 @@ const stats = [
     value: "48",
     icon: Package,
     color: "text-accent",
-    bgColor: "bg-accent/10",
+    bg: "bg-accent/10",
     change: "+5",
-    changeColor: "text-success",
+    up: true,
     borderColor: "#F9A825",
   },
   {
@@ -120,9 +121,9 @@ const stats = [
     value: "260 kg",
     icon: BarChart3,
     color: "text-info",
-    bgColor: "bg-info/10",
+    bg: "bg-info/10",
     change: "+3%",
-    changeColor: "text-success",
+    up: true,
     borderColor: "#0288D1",
   },
 ];
@@ -257,29 +258,19 @@ function ProductionPage() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <motion.div
+        {stats.map((stat, i) => (
+          <StatCard
             key={stat.label}
-            variants={itemVariants}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-          >
-            <Card padding="md" shadow="md" hover className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-text-secondary">{stat.label}</p>
-                  <p className="text-2xl font-bold text-text-primary mt-1">
-                    {stat.value}
-                  </p>
-                  <p className={`text-xs mt-1 font-medium ${stat.changeColor}`}>
-                    {stat.change} from last month
-                  </p>
-                </div>
-                <div className={`${stat.bgColor} p-3 rounded-xl`}>
-                  <stat.icon size={22} className={stat.color} />
-                </div>
-              </div>
-            </Card>
-          </motion.div>
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            change={stat.change}
+            up={stat.up}
+            color={stat.color}
+            bg={stat.bg}
+            borderColor={stat.borderColor}
+            delay={i * 0.06}
+          />
         ))}
       </motion.div>
 

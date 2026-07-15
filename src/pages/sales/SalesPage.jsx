@@ -22,6 +22,7 @@ import SearchInput from "../../components/ui/SearchInput";
 import Select from "../../components/ui/Select";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
+import StatCard from "../../components/ui/StatCard";
 
 const STATUS_OPTIONS = [
   { value: "Paid", label: "Paid" },
@@ -229,22 +230,23 @@ function SalesPage() {
 
         <motion.div variants={fadeIn} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Total Sales", value: `$${stats.total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: DollarSign, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
-            { label: "Pending Payments", value: `$${stats.pending.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: Clock, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
-            { label: "Invoices", value: stats.invoices, icon: FileText, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
-            { label: "This Month", value: `$${stats.thisMonth.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: TrendingUp, color: "text-success", bg: "bg-success/10", borderColor: "#43A047" },
+            { label: "Total Sales", value: `$${stats.total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: DollarSign, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32", change: "+12.5%", up: true },
+            { label: "Pending Payments", value: `$${stats.pending.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: Clock, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00", change: "-3.2%", up: false },
+            { label: "Invoices", value: stats.invoices, icon: FileText, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1", change: "+8", up: true },
+            { label: "This Month", value: `$${stats.thisMonth.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: TrendingUp, color: "text-success", bg: "bg-success/10", borderColor: "#43A047", change: "+18.3%", up: true },
           ].map((stat, idx) => (
-            <Card key={idx} hover shadow="sm" padding="md" className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
-                  <stat.icon size={24} className={stat.color} />
-                </div>
-                <div>
-                  <p className="text-sm text-text-secondary">{stat.label}</p>
-                  <p className="text-2xl font-bold text-text-primary">{stat.value}</p>
-                </div>
-              </div>
-            </Card>
+            <StatCard
+              key={stat.label}
+              icon={stat.icon}
+              label={stat.label}
+              value={stat.value}
+              change={stat.change}
+              up={stat.up}
+              color={stat.color}
+              bg={stat.bg}
+              borderColor={stat.borderColor}
+              delay={idx * 0.06}
+            />
           ))}
         </motion.div>
 

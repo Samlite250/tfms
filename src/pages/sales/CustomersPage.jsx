@@ -19,6 +19,7 @@ import SearchInput from "../../components/ui/SearchInput";
 import Modal from "../../components/ui/Modal";
 import Input from "../../components/ui/Input";
 import { useToast } from "../../components/ui/Toast";
+import StatCard from "../../components/ui/StatCard";
 
 const MOCK_CUSTOMERS = [
   { id: 1, name: "James Mitchell", company: "Emerald Tea Traders Ltd.", email: "james@emeraldtea.com", phone: "+1 (555) 234-5678", totalPurchases: 12500, outstandingBalance: 0 },
@@ -205,22 +206,23 @@ function CustomersPage() {
 
         <motion.div variants={fadeIn} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Total Customers", value: stats.count, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
-            { label: "Total Purchases", value: `$${stats.totalPurchases.toLocaleString()}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", borderColor: "#43A047" },
-            { label: "Outstanding Balance", value: `$${stats.outstanding.toLocaleString()}`, icon: AlertTriangle, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F" },
-            { label: "With Balance", value: stats.withBalance, icon: Mail, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
+            { label: "Total Customers", value: stats.count, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32", change: "+12%", up: true },
+            { label: "Total Purchases", value: `$${stats.totalPurchases.toLocaleString()}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", borderColor: "#43A047", change: "+8.5%", up: true },
+            { label: "Outstanding Balance", value: `$${stats.outstanding.toLocaleString()}`, icon: AlertTriangle, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F", change: "-3.2%", up: false },
+            { label: "With Balance", value: stats.withBalance, icon: Mail, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00", change: "+5.1%", up: true },
           ].map((stat, idx) => (
-            <Card key={idx} hover shadow="sm" padding="md" className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
-                  <stat.icon size={24} className={stat.color} />
-                </div>
-                <div>
-                  <p className="text-sm text-text-secondary">{stat.label}</p>
-                  <p className="text-2xl font-bold text-text-primary">{stat.value}</p>
-                </div>
-              </div>
-            </Card>
+            <StatCard
+              key={stat.label}
+              icon={stat.icon}
+              label={stat.label}
+              value={stat.value}
+              change={stat.change}
+              up={stat.up}
+              color={stat.color}
+              bg={stat.bg}
+              borderColor={stat.borderColor}
+              delay={idx * 0.06}
+            />
           ))}
         </motion.div>
 

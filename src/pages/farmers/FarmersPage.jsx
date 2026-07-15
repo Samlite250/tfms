@@ -15,12 +15,11 @@ import {
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
-import DataTable from "../../components/ui/DataTable";
 import Badge from "../../components/ui/Badge";
-import SearchInput from "../../components/ui/SearchInput";
-import Select from "../../components/ui/Select";
 import Modal from "../../components/ui/Modal";
+import SearchInput from "../../components/ui/SearchInput";
 import EmptyState from "../../components/ui/EmptyState";
+import StatCard from "../../components/ui/StatCard";
 import { useToast } from "../../components/ui/Toast";
 
 const collectionCenterOptions = [
@@ -181,18 +180,17 @@ function FarmersPage() {
         </motion.div>
 
         <motion.div variants={staggerItem} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {statCards.map((stat) => (
-            <Card key={stat.label} padding="md" hover className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
-                  <stat.icon size={22} className={stat.color} />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-text-primary">{stat.value}</p>
-                  <p className="text-sm text-text-secondary">{stat.label}</p>
-                </div>
-              </div>
-            </Card>
+          {statCards.map((stat, idx) => (
+            <StatCard
+              key={stat.label}
+              icon={stat.icon}
+              label={stat.label}
+              value={stat.value}
+              color={stat.color}
+              bg={stat.bg}
+              borderColor={stat.borderColor}
+              delay={idx * 0.06}
+            />
           ))}
         </motion.div>
 

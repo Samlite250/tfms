@@ -48,6 +48,7 @@ import Select from "../../components/ui/Select";
 import SearchInput from "../../components/ui/SearchInput";
 import Pagination from "../../components/ui/Pagination";
 import EmptyState from "../../components/ui/EmptyState";
+import StatCard from "../../components/ui/StatCard";
 import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from "../../utils/constants";
@@ -664,31 +665,25 @@ export default function AdminPage() {
       {/* Dashboard Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
         {[
-          { label: "Total Users", value: stats.totalUsers, icon: Users, color: "bg-primary/10", iconColor: "text-primary", borderColor: "#2E7D32" },
-          { label: "Active Users", value: stats.activeUsers, icon: UserCheck, color: "bg-green-100", iconColor: "text-green-600", borderColor: "#16A34A" },
-          { label: "Total Farmers", value: `${stats.totalFarmers}+`, icon: Tractor, color: "bg-blue-100", iconColor: "text-blue-600", borderColor: "#2563EB" },
-          { label: "Total Employees", value: stats.totalEmployees, icon: Briefcase, color: "bg-purple-100", iconColor: "text-purple-600", borderColor: "#9333EA" },
-          { label: "System Health", value: "Good", icon: HeartPulse, color: "bg-emerald-100", iconColor: "text-emerald-600", borderColor: "#059669" },
-          { label: "Last Backup", value: "2h ago", icon: Clock, color: "bg-amber-100", iconColor: "text-amber-600", borderColor: "#D97706" },
-        ].map((stat) => (
-          <motion.div
+          { label: "Total Users", value: stats.totalUsers, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32", change: "+12%", up: true },
+          { label: "Active Users", value: stats.activeUsers, icon: UserCheck, color: "text-green-600", bg: "bg-green-100", borderColor: "#16A34A", change: "+8%", up: true },
+          { label: "Total Farmers", value: `${stats.totalFarmers}+`, icon: Tractor, color: "text-blue-600", bg: "bg-blue-100", borderColor: "#2563EB", change: "+5%", up: true },
+          { label: "Total Employees", value: stats.totalEmployees, icon: Briefcase, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA", change: "+3%", up: true },
+          { label: "System Health", value: "Good", icon: HeartPulse, color: "text-emerald-600", bg: "bg-emerald-100", borderColor: "#059669", change: "Stable", up: true },
+          { label: "Last Backup", value: "2h ago", icon: Clock, color: "text-amber-600", bg: "bg-amber-100", borderColor: "#D97706", change: "On time", up: true },
+        ].map((stat, idx) => (
+          <StatCard
             key={stat.label}
-            variants={itemVariants}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className="rounded-2xl border border-border bg-card p-5 shadow-sm border-l-4"
-            style={{ borderLeftColor: stat.borderColor }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}>
-                <stat.icon size={20} className={stat.iconColor} />
-              </div>
-              {stat.label === "System Health" && (
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-              )}
-            </div>
-            <p className="text-2xl font-bold text-text-primary">{stat.value}</p>
-            <p className="text-sm text-text-secondary mt-0.5">{stat.label}</p>
-          </motion.div>
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            change={stat.change}
+            up={stat.up}
+            color={stat.color}
+            bg={stat.bg}
+            borderColor={stat.borderColor}
+            delay={idx * 0.06}
+          />
         ))}
       </div>
 
