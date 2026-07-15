@@ -4,6 +4,7 @@ import {
   BarChart3,
   Coffee,
   Factory,
+  ShoppingCart,
   Receipt,
   DollarSign,
   Package,
