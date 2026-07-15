@@ -107,11 +107,11 @@ function getRoleConfig(role) {
       return {
         subtitle: "Here's your factory overview",
         stats: [
-          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Production Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10" },
-          { label: "Inventory Available", value: "15,400 kg", change: "In stock", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100" },
-          { label: "Total Sales", value: "$45,200", change: "+15%", up: true, icon: ShoppingCart, color: "text-secondary", bg: "bg-secondary/10" },
-          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10" },
+          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Production Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
+          { label: "Inventory Available", value: "15,400 kg", change: "In stock", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
+          { label: "Total Sales", value: "$45,200", change: "+15%", up: true, icon: ShoppingCart, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20" },
+          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
         ],
         charts: ["collection", "production", "sales"],
         quickActions: [
@@ -136,10 +136,10 @@ function getRoleConfig(role) {
       return {
         subtitle: "Here's your management overview",
         stats: [
-          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Production Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10" },
-          { label: "Active Employees", value: "48", change: "On shift", up: true, icon: Users, color: "text-purple-600", bg: "bg-purple-100" },
-          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10" },
+          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Production Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
+          { label: "Active Employees", value: "48", change: "On shift", up: true, icon: Users, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
+          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
         ],
         charts: ["collection", "production", "sales"],
         quickActions: [
@@ -160,10 +160,10 @@ function getRoleConfig(role) {
       return {
         subtitle: "Manage farmer collections and registrations",
         stats: [
-          { label: "Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Today's Farmers", value: "24", change: "Deliveries", up: true, icon: Tractor, color: "text-info", bg: "bg-info/10" },
-          { label: "This Week", value: "8,400 kg", change: "+5%", up: true, icon: TrendingUp, color: "text-secondary", bg: "bg-secondary/10" },
-          { label: "Total Farmers", value: "156", change: "Registered", up: true, icon: Users, color: "text-purple-600", bg: "bg-purple-100" },
+          { label: "Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Today's Farmers", value: "24", change: "Deliveries", up: true, icon: Tractor, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
+          { label: "This Week", value: "8,400 kg", change: "+5%", up: true, icon: TrendingUp, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20" },
+          { label: "Total Farmers", value: "156", change: "Registered", up: true, icon: Users, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
         ],
         charts: ["collection"],
         quickActions: [
@@ -182,10 +182,10 @@ function getRoleConfig(role) {
       return {
         subtitle: "Monitor production and inventory levels",
         stats: [
-          { label: "Produced Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10" },
-          { label: "Active Batches", value: "4", change: "In progress", up: true, icon: ClipboardList, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Inventory Stock", value: "15,400 kg", change: "Available", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100" },
-          { label: "Low Stock Items", value: "2", change: "Alerts", up: false, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10" },
+          { label: "Produced Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
+          { label: "Active Batches", value: "4", change: "In progress", up: true, icon: ClipboardList, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Inventory Stock", value: "15,400 kg", change: "Available", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
+          { label: "Low Stock Items", value: "2", change: "Alerts", up: false, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
         ],
         charts: ["production", "inventory"],
         quickActions: [
@@ -204,10 +204,10 @@ function getRoleConfig(role) {
       return {
         subtitle: "Manage inventory and stock levels",
         stats: [
-          { label: "Total Items", value: "35", change: "Tracked", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100" },
-          { label: "In Stock", value: "15,400 kg", change: "Available", up: true, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Low Stock", value: "2", change: "Items below threshold", up: false, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10" },
-          { label: "Movements Today", value: "8", change: "In/Out", up: true, icon: ArrowRight, color: "text-info", bg: "bg-info/10" },
+          { label: "Total Items", value: "35", change: "Tracked", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
+          { label: "In Stock", value: "15,400 kg", change: "Available", up: true, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Low Stock", value: "2", change: "Items below threshold", up: false, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
+          { label: "Movements Today", value: "8", change: "In/Out", up: true, icon: ArrowRight, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
         ],
         charts: ["inventory"],
         quickActions: [
@@ -226,10 +226,10 @@ function getRoleConfig(role) {
       return {
         subtitle: "Track sales, expenses, and financials",
         stats: [
-          { label: "Total Sales", value: "$45,200", change: "+15%", up: true, icon: ShoppingCart, color: "text-secondary", bg: "bg-secondary/10" },
-          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Total Expenses", value: "$78,400", change: "+8%", up: false, icon: Receipt, color: "text-danger", bg: "bg-danger/10" },
-          { label: "Net Profit", value: "$50,100", change: "+35%", up: true, icon: TrendingUp, color: "text-accent-dark", bg: "bg-accent/10" },
+          { label: "Total Sales", value: "$45,200", change: "+15%", up: true, icon: ShoppingCart, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20" },
+          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Total Expenses", value: "$78,400", change: "+8%", up: false, icon: Receipt, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F" },
+          { label: "Net Profit", value: "$50,100", change: "+35%", up: true, icon: TrendingUp, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
         ],
         charts: ["sales", "expense"],
         quickActions: [
@@ -249,7 +249,7 @@ function getRoleConfig(role) {
       return {
         subtitle: "Here's your overview",
         stats: [
-          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
         ],
         charts: [],
         quickActions: [],
@@ -447,7 +447,8 @@ export default function DashboardPage() {
             key={card.label}
             variants={itemVariants}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="group cursor-default rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+            className="group cursor-default rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md border-l-4"
+            style={{ borderLeftColor: card.borderColor || "#2E7D32" }}
           >
             <div className="mb-4 flex items-center justify-between">
               <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${card.bg}`}>

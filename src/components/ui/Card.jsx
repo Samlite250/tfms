@@ -21,9 +21,11 @@ function Card({
   shadow = "md",
   header,
   footer,
+  style,
 }) {
   return (
     <div
+      style={style}
       className={`
         bg-card rounded-2xl overflow-hidden
         ${shadows[shadow]}

@@ -110,10 +110,10 @@ function FarmersPage() {
   }, [farmersList]);
 
   const statCards = [
-    { label: "Total Farmers", value: stats.total, icon: Users, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Active", value: stats.active, icon: UserCheck, color: "text-success", bg: "bg-success/10" },
-    { label: "Inactive", value: stats.inactive, icon: UserX, color: "text-danger", bg: "bg-danger/10" },
-    { label: "New This Month", value: stats.newThisMonth, icon: UserPlus, color: "text-info", bg: "bg-info/10" },
+    { label: "Total Farmers", value: stats.total, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+    { label: "Active", value: stats.active, icon: UserCheck, color: "text-success", bg: "bg-success/10", borderColor: "#43A047" },
+    { label: "Inactive", value: stats.inactive, icon: UserX, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F" },
+    { label: "New This Month", value: stats.newThisMonth, icon: UserPlus, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
   ];
 
   function handleDelete() {
@@ -182,7 +182,7 @@ function FarmersPage() {
 
         <motion.div variants={staggerItem} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {statCards.map((stat) => (
-            <Card key={stat.label} padding="md" hover>
+            <Card key={stat.label} padding="md" hover className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
                   <stat.icon size={22} className={stat.color} />

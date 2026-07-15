@@ -193,12 +193,12 @@ function InventoryPage() {
 
         <motion.div variants={fadeIn} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Total Items", value: stats.total, icon: Package, color: "text-primary", bg: "bg-primary/10" },
-            { label: "Low Stock Alerts", value: stats.lowStock, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10" },
-            { label: "Total Value", value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: DollarSign, color: "text-success", bg: "bg-success/10" },
-            { label: "Categories", value: stats.cats, icon: Layers, color: "text-info", bg: "bg-info/10" },
+            { label: "Total Items", value: stats.total, icon: Package, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+            { label: "Low Stock Alerts", value: stats.lowStock, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
+            { label: "Total Value", value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", borderColor: "#43A047" },
+            { label: "Categories", value: stats.cats, icon: Layers, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
           ].map((stat, idx) => (
-            <Card key={idx} hover shadow="sm" padding="md">
+            <Card key={idx} hover shadow="sm" padding="md" className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
                   <stat.icon size={24} className={stat.color} />

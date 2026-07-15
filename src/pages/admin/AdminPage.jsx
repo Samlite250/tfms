@@ -664,18 +664,19 @@ export default function AdminPage() {
       {/* Dashboard Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
         {[
-          { label: "Total Users", value: stats.totalUsers, icon: Users, color: "bg-primary/10", iconColor: "text-primary" },
-          { label: "Active Users", value: stats.activeUsers, icon: UserCheck, color: "bg-green-100", iconColor: "text-green-600" },
-          { label: "Total Farmers", value: `${stats.totalFarmers}+`, icon: Tractor, color: "bg-blue-100", iconColor: "text-blue-600" },
-          { label: "Total Employees", value: stats.totalEmployees, icon: Briefcase, color: "bg-purple-100", iconColor: "text-purple-600" },
-          { label: "System Health", value: "Good", icon: HeartPulse, color: "bg-emerald-100", iconColor: "text-emerald-600" },
-          { label: "Last Backup", value: "2h ago", icon: Clock, color: "bg-amber-100", iconColor: "text-amber-600" },
+          { label: "Total Users", value: stats.totalUsers, icon: Users, color: "bg-primary/10", iconColor: "text-primary", borderColor: "#2E7D32" },
+          { label: "Active Users", value: stats.activeUsers, icon: UserCheck, color: "bg-green-100", iconColor: "text-green-600", borderColor: "#16A34A" },
+          { label: "Total Farmers", value: `${stats.totalFarmers}+`, icon: Tractor, color: "bg-blue-100", iconColor: "text-blue-600", borderColor: "#2563EB" },
+          { label: "Total Employees", value: stats.totalEmployees, icon: Briefcase, color: "bg-purple-100", iconColor: "text-purple-600", borderColor: "#9333EA" },
+          { label: "System Health", value: "Good", icon: HeartPulse, color: "bg-emerald-100", iconColor: "text-emerald-600", borderColor: "#059669" },
+          { label: "Last Backup", value: "2h ago", icon: Clock, color: "bg-amber-100", iconColor: "text-amber-600", borderColor: "#D97706" },
         ].map((stat) => (
           <motion.div
             key={stat.label}
             variants={itemVariants}
             whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className="rounded-2xl border border-border bg-card p-5 shadow-sm"
+            className="rounded-2xl border border-border bg-card p-5 shadow-sm border-l-4"
+            style={{ borderLeftColor: stat.borderColor }}
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}>

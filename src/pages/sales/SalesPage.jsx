@@ -229,12 +229,12 @@ function SalesPage() {
 
         <motion.div variants={fadeIn} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Total Sales", value: `$${stats.total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
-            { label: "Pending Payments", value: `$${stats.pending.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: Clock, color: "text-warning", bg: "bg-warning/10" },
-            { label: "Invoices", value: stats.invoices, icon: FileText, color: "text-info", bg: "bg-info/10" },
-            { label: "This Month", value: `$${stats.thisMonth.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
+            { label: "Total Sales", value: `$${stats.total.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: DollarSign, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+            { label: "Pending Payments", value: `$${stats.pending.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: Clock, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
+            { label: "Invoices", value: stats.invoices, icon: FileText, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
+            { label: "This Month", value: `$${stats.thisMonth.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: TrendingUp, color: "text-success", bg: "bg-success/10", borderColor: "#43A047" },
           ].map((stat, idx) => (
-            <Card key={idx} hover shadow="sm" padding="md">
+            <Card key={idx} hover shadow="sm" padding="md" className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
                   <stat.icon size={24} className={stat.color} />

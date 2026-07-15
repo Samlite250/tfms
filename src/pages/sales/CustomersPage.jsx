@@ -205,12 +205,12 @@ function CustomersPage() {
 
         <motion.div variants={fadeIn} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Total Customers", value: stats.count, icon: Users, color: "text-primary", bg: "bg-primary/10" },
-            { label: "Total Purchases", value: `$${stats.totalPurchases.toLocaleString()}`, icon: DollarSign, color: "text-success", bg: "bg-success/10" },
-            { label: "Outstanding Balance", value: `$${stats.outstanding.toLocaleString()}`, icon: AlertTriangle, color: "text-danger", bg: "bg-danger/10" },
-            { label: "With Balance", value: stats.withBalance, icon: Mail, color: "text-warning", bg: "bg-warning/10" },
+            { label: "Total Customers", value: stats.count, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+            { label: "Total Purchases", value: `$${stats.totalPurchases.toLocaleString()}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", borderColor: "#43A047" },
+            { label: "Outstanding Balance", value: `$${stats.outstanding.toLocaleString()}`, icon: AlertTriangle, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F" },
+            { label: "With Balance", value: stats.withBalance, icon: Mail, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
           ].map((stat, idx) => (
-            <Card key={idx} hover shadow="sm" padding="md">
+            <Card key={idx} hover shadow="sm" padding="md" className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
                   <stat.icon size={24} className={stat.color} />

@@ -86,6 +86,7 @@ const statsConfig = [
     color: "bg-primary/10 text-primary",
     change: "+12% from yesterday",
     changeColor: "text-secondary",
+    borderColor: "#2E7D32",
   },
   {
     label: "This Week",
@@ -94,6 +95,7 @@ const statsConfig = [
     color: "bg-secondary/10 text-secondary",
     change: "+8% from last week",
     changeColor: "text-secondary",
+    borderColor: "#1B5E20",
   },
   {
     label: "This Month",
@@ -102,6 +104,7 @@ const statsConfig = [
     color: "bg-accent/10 text-accent",
     change: "+15% from last month",
     changeColor: "text-secondary",
+    borderColor: "#F9A825",
   },
   {
     label: "Avg per Delivery",
@@ -110,6 +113,7 @@ const statsConfig = [
     color: "bg-primary/10 text-primary",
     change: "Stable",
     changeColor: "text-text-secondary",
+    borderColor: "#43A047",
   },
 ];
 
@@ -220,7 +224,7 @@ function CollectionPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {statsConfig.map((stat, i) => (
           <motion.div key={stat.label} variants={itemVariants}>
-            <Card hover shadow="md">
+            <Card hover shadow="md" className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">{stat.label}</p>

@@ -687,29 +687,6 @@ export default function LandingPage() {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bg to-transparent" />
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={heroInView ? { opacity: 1 } : {}}
-          transition={{ delay: 1.2, duration: 0.6 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-        >
-          <button
-            onClick={() => scrollTo("features")}
-            className="flex flex-col items-center gap-2 group"
-          >
-            <span className="text-xs font-medium text-white/60 uppercase tracking-widest group-hover:text-white/90 transition-colors">
-              Scroll Down
-            </span>
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center pt-2 group-hover:border-white/70 transition-colors"
-            >
-              <div className="w-1 h-2 rounded-full bg-white/60" />
-            </motion.div>
-          </button>
-        </motion.div>
       </section>
 
       {/* Features Section */}

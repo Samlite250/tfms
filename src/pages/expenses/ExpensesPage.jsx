@@ -211,13 +211,13 @@ export default function ExpensesPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Expenses", value: formatCurrency(stats.total), icon: DollarSign, color: "bg-primary/10 text-primary" },
-          { label: "This Month", value: formatCurrency(stats.thisMonth), icon: Calendar, color: "bg-secondary/10 text-secondary" },
-          { label: "Pending Approvals", value: stats.pending, icon: Clock, color: "bg-accent/10 text-accent" },
-          { label: "Categories", value: stats.categories, icon: Tag, color: "bg-blue-100 text-blue-600" },
+          { label: "Total Expenses", value: formatCurrency(stats.total), icon: DollarSign, color: "bg-primary/10 text-primary", borderColor: "#2E7D32" },
+          { label: "This Month", value: formatCurrency(stats.thisMonth), icon: Calendar, color: "bg-secondary/10 text-secondary", borderColor: "#1B5E20" },
+          { label: "Pending Approvals", value: stats.pending, icon: Clock, color: "bg-accent/10 text-accent", borderColor: "#F9A825" },
+          { label: "Categories", value: stats.categories, icon: Tag, color: "bg-blue-100 text-blue-600", borderColor: "#2563EB" },
         ].map((stat, i) => (
           <motion.div key={stat.label} variants={itemVariants}>
-            <Card hover>
+            <Card hover className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">{stat.label}</p>

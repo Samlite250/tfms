@@ -93,6 +93,7 @@ const stats = [
     bgColor: "bg-primary/10",
     change: "+12%",
     changeColor: "text-success",
+    borderColor: "#2E7D32",
   },
   {
     label: "This Month",
@@ -102,6 +103,7 @@ const stats = [
     bgColor: "bg-secondary/10",
     change: "+8%",
     changeColor: "text-success",
+    borderColor: "#1B5E20",
   },
   {
     label: "Batches This Month",
@@ -111,6 +113,7 @@ const stats = [
     bgColor: "bg-accent/10",
     change: "+5",
     changeColor: "text-success",
+    borderColor: "#F9A825",
   },
   {
     label: "Average Batch Size",
@@ -120,6 +123,7 @@ const stats = [
     bgColor: "bg-info/10",
     change: "+3%",
     changeColor: "text-success",
+    borderColor: "#0288D1",
   },
 ];
 
@@ -259,7 +263,7 @@ function ProductionPage() {
             variants={itemVariants}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
           >
-            <Card padding="md" shadow="md" hover>
+            <Card padding="md" shadow="md" hover className="border-l-4" style={{ borderLeftColor: stat.borderColor }}>
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm text-text-secondary">{stat.label}</p>
