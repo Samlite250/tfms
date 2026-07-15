@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useAuth } from "../../contexts/AuthContext";
+import heroImg from "../../assets/hero.png";
 import {
   motion,
   useInView,
@@ -424,7 +424,6 @@ const benefits = [
 ];
 
 export default function LandingPage() {
-  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const {
     register,
@@ -493,29 +492,18 @@ export default function LandingPage() {
             </div>
 
             <div className="hidden md:flex items-center gap-3">
-              {user ? (
-                <Link
-                  to="/dashboard"
-                  className="text-sm font-medium text-white bg-primary hover:bg-primary-dark px-5 py-2 rounded-lg transition-all shadow-sm hover:shadow-md"
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-sm font-medium text-gray-700 hover:text-primary px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="text-sm font-medium text-white bg-primary hover:bg-primary-dark px-5 py-2 rounded-lg transition-all shadow-sm hover:shadow-md"
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
+              <Link
+                to="/login"
+                className="text-sm font-medium text-gray-700 hover:text-primary px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="text-sm font-medium text-white bg-primary hover:bg-primary-dark px-5 py-2 rounded-lg transition-all shadow-sm hover:shadow-md"
+              >
+                Get Started
+              </Link>
             </div>
 
             <button
@@ -549,29 +537,18 @@ export default function LandingPage() {
                 </button>
               ))}
               <div className="pt-2 border-t border-gray-100 flex flex-col gap-2">
-                {user ? (
-                  <Link
-                    to="/dashboard"
-                    className="text-sm font-medium text-white bg-primary text-center px-4 py-2 rounded-lg transition-all"
-                  >
-                    Dashboard
-                  </Link>
-                ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      className="text-sm font-medium text-gray-700 text-center px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="text-sm font-medium text-white bg-primary text-center px-4 py-2 rounded-lg transition-all"
-                    >
-                      Get Started
-                    </Link>
-                  </>
-                )}
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-gray-700 text-center px-4 py-2 rounded-lg hover:bg-gray-50 transition-all"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="text-sm font-medium text-white bg-primary text-center px-4 py-2 rounded-lg transition-all"
+                >
+                  Get Started
+                </Link>
               </div>
             </div>
           </motion.div>
@@ -583,29 +560,15 @@ export default function LandingPage() {
         id="home"
         ref={heroRef}
         className="relative min-h-screen flex items-center overflow-hidden pt-16"
-        style={{
-          background:
-            "linear-gradient(135deg, #F8FAFC 0%, #E8F5E9 30%, #F1F8E9 60%, #F8FAFC 100%)",
-        }}
       >
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${heroImg})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 via-gray-900/50 to-gray-900/30" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            animate={{
-              background: [
-                "radial-gradient(circle at 20% 50%, rgba(46,125,50,0.08) 0%, transparent 50%)",
-                "radial-gradient(circle at 80% 20%, rgba(46,125,50,0.06) 0%, transparent 50%)",
-                "radial-gradient(circle at 40% 80%, rgba(46,125,50,0.08) 0%, transparent 50%)",
-                "radial-gradient(circle at 20% 50%, rgba(46,125,50,0.08) 0%, transparent 50%)",
-              ],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0"
-          />
-          <TeaLeafSVG className="absolute top-20 left-10 w-32 h-32 opacity-20" />
-          <TeaLeafSVG className="absolute bottom-32 right-16 w-48 h-48 opacity-15" />
-          <TeaLeafSVG className="absolute top-1/3 right-1/4 w-24 h-24 opacity-10" />
-          <div className="absolute top-1/4 right-10 w-72 h-72 bg-secondary rounded-full blur-[120px] opacity-5" />
-          <div className="absolute bottom-1/4 left-20 w-96 h-96 bg-accent rounded-full blur-[150px] opacity-5" />
+          <div className="absolute top-1/4 right-10 w-72 h-72 bg-secondary rounded-full blur-[120px] opacity-10" />
+          <div className="absolute bottom-1/4 left-20 w-96 h-96 bg-accent rounded-full blur-[150px] opacity-10" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -615,7 +578,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6"
+                className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-sm font-medium mb-6"
               >
                 <Sprout className="w-4 h-4" />
                 Tea Factory Management System
@@ -625,7 +588,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6"
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
               >
                 Modern Tea{" "}
                 <span className="text-primary">Factory</span>{" "}
@@ -636,7 +599,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="text-lg text-gray-600 leading-relaxed mb-8 max-w-lg"
+                className="text-lg text-gray-200 leading-relaxed mb-8 max-w-lg"
               >
                 Streamline your tea factory operations with our comprehensive
                 digital management system. From farmer registration to sales
@@ -649,32 +612,20 @@ export default function LandingPage() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="flex flex-wrap gap-4"
               >
-                {user ? (
-                  <Link
-                    to="/dashboard"
-                    className="inline-flex items-center gap-2 bg-primary text-white px-7 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
-                  >
-                    Go to Dashboard
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                ) : (
-                  <>
-                    <Link
-                      to="/register"
-                      className="inline-flex items-center gap-2 bg-primary text-white px-7 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
-                    >
-                      Get Started
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                    <Link
-                      to="/login"
-                      className="inline-flex items-center gap-2 bg-white text-gray-700 px-7 py-3.5 rounded-xl font-semibold text-sm border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                    >
-                      Login
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  </>
-                )}
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 bg-primary text-white px-7 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+                >
+                  Get Started
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-2 bg-white text-gray-700 px-7 py-3.5 rounded-xl font-semibold text-sm border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                >
+                  Login
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
               </motion.div>
 
               <motion.div
@@ -693,10 +644,10 @@ export default function LandingPage() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={heroInView ? { opacity: 1, scale: 1 } : {}}
                     transition={{ duration: 0.4, delay: 0.7 + i * 0.1 }}
-                    className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-100 shadow-sm"
+                    className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 shadow-sm"
                   >
-                    <badge.icon className="w-4 h-4 text-secondary" />
-                    <span className="text-xs font-medium text-gray-700">
+                    <badge.icon className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-white">
                       {badge.label}
                     </span>
                   </motion.div>
@@ -1315,23 +1266,13 @@ export default function LandingPage() {
               <p className="text-sm text-gray-400 leading-relaxed mb-4">
                 Ready to digitize your tea factory? Get started today.
               </p>
-              {user ? (
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary transition-all shadow-sm hover:shadow-md"
-                >
-                  Go to Dashboard
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              ) : (
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary transition-all shadow-sm hover:shadow-md"
-                >
-                  Create Account
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary transition-all shadow-sm hover:shadow-md"
+              >
+                Create Account
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </div>
