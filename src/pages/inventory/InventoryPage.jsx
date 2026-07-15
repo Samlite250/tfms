@@ -196,7 +196,7 @@ function InventoryPage() {
           {[
             { label: "Total Items", value: stats.total, icon: Package, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32", change: "+12%", up: true },
             { label: "Low Stock Alerts", value: stats.lowStock, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00", change: "+3%", up: false },
-            { label: "Total Value", value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", borderColor: "#43A047", change: "+8%", up: true },
+            { label: "Total Value", value: `RWF ${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", borderColor: "#43A047", change: "+8%", up: true },
             { label: "Categories", value: stats.cats, icon: Layers, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1", change: "0%", up: true },
           ].map((stat, idx) => (
             <StatCard

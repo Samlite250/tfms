@@ -402,9 +402,9 @@ function SalesReport() {
   return (
     <motion.div {...fadeIn} className="space-y-6">
       <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" variants={staggerContainer} initial="initial" animate="animate">
-        <StatCard icon={DollarSign} label="Total Revenue" value={`$${(totalRevenue / 1000).toFixed(0)}K`} change={14.5} changeLabel="vs last period" color="primary" />
+        <StatCard icon={DollarSign} label="Total Revenue" value={`RWF ${(totalRevenue / 1000).toFixed(0)}K`} change={14.5} changeLabel="vs last period" color="primary" />
         <StatCard icon={FileText} label="Invoices" value={totalOrders.toString()} change={9.2} changeLabel="vs last period" color="info" />
-        <StatCard icon={BarChart3} label="Average Order" value={`$${avgOrder.toLocaleString()}`} change={3.8} changeLabel="increase" color="secondary" />
+        <StatCard icon={BarChart3} label="Average Order" value={`RWF ${avgOrder.toLocaleString()}`} change={3.8} changeLabel="increase" color="secondary" />
         <StatCard icon={Users} label="Top Customer" value="Nairobi Traders" change={18.3} changeLabel="volume" color="accent" />
       </motion.div>
 
@@ -451,9 +451,9 @@ function ExpenseReport() {
   return (
     <motion.div {...fadeIn} className="space-y-6">
       <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" variants={staggerContainer} initial="initial" animate="animate">
-        <StatCard icon={Receipt} label="Total Spent" value={`$${(totalSpent / 1000).toFixed(1)}K`} change={-5.2} changeLabel="vs last period" color="danger" />
+        <StatCard icon={Receipt} label="Total Spent" value={`RWF ${(totalSpent / 1000).toFixed(1)}K`} change={-5.2} changeLabel="vs last period" color="danger" />
         <StatCard icon={PieChartIcon} label="Biggest Category" value={biggestCategory.name} change={8.4} changeLabel={`${((biggestCategory.value / totalSpent) * 100).toFixed(1)}% of total`} color="primary" />
-        <StatCard icon={BarChart3} label="Daily Average" value={`$${dailyAvg.toLocaleString()}`} change={-2.1} changeLabel="decrease" color="info" />
+        <StatCard icon={BarChart3} label="Daily Average" value={`RWF ${dailyAvg.toLocaleString()}`} change={-2.1} changeLabel="decrease" color="info" />
       </motion.div>
 
       <Card padding="none" header={<div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-text-primary">Expense Records</h3><Badge variant="warning">{expenseRecords.length} entries</Badge></div>}>
@@ -498,9 +498,9 @@ function FinancialSummary() {
   return (
     <motion.div {...fadeIn} className="space-y-6">
       <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" variants={staggerContainer} initial="initial" animate="animate">
-        <StatCard icon={DollarSign} label="Total Revenue" value={`$${(totalRevenue / 1000).toFixed(0)}K`} change={12.8} changeLabel="vs last period" color="primary" />
-        <StatCard icon={Receipt} label="Total Expenses" value={`$${(totalExpenses / 1000).toFixed(0)}K`} change={6.4} changeLabel="vs last period" color="danger" />
-        <StatCard icon={TrendingUp} label="Net Profit" value={`$${(totalProfit / 1000).toFixed(0)}K`} change={18.5} changeLabel="growth" color="secondary" />
+        <StatCard icon={DollarSign} label="Total Revenue" value={`RWF ${(totalRevenue / 1000).toFixed(0)}K`} change={12.8} changeLabel="vs last period" color="primary" />
+        <StatCard icon={Receipt} label="Total Expenses" value={`RWF ${(totalExpenses / 1000).toFixed(0)}K`} change={6.4} changeLabel="vs last period" color="danger" />
+        <StatCard icon={TrendingUp} label="Net Profit" value={`RWF ${(totalProfit / 1000).toFixed(0)}K`} change={18.5} changeLabel="growth" color="secondary" />
         <StatCard icon={BarChart3} label="Profit Margin" value={`${profitMargin}%`} change={2.3} changeLabel="improvement" color="accent" />
       </motion.div>
 
@@ -557,7 +557,7 @@ function InventoryReport() {
     <motion.div {...fadeIn} className="space-y-6">
       <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" variants={staggerContainer} initial="initial" animate="animate">
         <StatCard icon={Package} label="Total SKUs" value={inventoryItems.length.toString()} change={2.1} changeLabel="new items" color="primary" />
-        <StatCard icon={DollarSign} label="Total Value" value={`$${(totalValue / 1000).toFixed(1)}K`} change={6.8} changeLabel="increase" color="secondary" />
+        <StatCard icon={DollarSign} label="Total Value" value={`RWF ${(totalValue / 1000).toFixed(1)}K`} change={6.8} changeLabel="increase" color="secondary" />
         <StatCard icon={AlertTriangle} label="Low Stock Alerts" value={lowStockItems.length.toString()} change={-12.5} changeLabel="fewer alerts" color="danger" />
         <StatCard icon={TrendingUp} label="Avg Fill Rate" value={`${Math.round(inventoryItems.reduce((s, i) => s + (i.stock / i.capacity) * 100, 0) / inventoryItems.length)}%`} change={3.4} changeLabel="improvement" color="info" />
       </motion.div>

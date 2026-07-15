@@ -12,11 +12,12 @@ export function formatDate(date) {
 }
 
 export function formatCurrency(amount) {
-  if (amount === null || amount === undefined) return 'Rs. 0.00';
-  return new Intl.NumberFormat('en-LK', {
+  if (amount === null || amount === undefined) return 'RWF 0';
+  return new Intl.NumberFormat('en-RW', {
     style: 'currency',
-    currency: 'LKR',
-    minimumFractionDigits: 2,
+    currency: 'RWF',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount);
 }
 

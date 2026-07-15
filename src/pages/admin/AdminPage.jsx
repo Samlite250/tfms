@@ -69,7 +69,7 @@ const ROLE_OPTIONS = Object.entries(ROLE_LABELS).map(([value, label]) => ({
 const DEPARTMENT_OPTIONS = DEPARTMENTS.map((d) => ({ value: d, label: d }));
 
 const CURRENCY_OPTIONS = [
-  { value: "USD", label: "US Dollar (USD)" },
+  { value: "RWF", label: "Rwandan Franc (RWF)" },
   { value: "EUR", label: "Euro (EUR)" },
   { value: "GBP", label: "British Pound (GBP)" },
   { value: "LKR", label: "Sri Lankan Rupee (LKR)" },
@@ -116,7 +116,7 @@ const mockActivities = [
   { id: 1, user: "Kamal Perera", action: "Created", module: "Collection", details: "Recorded tea collection: 450 kg from Kigali cooperative", timestamp: "2026-07-14 09:15:00" },
   { id: 2, user: "Nimal Silva", action: "Updated", module: "Farmers", details: "Updated farmer profile: Jean Mugabo - contact info changed", timestamp: "2026-07-14 09:05:00" },
   { id: 3, user: "Dissanayake Bandara", action: "Deleted", module: "Users", details: "Deactivated user account: Lakshman Peris", timestamp: "2026-07-14 08:50:00" },
-  { id: 4, user: "Ravi Wickrama", action: "Created", module: "Expenses", details: "Logged expense: $1,850 for machinery maintenance", timestamp: "2026-07-14 08:40:00" },
+  { id: 4, user: "Ravi Wickrama", action: "Created", module: "Expenses", details: "Logged expense: RWF 1,850 for machinery maintenance", timestamp: "2026-07-14 08:40:00" },
   { id: 5, user: "Dilani Herath", action: "Updated", module: "Production", details: "Updated batch #1042 status to 'In Progress'", timestamp: "2026-07-14 08:30:00" },
   { id: 6, user: "Chaminda Rajapaksa", action: "Created", module: "Inventory", details: "Added new stock entry: 500 kg Black Tea BOP1", timestamp: "2026-07-14 08:15:00" },
   { id: 7, user: "Kamal Perera", action: "Updated", module: "Employees", details: "Shift assignment updated for evening crew", timestamp: "2026-07-14 08:00:00" },
@@ -129,7 +129,7 @@ const mockActivities = [
   { id: 14, user: "Priya Bandara", action: "Deleted", module: "Collection", details: "Removed duplicate collection record #C-4521", timestamp: "2026-07-13 17:00:00" },
   { id: 15, user: "Kamal Perera", action: "Created", module: "Inventory", details: "Stock transfer: 200 kg from Warehouse A to Processing", timestamp: "2026-07-13 16:45:00" },
   { id: 16, user: "Nimal Silva", action: "Created", module: "Farmers", details: "Registered new farmer: Emmanuel Ndayisaba - 2.5 hectares", timestamp: "2026-07-13 16:30:00" },
-  { id: 17, user: "Ravi Wickrama", action: "Created", module: "Sales", details: "Generated invoice #2090: $5,200 to Nairobi Traders", timestamp: "2026-07-13 16:15:00" },
+  { id: 17, user: "Ravi Wickrama", action: "Created", module: "Sales", details: "Generated invoice #2090: RWF 5,200 to Nairobi Traders", timestamp: "2026-07-13 16:15:00" },
   { id: 18, user: "Anita Jayawardena", action: "Updated", module: "Employees", details: "Updated leave request for Dilani Herath - Approved", timestamp: "2026-07-13 16:00:00" },
   { id: 19, user: "Dilani Herath", action: "Updated", module: "Production", details: "Quality check passed for batch #1040", timestamp: "2026-07-13 15:45:00" },
   { id: 20, user: "Chaminda Rajapaksa", action: "Deleted", module: "Inventory", details: "Removed expired stock entry: Fertilizer batch #FB-203", timestamp: "2026-07-13 15:30:00" },
@@ -243,7 +243,7 @@ export default function AdminPage() {
   const [factoryAddress, setFactoryAddress] = useState("No. 42, Plantation Road, Nuwara Eliya, Sri Lanka");
   const [factoryPhone, setFactoryPhone] = useState("+94 52 222 3456");
   const [factoryEmail, setFactoryEmail] = useState("admin@highlandtea.com");
-  const [defaultCurrency, setDefaultCurrency] = useState("USD");
+  const [defaultCurrency, setDefaultCurrency] = useState("RWF");
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
   const [timeZone, setTimeZone] = useState("Asia/Colombo");
   const [maintenanceMode, setMaintenanceMode] = useState(false);

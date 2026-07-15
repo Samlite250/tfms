@@ -207,8 +207,8 @@ function CustomersPage() {
         <motion.div variants={fadeIn} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: "Total Customers", value: stats.count, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32", change: "+12%", up: true },
-            { label: "Total Purchases", value: `$${stats.totalPurchases.toLocaleString()}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", borderColor: "#43A047", change: "+8.5%", up: true },
-            { label: "Outstanding Balance", value: `$${stats.outstanding.toLocaleString()}`, icon: AlertTriangle, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F", change: "-3.2%", up: false },
+            { label: "Total Purchases", value: `RWF ${stats.totalPurchases.toLocaleString()}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", borderColor: "#43A047", change: "+8.5%", up: true },
+            { label: "Outstanding Balance", value: `RWF ${stats.outstanding.toLocaleString()}`, icon: AlertTriangle, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F", change: "-3.2%", up: false },
             { label: "With Balance", value: stats.withBalance, icon: Mail, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00", change: "+5.1%", up: true },
           ].map((stat, idx) => (
             <StatCard
