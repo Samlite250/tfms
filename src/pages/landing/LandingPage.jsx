@@ -669,7 +669,7 @@ export default function LandingPage() {
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="group relative text-center p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300"
+                        className="group relative text-center p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300"
                       >
                         <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${item.bg} mb-2`}>
                           <item.icon className={`h-5 w-5 ${item.color}`} />
