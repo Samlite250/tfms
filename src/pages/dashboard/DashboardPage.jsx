@@ -3,65 +3,11 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Coffee, Factory, Package, ShoppingCart, DollarSign, Users, TrendingUp,
-  ArrowUpRight, ArrowDownRight, Clock, FileText, BarChart3, ArrowRight,
+  ArrowUpRight, ArrowDownRight, Clock, FileText, ArrowRight,
   UserPlus, Receipt, ClipboardList, Tractor, AlertTriangle,
 } from "lucide-react";
-import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-} from "recharts";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROLES, ROLE_LABELS } from "../../utils/constants";
-
-const monthlyCollectionData = [
-  { month: "Jan", collected: 32000, target: 30000 },
-  { month: "Feb", collected: 28500, target: 30000 },
-  { month: "Mar", collected: 35200, target: 32000 },
-  { month: "Apr", collected: 31800, target: 32000 },
-  { month: "May", collected: 38600, target: 35000 },
-  { month: "Jun", collected: 42100, target: 38000 },
-];
-
-const monthlyProductionData = [
-  { month: "Jan", greenTea: 8200, blackTea: 6400, oolong: 2100 },
-  { month: "Feb", greenTea: 7500, blackTea: 5800, oolong: 1900 },
-  { month: "Mar", greenTea: 9100, blackTea: 7200, oolong: 2500 },
-  { month: "Apr", greenTea: 8400, blackTea: 6800, oolong: 2300 },
-  { month: "May", greenTea: 10200, blackTea: 7900, oolong: 2800 },
-  { month: "Jun", greenTea: 11500, blackTea: 8600, oolong: 3100 },
-];
-
-const salesTrendData = [
-  { month: "Jan", revenue: 85000, expenses: 62000 },
-  { month: "Feb", revenue: 78000, expenses: 58000 },
-  { month: "Mar", revenue: 92000, expenses: 65000 },
-  { month: "Apr", revenue: 88000, expenses: 61000 },
-  { month: "May", revenue: 105000, expenses: 72000 },
-  { month: "Jun", revenue: 118000, expenses: 78000 },
-  { month: "Jul", revenue: 112000, expenses: 75000 },
-  { month: "Aug", revenue: 98000, expenses: 68000 },
-  { month: "Sep", revenue: 125000, expenses: 82000 },
-  { month: "Oct", revenue: 132000, expenses: 85000 },
-  { month: "Nov", revenue: 128000, expenses: 80000 },
-  { month: "Dec", revenue: 145000, expenses: 92000 },
-];
-
-const expenseBreakdownData = [
-  { name: "Labor", value: 35000, color: "#2E7D32" },
-  { name: "Transport", value: 18000, color: "#43A047" },
-  { name: "Materials", value: 22000, color: "#F9A825" },
-  { name: "Utilities", value: 12000, color: "#1565C0" },
-  { name: "Maintenance", value: 8000, color: "#DC2626" },
-  { name: "Other", value: 5000, color: "#7C3AED" },
-];
-
-const inventoryData = [
-  { name: "Green Tea", stock: 4200, threshold: 1000 },
-  { name: "Black Tea", stock: 3800, threshold: 1200 },
-  { name: "Oolong", stock: 1500, threshold: 500 },
-  { name: "Dust", stock: 2100, threshold: 800 },
-  { name: "Fannings", stock: 1800, threshold: 600 },
-];
 
 
 function getGreeting() {
@@ -87,20 +33,6 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-function CustomTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-xl border border-border bg-white p-3 shadow-lg">
-      <p className="mb-1 text-sm font-semibold text-text-primary">{label}</p>
-      {payload.map((entry, i) => (
-        <p key={i} className="text-sm" style={{ color: entry.color }}>
-          {entry.name}: {typeof entry.value === "number" ? entry.value.toLocaleString() : entry.value}
-        </p>
-      ))}
-    </div>
-  );
-}
-
 function getRoleConfig(role) {
   switch (role) {
     case ROLES.ADMIN:
@@ -111,9 +43,8 @@ function getRoleConfig(role) {
           { label: "Production Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
           { label: "Inventory Available", value: "15,400 kg", change: "In stock", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
           { label: "Total Sales", value: "$45,200", change: "+15%", up: true, icon: ShoppingCart, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20" },
-          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
+          { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10",           borderColor: "#F9A825" },
         ],
-        charts: ["collection", "production", "sales"],
         quickActions: [
           { label: "Record Collection", icon: Coffee, to: "/collections/new", color: "bg-primary" },
           { label: "New Production", icon: Factory, to: "/production/new", color: "bg-secondary" },
@@ -141,7 +72,6 @@ function getRoleConfig(role) {
           { label: "Active Employees", value: "48", change: "On shift", up: true, icon: Users, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
           { label: "Monthly Revenue", value: "$128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
         ],
-        charts: ["collection", "production", "sales"],
         quickActions: [
           { label: "Record Collection", icon: Coffee, to: "/collections/new", color: "bg-primary" },
           { label: "New Production", icon: Factory, to: "/production/new", color: "bg-secondary" },
@@ -165,7 +95,6 @@ function getRoleConfig(role) {
           { label: "This Week", value: "8,400 kg", change: "+5%", up: true, icon: TrendingUp, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20" },
           { label: "Total Farmers", value: "156", change: "Registered", up: true, icon: Users, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
         ],
-        charts: ["collection"],
         quickActions: [
           { label: "Record Collection", icon: Coffee, to: "/collections/new", color: "bg-primary" },
           { label: "Add Farmer", icon: UserPlus, to: "/farmers/new", color: "bg-info" },
@@ -187,7 +116,6 @@ function getRoleConfig(role) {
           { label: "Inventory Stock", value: "15,400 kg", change: "Available", up: true, icon: Package, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
           { label: "Low Stock Items", value: "2", change: "Alerts", up: false, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
         ],
-        charts: ["production", "inventory"],
         quickActions: [
           { label: "New Production", icon: Factory, to: "/production/new", color: "bg-secondary" },
           { label: "View Inventory", icon: Package, to: "/inventory", color: "bg-purple-600" },
@@ -209,7 +137,6 @@ function getRoleConfig(role) {
           { label: "Low Stock", value: "2", change: "Items below threshold", up: false, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
           { label: "Movements Today", value: "8", change: "In/Out", up: true, icon: ArrowRight, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
         ],
-        charts: ["inventory"],
         quickActions: [
           { label: "View Inventory", icon: Package, to: "/inventory", color: "bg-purple-600" },
           { label: "Stock Movement", icon: ArrowRight, to: "/inventory/movements", color: "bg-primary" },
@@ -231,7 +158,6 @@ function getRoleConfig(role) {
           { label: "Total Expenses", value: "$78,400", change: "+8%", up: false, icon: Receipt, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F" },
           { label: "Net Profit", value: "$50,100", change: "+35%", up: true, icon: TrendingUp, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
         ],
-        charts: ["sales", "expense"],
         quickActions: [
           { label: "Record Sale", icon: ShoppingCart, to: "/sales/new", color: "bg-secondary" },
           { label: "Add Expense", icon: Receipt, to: "/expenses/new", color: "bg-danger" },
@@ -251,167 +177,9 @@ function getRoleConfig(role) {
         stats: [
           { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
         ],
-        charts: [],
         quickActions: [],
         activities: [],
       };
-  }
-}
-
-function renderChart(chartType) {
-  switch (chartType) {
-    case "collection":
-      return (
-        <motion.div key="collection" variants={itemVariants} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary">Monthly Collection</h3>
-              <p className="text-sm text-text-secondary">Tea leaves collected over 6 months</p>
-            </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-              <TrendingUp className="h-4.5 w-4.5 text-primary" />
-            </div>
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyCollectionData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorCollected" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2E7D32" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#2E7D32" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorTarget" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F9A825" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#F9A825" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7280" }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7280" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="collected" name="Collected" stroke="#2E7D32" strokeWidth={2.5} fill="url(#colorCollected)" />
-                <Area type="monotone" dataKey="target" name="Target" stroke="#F9A825" strokeWidth={2} strokeDasharray="5 5" fill="url(#colorTarget)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      );
-
-    case "production":
-      return (
-        <motion.div key="production" variants={itemVariants} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary">Monthly Production</h3>
-              <p className="text-sm text-text-secondary">Tea production by type</p>
-            </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-info/10">
-              <Factory className="h-4.5 w-4.5 text-info" />
-            </div>
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyProductionData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7280" }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7280" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                <Bar dataKey="greenTea" name="Green Tea" fill="#2E7D32" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="blackTea" name="Black Tea" fill="#43A047" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="oolong" name="Oolong" fill="#F9A825" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      );
-
-    case "sales":
-      return (
-        <motion.div key="sales" variants={itemVariants} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary">Sales Trend</h3>
-              <p className="text-sm text-text-secondary">Revenue vs expenses over 12 months</p>
-            </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10">
-              <BarChart3 className="h-4.5 w-4.5 text-accent-dark" />
-            </div>
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={salesTrendData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7280" }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7280" }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#2E7D32" strokeWidth={2.5} dot={{ r: 4, fill: "#2E7D32", strokeWidth: 0 }} />
-                <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#DC2626" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3, fill: "#DC2626", strokeWidth: 0 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      );
-
-    case "expense":
-      return (
-        <motion.div key="expense" variants={itemVariants} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary">Expense Breakdown</h3>
-              <p className="text-sm text-text-secondary">Expenses by category this month</p>
-            </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-danger/10">
-              <Receipt className="h-4.5 w-4.5 text-danger" />
-            </div>
-          </div>
-          <div className="h-72 flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={expenseBreakdownData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value">
-                  {expenseBreakdownData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      );
-
-    case "inventory":
-      return (
-        <motion.div key="inventory" variants={itemVariants} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary">Stock Levels</h3>
-              <p className="text-sm text-text-secondary">Current inventory vs threshold</p>
-            </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100">
-              <Package className="h-4.5 w-4.5 text-purple-600" />
-            </div>
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={inventoryData} layout="vertical" margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" horizontal={false} />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7280" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7280" }} width={80} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                <Bar dataKey="stock" name="Current Stock" fill="#2E7D32" radius={[0, 4, 4, 0]} />
-                <Bar dataKey="threshold" name="Min Threshold" fill="#F9A825" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      );
-
-    default:
-      return null;
   }
 }
 
@@ -464,13 +232,6 @@ export default function DashboardPage() {
           </motion.div>
         ))}
       </div>
-
-      {/* Charts */}
-      {config.charts.length > 0 && (
-        <div className={`grid grid-cols-1 gap-6 ${config.charts.length >= 2 ? "lg:grid-cols-2" : ""}`}>
-          {config.charts.map((chartType) => renderChart(chartType))}
-        </div>
-      )}
 
       {/* Bottom Row: Activities & Quick Actions */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import {
   Plus,
   Receipt,
@@ -434,35 +433,7 @@ export default function ExpensesPage() {
         <motion.div variants={itemVariants}>
           <Card>
             <h3 className="text-base font-semibold text-gray-900 mb-4">Category Breakdown</h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={PIE_CHART_DATA}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {PIE_CHART_DATA.map((entry) => (
-                      <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => formatCurrency(value)}
-                    contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "13px" }}
-                  />
-                  <Legend
-                    iconType="circle"
-                    iconSize={8}
-                    formatter={(value) => <span className="text-xs text-gray-600">{value}</span>}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="space-y-2 mt-4 pt-4 border-t border-border">
+            <div className="space-y-2">
               {PIE_CHART_DATA.sort((a, b) => b.value - a.value).map((item) => {
                 const total = PIE_CHART_DATA.reduce((s, d) => s + d.value, 0);
                 const pct = ((item.value / total) * 100).toFixed(1);

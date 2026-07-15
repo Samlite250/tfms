@@ -1,56 +1,30 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3,
   Coffee,
   Factory,
-  ShoppingCart,
   Receipt,
   DollarSign,
   Package,
-  Calendar,
   Download,
   FileText,
   Printer,
   Mail,
   TrendingUp,
-  TrendingDown,
   Users,
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
   PieChart as PieChartIcon,
   Filter,
-  ChevronDown,
-  X,
   Check,
   Layers,
-  Landmark,
-  ClipboardList,
 } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  ComposedChart,
-  ReferenceLine,
-} from "recharts";
+
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
-import Select from "../../components/ui/Select";
 import Input from "../../components/ui/Input";
 import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
@@ -66,17 +40,6 @@ const COLORS = {
   teal: "#00897B",
   pink: "#D81B60",
 };
-
-const CHART_PALETTE = [
-  "#2E7D32",
-  "#43A047",
-  "#F9A825",
-  "#1E88E5",
-  "#E53935",
-  "#7B1FA2",
-  "#00897B",
-  "#D81B60",
-];
 
 const fadeIn = {
   initial: { opacity: 0, y: 12 },
@@ -172,16 +135,6 @@ const expenseByCategory = [
   { name: "Admin", value: 7200, color: COLORS.pink },
 ];
 
-const monthlyExpenses = [
-  { month: "Jan", raw: 5800, labor: 4900, utilities: 2600, transport: 2100, other: 2800 },
-  { month: "Feb", raw: 5200, labor: 4900, utilities: 2500, transport: 1900, other: 2600 },
-  { month: "Mar", raw: 6400, labor: 5100, utilities: 2800, transport: 2300, other: 3000 },
-  { month: "Apr", raw: 6000, labor: 5100, utilities: 2700, transport: 2200, other: 2900 },
-  { month: "May", raw: 7200, labor: 5300, utilities: 3000, transport: 2500, other: 3200 },
-  { month: "Jun", raw: 7800, labor: 5500, utilities: 3200, transport: 2700, other: 3500 },
-  { month: "Jul", raw: 6900, labor: 5400, utilities: 3100, transport: 2400, other: 3200 },
-];
-
 const expenseRecords = [
   { id: "EXP-421", date: "2026-07-14", category: "Raw Materials", description: "Premium tea leaves procurement", amount: 4500, vendor: "Kigali Suppliers" },
   { id: "EXP-420", date: "2026-07-13", category: "Labor", description: "Overtime pay - weekend shift", amount: 3200, vendor: "Internal" },
@@ -211,30 +164,6 @@ const inventoryItems = [
   { name: "Tea Bags (Black)", stock: 3200, capacity: 25000, unit: "pcs", value: 1600, status: "Low" },
   { name: "Packaging Boxes", stock: 8500, capacity: 12000, unit: "pcs", value: 4250, status: "Healthy" },
 ];
-
-const inventoryValueData = inventoryItems.map((item) => ({
-  name: item.name.length > 12 ? item.name.substring(0, 12) + "..." : item.name,
-  fullName: item.name,
-  stock: item.stock,
-  capacity: item.capacity,
-  value: item.value,
-  fillPercent: Math.round((item.stock / item.capacity) * 100),
-}));
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-xl border border-border bg-white p-3 shadow-lg">
-      <p className="text-xs font-semibold text-text-primary mb-1">{label}</p>
-      {payload.map((entry, i) => (
-        <p key={i} className="text-xs text-text-secondary flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
-          {entry.name}: <span className="font-medium text-text-primary">{typeof entry.value === "number" ? entry.value.toLocaleString() : entry.value}</span>
-        </p>
-      ))}
-    </div>
-  );
-};
 
 function StatCard({ icon: Icon, label, value, change, changeLabel, color = "primary", delay = 0 }) {
   const isPositive = change >= 0;
@@ -367,38 +296,6 @@ function CollectionReport() {
         <StatCard icon={TrendingUp} label="Top Grade" value="Premium" change={5.8} changeLabel="share" color="accent" />
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card padding="md" className="lg:col-span-2" header={<h3 className="text-sm font-semibold text-text-primary">Daily Collection Volume</h3>}>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={collectionDailyData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-                <YAxis tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="collected" name="Collected (kg)" fill={COLORS.primary} radius={[6, 6, 0, 0]} />
-                <Bar dataKey="target" name="Target (kg)" fill={COLORS.accent} radius={[6, 6, 0, 0]} opacity={0.7} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        <Card padding="md" header={<h3 className="text-sm font-semibold text-text-primary">Farmer Participation</h3>}>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={collectionDailyData} layout="vertical" barSize={16}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-                <YAxis dataKey="day" type="category" tick={{ fontSize: 12 }} stroke="#9CA3AF" width={35} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="farmers" name="Farmers" fill={COLORS.secondary} radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-      </div>
-
       <Card padding="none" header={<div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-text-primary">Collection Records</h3><Badge variant="info">{collectionRecords.length} records</Badge></div>}>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -457,23 +354,6 @@ function ProductionReport() {
         <StatCard icon={Layers} label="Batches Count" value={productionBatches.length.toString()} change={7.8} changeLabel="vs last week" color="info" />
       </motion.div>
 
-      <Card padding="md" header={<h3 className="text-sm font-semibold text-text-primary">Production Over Time</h3>}>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={productionData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey="greenTea" name="Green Tea" stroke={COLORS.primary} strokeWidth={2.5} dot={{ r: 4, fill: COLORS.primary }} activeDot={{ r: 6 }} />
-              <Line type="monotone" dataKey="blackTea" name="Black Tea" stroke={COLORS.secondary} strokeWidth={2.5} dot={{ r: 4, fill: COLORS.secondary }} activeDot={{ r: 6 }} />
-              <Line type="monotone" dataKey="oolong" name="Oolong" stroke={COLORS.accent} strokeWidth={2.5} dot={{ r: 4, fill: COLORS.accent }} activeDot={{ r: 6 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
       <Card padding="none" header={<div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-text-primary">Production Batches</h3><Badge variant="info">{productionBatches.length} batches</Badge></div>}>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -527,26 +407,6 @@ function SalesReport() {
         <StatCard icon={Users} label="Top Customer" value="Nairobi Traders" change={18.3} changeLabel="volume" color="accent" />
       </motion.div>
 
-      <Card padding="md" header={<h3 className="text-sm font-semibold text-text-primary">Sales Trend</h3>}>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={salesData}>
-              <defs>
-                <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#9CA3AF" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="revenue" name="Revenue ($)" stroke={COLORS.primary} strokeWidth={2.5} fill="url(#salesGradient)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
       <Card padding="none" header={<div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-text-primary">Sales Records</h3><Badge variant="info">{salesRecords.length} invoices</Badge></div>}>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -595,53 +455,6 @@ function ExpenseReport() {
         <StatCard icon={BarChart3} label="Daily Average" value={`$${dailyAvg.toLocaleString()}`} change={-2.1} changeLabel="decrease" color="info" />
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card padding="md" header={<h3 className="text-sm font-semibold text-text-primary">Expenses by Category</h3>}>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={expenseByCategory}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={65}
-                  outerRadius={110}
-                  paddingAngle={3}
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={{ stroke: "#9CA3AF", strokeWidth: 1 }}
-                >
-                  {expenseByCategory.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        <Card padding="md" header={<h3 className="text-sm font-semibold text-text-primary">Monthly Expenses</h3>}>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyExpenses} barGap={2}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-                <YAxis tick={{ fontSize: 12 }} stroke="#9CA3AF" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="raw" name="Raw Materials" stackId="a" fill={COLORS.primary} radius={[0, 0, 0, 0]} />
-                <Bar dataKey="labor" name="Labor" stackId="a" fill={COLORS.secondary} />
-                <Bar dataKey="utilities" name="Utilities" stackId="a" fill={COLORS.info} />
-                <Bar dataKey="transport" name="Transport" stackId="a" fill={COLORS.accent} />
-                <Bar dataKey="other" name="Other" stackId="a" fill={COLORS.purple} radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-      </div>
-
       <Card padding="none" header={<div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-text-primary">Expense Records</h3><Badge variant="warning">{expenseRecords.length} entries</Badge></div>}>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -689,29 +502,6 @@ function FinancialSummary() {
         <StatCard icon={TrendingUp} label="Net Profit" value={`$${(totalProfit / 1000).toFixed(0)}K`} change={18.5} changeLabel="growth" color="secondary" />
         <StatCard icon={BarChart3} label="Profit Margin" value={`${profitMargin}%`} change={2.3} changeLabel="improvement" color="accent" />
       </motion.div>
-
-      <Card padding="md" header={<h3 className="text-sm font-semibold text-text-primary">Revenue vs Expenses</h3>}>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={financialMonthly}>
-              <defs>
-                <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#9CA3AF" tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Area type="monotone" dataKey="revenue" name="Revenue" stroke={COLORS.primary} strokeWidth={2.5} fill="url(#revenueGrad)" />
-              <Line type="monotone" dataKey="expenses" name="Expenses" stroke={COLORS.danger} strokeWidth={2.5} dot={{ r: 4, fill: COLORS.danger }} />
-              <Bar dataKey="profit" name="Profit" fill={COLORS.secondary} radius={[4, 4, 0, 0]} opacity={0.6} barSize={28} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
 
       <Card padding="none" header={<h3 className="text-sm font-semibold text-text-primary px-6 py-4">Monthly Profit & Loss</h3>}>
         <div className="overflow-x-auto">
@@ -771,38 +561,6 @@ function InventoryReport() {
         <StatCard icon={TrendingUp} label="Avg Fill Rate" value={`${Math.round(inventoryItems.reduce((s, i) => s + (i.stock / i.capacity) * 100, 0) / inventoryItems.length)}%`} change={3.4} changeLabel="improvement" color="info" />
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card padding="md" className="lg:col-span-2" header={<h3 className="text-sm font-semibold text-text-primary">Stock Levels</h3>}>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={inventoryValueData} barGap={2}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="#9CA3AF" angle={-20} textAnchor="end" height={60} />
-                <YAxis tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0].payload;
-                    return (
-                      <div className="rounded-xl border border-border bg-white p-3 shadow-lg">
-                        <p className="text-xs font-semibold text-text-primary mb-1">{d.fullName}</p>
-                        <p className="text-xs text-text-secondary">Stock: <span className="font-medium text-text-primary">{d.stock.toLocaleString()} {inventoryItems[0].unit}</span></p>
-                        <p className="text-xs text-text-secondary">Capacity: <span className="font-medium text-text-primary">{d.capacity.toLocaleString()}</span></p>
-                        <p className="text-xs text-text-secondary">Fill: <span className={`font-medium ${d.fillPercent < 30 ? "text-danger" : d.fillPercent < 60 ? "text-warning" : "text-success"}`}>{d.fillPercent}%</span></p>
-                      </div>
-                    );
-                  }}
-                />
-                <Bar dataKey="stock" name="Current Stock" radius={[6, 6, 0, 0]}>
-                  {inventoryValueData.map((entry, i) => (
-                    <Cell key={i} fill={entry.fillPercent < 30 ? COLORS.danger : entry.fillPercent < 60 ? COLORS.accent : COLORS.primary} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
         <Card padding="md" header={<div className="flex items-center gap-2"><AlertTriangle size={16} className="text-danger" /><h3 className="text-sm font-semibold text-text-primary">Low Stock Alerts</h3></div>}>
           <div className="space-y-3">
             {lowStockItems.map((item, i) => {
@@ -836,7 +594,6 @@ function InventoryReport() {
             })}
           </div>
         </Card>
-      </div>
 
       <Card padding="none" header={<h3 className="text-sm font-semibold text-text-primary px-6 py-4">Inventory Valuation</h3>}>
         <div className="overflow-x-auto">
