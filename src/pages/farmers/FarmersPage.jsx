@@ -12,6 +12,7 @@ import {
   Trash2,
   Filter,
   MoreVertical,
+  Loader2,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
@@ -23,6 +24,8 @@ import StatCard from "../../components/ui/StatCard";
 import DataTable from "../../components/ui/DataTable";
 import Select from "../../components/ui/Select";
 import { useToast } from "../../components/ui/Toast";
+import useRealtimeCollection from "../../hooks/useRealtimeCollection";
+import { farmersSeed } from "../../firebase/seedData";
 
 const collectionCenterOptions = [
   { value: null, label: "All Centers" },
@@ -39,46 +42,20 @@ const statusFilterOptions = [
   { value: "Inactive", label: "Inactive" },
 ];
 
-const farmers = [
-  { id: "FRM-001", name: "Mugisha Patrick", phone: "+256 772 123456", email: "mugisha.p@gmail.com", village: "Kyanja", district: "Kampala", province: "Central", country: "Uganda", farmSize: 2.5, teaVariety: "TRFK 306/1", collectionCenter: "Kyanja CC", totalDeliveries: 48, totalWeight: 1240, status: "Active", joinedDate: "2024-03-15", gender: "Male" },
-  { id: "FRM-002", name: "Nambogo Sarah", phone: "+256 783 234567", email: "nambogo.s@yahoo.com", village: "Mushubi", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 1.8, teaVariety: "TRFK 306/1", collectionCenter: "Mushubi CC", totalDeliveries: 36, totalWeight: 890, status: "Active", joinedDate: "2024-01-20", gender: "Female" },
-  { id: "FRM-003", name: "Kizza Moses", phone: "+256 701 345678", email: "kizza.m@gmail.com", village: "Rulangala", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 3.2, teaVariety: "RB 16/9", collectionCenter: "Rulangala CC", totalDeliveries: 62, totalWeight: 1780, status: "Active", joinedDate: "2023-11-08", gender: "Male" },
-  { id: "FRM-004", name: "Namukasa Grace", phone: "+256 775 456789", email: "namukasa.g@outlook.com", village: "Ntinda", district: "Kampala", province: "Central", country: "Uganda", farmSize: 1.2, teaVariety: "TRFK 306/1", collectionCenter: "Ntinda CC", totalDeliveries: 22, totalWeight: 520, status: "Active", joinedDate: "2024-06-10", gender: "Female" },
-  { id: "FRM-005", name: "Ssempala John", phone: "+256 786 567890", email: "ssempala.j@gmail.com", village: "Kisementi", district: "Kampala", province: "Central", country: "Uganda", farmSize: 4.0, teaVariety: "SFS 150/10", collectionCenter: "Kisementi CC", totalDeliveries: 71, totalWeight: 2100, status: "Active", joinedDate: "2023-08-22", gender: "Male" },
-  { id: "FRM-006", name: "Auma Florence", phone: "+256 702 678901", email: "auma.f@gmail.com", village: "Kyanja", district: "Kampala", province: "Central", country: "Uganda", farmSize: 1.5, teaVariety: "TRFK 306/1", collectionCenter: "Kyanja CC", totalDeliveries: 18, totalWeight: 410, status: "Inactive", joinedDate: "2024-04-05", gender: "Female" },
-  { id: "FRM-007", name: "Opio David", phone: "+256 773 789012", email: "opio.d@yahoo.com", village: "Mushubi", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 2.8, teaVariety: "RB 16/9", collectionCenter: "Mushubi CC", totalDeliveries: 55, totalWeight: 1520, status: "Active", joinedDate: "2023-12-01", gender: "Male" },
-  { id: "FRM-008", name: "Nansubuga Rose", phone: "+256 784 890123", email: "nansubuga.r@gmail.com", village: "Rulangala", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 2.0, teaVariety: "TRFK 306/1", collectionCenter: "Rulangala CC", totalDeliveries: 40, totalWeight: 1050, status: "Active", joinedDate: "2024-02-14", gender: "Female" },
-  { id: "FRM-009", name: "Tumwine Samuel", phone: "+256 705 901234", email: "tumwine.s@gmail.com", village: "Ntinda", district: "Kampala", province: "Central", country: "Uganda", farmSize: 3.5, teaVariety: "SFS 150/10", collectionCenter: "Ntinda CC", totalDeliveries: 58, totalWeight: 1680, status: "Active", joinedDate: "2023-10-18", gender: "Male" },
-  { id: "FRM-010", name: "Atim Joyce", phone: "+256 776 012345", email: "atim.j@outlook.com", village: "Kisementi", district: "Kampala", province: "Central", country: "Uganda", farmSize: 1.0, teaVariety: "TRFK 306/1", collectionCenter: "Kisementi CC", totalDeliveries: 12, totalWeight: 280, status: "Inactive", joinedDate: "2024-07-25", gender: "Female" },
-  { id: "FRM-011", name: "Wasswa Joseph", phone: "+256 781 123456", email: "wasswa.j@gmail.com", village: "Kyanja", district: "Kampala", province: "Central", country: "Uganda", farmSize: 2.2, teaVariety: "RB 16/9", collectionCenter: "Kyanja CC", totalDeliveries: 44, totalWeight: 1180, status: "Active", joinedDate: "2024-01-03", gender: "Male" },
-  { id: "FRM-012", name: "Nalubwama Agnes", phone: "+256 703 234567", email: "nalubwama.a@yahoo.com", village: "Mushubi", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 1.6, teaVariety: "TRFK 306/1", collectionCenter: "Mushubi CC", totalDeliveries: 30, totalWeight: 740, status: "Active", joinedDate: "2024-05-12", gender: "Female" },
-  { id: "FRM-013", name: "Kiiza Robert", phone: "+256 777 345678", email: "kiiza.r@gmail.com", village: "Rulangala", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 3.8, teaVariety: "SFS 150/10", collectionCenter: "Rulangala CC", totalDeliveries: 65, totalWeight: 1920, status: "Active", joinedDate: "2023-09-30", gender: "Male" },
-  { id: "FRM-014", name: "Nakitto Betty", phone: "+256 782 456789", email: "nakitto.b@gmail.com", village: "Ntinda", district: "Kampala", province: "Central", country: "Uganda", farmSize: 0.8, teaVariety: "TRFK 306/1", collectionCenter: "Ntinda CC", totalDeliveries: 8, totalWeight: 180, status: "Inactive", joinedDate: "2024-08-19", gender: "Female" },
-  { id: "FRM-015", name: "Byaruhanga Frank", phone: "+256 704 567890", email: "byaruhanga.f@outlook.com", village: "Kisementi", district: "Kampala", province: "Central", country: "Uganda", farmSize: 2.6, teaVariety: "RB 16/9", collectionCenter: "Kisementi CC", totalDeliveries: 50, totalWeight: 1380, status: "Active", joinedDate: "2023-12-15", gender: "Male" },
-  { id: "FRM-016", name: "Namara Christine", phone: "+256 778 678901", email: "namara.c@gmail.com", village: "Kyanja", district: "Kampala", province: "Central", country: "Uganda", farmSize: 1.9, teaVariety: "TRFK 306/1", collectionCenter: "Kyanja CC", totalDeliveries: 38, totalWeight: 960, status: "Active", joinedDate: "2024-02-28", gender: "Female" },
-  { id: "FRM-017", name: "Okello Peter", phone: "+256 785 789012", email: "okello.p@gmail.com", village: "Mushubi", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 2.4, teaVariety: "SFS 150/10", collectionCenter: "Mushubi CC", totalDeliveries: 46, totalWeight: 1260, status: "Active", joinedDate: "2024-04-22", gender: "Male" },
-  { id: "FRM-018", name: "Apio Hellen", phone: "+256 706 890123", email: "apio.h@yahoo.com", village: "Rulangala", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 1.3, teaVariety: "TRFK 306/1", collectionCenter: "Rulangala CC", totalDeliveries: 25, totalWeight: 620, status: "Active", joinedDate: "2024-06-30", gender: "Female" },
+const statusFilterOptions = [
+  { value: null, label: "All Statuses" },
+  { value: "Active", label: "Active" },
+  { value: "Inactive", label: "Inactive" },
 ];
-
-const fadeIn = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
-};
-
-const staggerItem = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
-};
 
 function FarmersPage() {
   const navigate = useNavigate();
   const { success } = useToast();
-  const [farmersList, setFarmersList] = useState(farmers);
+  const { data: farmersList, loading, remove } = useRealtimeCollection("farmers", {
+    orderByField: "joinedDate",
+    orderDirection: "desc",
+    seedData: farmersSeed,
+  });
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
   const [centerFilter, setCenterFilter] = useState(null);
@@ -117,9 +94,13 @@ function FarmersPage() {
     { label: "New This Month", value: stats.newThisMonth, icon: UserPlus, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
   ];
 
-  function handleDelete() {
-    setFarmersList((prev) => prev.filter((f) => f.id !== deleteModal.farmer.id));
-    success(`Farmer ${deleteModal.farmer.name} has been removed.`);
+  async function handleDelete() {
+    try {
+      await remove(deleteModal.farmer.id);
+      success(`Farmer ${deleteModal.farmer.name} has been removed.`);
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
     setDeleteModal({ open: false, farmer: null });
   }
 
