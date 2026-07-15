@@ -661,20 +661,23 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-primary/5 rounded-3xl transform rotate-3 scale-105" />
                 <div className="relative bg-white rounded-3xl shadow-2xl shadow-gray-200/60 p-8 border border-gray-100">
                   <FactorySVG className="w-full h-auto" />
-                  <div className="mt-4 grid grid-cols-3 gap-3">
+                  <div className="mt-5 grid grid-cols-3 gap-3">
                     {[
-                      { label: "Farmers", value: "500+", color: "text-primary" },
-                      { label: "Batches", value: "234", color: "text-accent" },
-                      { label: "Revenue", value: "LKR 2M+", color: "text-secondary" },
+                      { label: "Farmers", value: "500+", icon: Users, color: "text-primary", bg: "bg-primary/10" },
+                      { label: "Batches", value: "234", icon: Package, color: "text-accent-dark", bg: "bg-accent/10" },
+                      { label: "Revenue", value: "RWF 2M+", icon: TrendingUp, color: "text-secondary", bg: "bg-secondary/10" },
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="text-center p-3 bg-gray-50 rounded-xl"
+                        className="group relative text-center p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300"
                       >
-                        <div className={`text-lg font-bold ${item.color}`}>
+                        <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${item.bg} mb-2`}>
+                          <item.icon className={`h-5 w-5 ${item.color}`} />
+                        </div>
+                        <div className={`text-xl font-bold ${item.color}`}>
                           {item.value}
                         </div>
-                        <div className="text-[10px] text-gray-500 font-medium">
+                        <div className="text-[11px] text-gray-500 font-medium mt-0.5">
                           {item.label}
                         </div>
                       </div>
