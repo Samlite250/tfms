@@ -10,6 +10,17 @@ export function useCollection(collectionName, options = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Destructure stable primitives to avoid using JSON.stringify(options) as a dep
+  const {
+    orderField = null,
+    orderDirection = 'asc',
+    limitCount = null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    filters = [],
+  } = options;
+  // Serialize filters array once for stable comparison
+  const filtersKey = JSON.stringify(filters);
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -22,7 +33,8 @@ export function useCollection(collectionName, options = {}) {
     } finally {
       setLoading(false);
     }
-  }, [collectionName, JSON.stringify(options)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collectionName, filtersKey, orderField, orderDirection, limitCount]);
 
   useEffect(() => {
     fetchData();

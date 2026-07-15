@@ -42,16 +42,20 @@ const statusFilterOptions = [
   { value: "Inactive", label: "Inactive" },
 ];
 
-const statusFilterOptions = [
-  { value: null, label: "All Statuses" },
-  { value: "Active", label: "Active" },
-  { value: "Inactive", label: "Inactive" },
-];
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+};
 
 function FarmersPage() {
   const navigate = useNavigate();
   const { success } = useToast();
-  const { data: farmersList, loading, remove } = useRealtimeCollection("farmers", {
+  const { data: farmersList, loading, error, remove } = useRealtimeCollection("farmers", {
     orderByField: "joinedDate",
     orderDirection: "desc",
     seedData: farmersSeed,
@@ -60,6 +64,22 @@ function FarmersPage() {
   const [statusFilter, setStatusFilter] = useState(null);
   const [centerFilter, setCenterFilter] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, farmer: null });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <Loader2 size={36} className="animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="text-danger text-sm">Failed to load farmers: {error}</p>
+      </div>
+    );
+  }
 
   const filteredFarmers = useMemo(() => {
     return farmersList.filter((f) => {

@@ -13,7 +13,7 @@ import {
   startAfter,
   serverTimestamp,
   increment,
-  count as firestoreCount,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -68,8 +68,9 @@ export async function getCollectionCount(collectionName, filters = []) {
     q = query(q, where(field, operator, value));
   }
 
-  const snapshot = await getDocs(q);
-  return snapshot.size;
+  // Use getCountFromServer — avoids downloading all documents just to count
+  const snapshot = await getCountFromServer(q);
+  return snapshot.data().count;
 }
 
 export async function addDocToCollection(collectionName, data) {

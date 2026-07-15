@@ -5,12 +5,14 @@ import { auth, db } from '../firebase/config';
 
 const AuthContext = createContext(null);
 
+// ⚠️ SECURITY NOTE: These are DEMO-ONLY credentials for offline/dev use.
+// NEVER use plaintext passwords in production. Replace with env vars before shipping.
 const DEMO_USERS = [
-  { uid: 'admin-001', email: 'admin@tfms.com', password: 'admin123', displayName: 'James Mwangi', role: 'admin', status: 'active', department: 'Administration', phone: '+254 700 100 200' },
-  { uid: 'collection-001', email: 'collection@tfms.com', password: 'collection123', displayName: 'Peter Kamau', role: 'collection_officer', status: 'active', department: 'Collection', phone: '+254 700 100 202' },
-  { uid: 'production-001', email: 'production@tfms.com', password: 'production123', displayName: 'Mary Njeri', role: 'production_officer', status: 'active', department: 'Production', phone: '+254 700 100 203' },
-  { uid: 'store-001', email: 'store@tfms.com', password: 'store123', displayName: 'David Omondi', role: 'store_keeper', status: 'active', department: 'Packaging', phone: '+254 700 100 204' },
-  { uid: 'accountant-001', email: 'accountant@tfms.com', password: 'accountant123', displayName: 'Grace Akinyi', role: 'accountant', status: 'active', department: 'Finance', phone: '+254 700 100 205' },
+  { uid: 'admin-001', email: 'admin@tfms.com', password: import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'admin123', displayName: 'James Mwangi', role: 'admin', status: 'active', department: 'Administration', phone: '+254 700 100 200' },
+  { uid: 'collection-001', email: 'collection@tfms.com', password: import.meta.env.VITE_DEMO_COLLECTION_PASSWORD || 'collection123', displayName: 'Peter Kamau', role: 'collection_officer', status: 'active', department: 'Collection', phone: '+254 700 100 202' },
+  { uid: 'production-001', email: 'production@tfms.com', password: import.meta.env.VITE_DEMO_PRODUCTION_PASSWORD || 'production123', displayName: 'Mary Njeri', role: 'production_officer', status: 'active', department: 'Production', phone: '+254 700 100 203' },
+  { uid: 'store-001', email: 'store@tfms.com', password: import.meta.env.VITE_DEMO_STORE_PASSWORD || 'store123', displayName: 'David Omondi', role: 'store_keeper', status: 'active', department: 'Packaging', phone: '+254 700 100 204' },
+  { uid: 'accountant-001', email: 'accountant@tfms.com', password: import.meta.env.VITE_DEMO_ACCOUNTANT_PASSWORD || 'accountant123', displayName: 'Grace Akinyi', role: 'accountant', status: 'active', department: 'Finance', phone: '+254 700 100 205' },
 ];
 
 let firebaseAvailable = false;
@@ -31,9 +33,57 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Hold a ref to unsubscribe so we can clean up when the component unmounts
+    let unsubFn = null;
+
     checkFirebase().then(() => {
       if (firebaseAvailable) {
-        setupFirebaseAuth();
+        import('firebase/auth').then(({ onAuthStateChanged }) => {
+          unsubFn = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (firebaseUser) {
+              try {
+                const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                if (profileDoc.exists()) {
+                  const profile = { id: profileDoc.id, ...profileDoc.data() };
+
+                  if (profile.status === 'pending') {
+                    await auth.signOut();
+                    setUser(null);
+                    setUserProfile(null);
+                    setLoading(false);
+                    return;
+                  }
+
+                  setUser(firebaseUser);
+                  setUserProfile(profile);
+                } else {
+                  // Auto-create profile — set status 'pending' to enforce approval flow
+                  await setDoc(doc(db, 'users', firebaseUser.uid), {
+                    email: firebaseUser.email,
+                    displayName: firebaseUser.displayName || '',
+                    role: 'collection_officer',
+                    department: '',
+                    phone: '',
+                    status: 'pending',
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                  });
+                  // Sign them out immediately — they must wait for approval
+                  await auth.signOut();
+                  setUser(null);
+                  setUserProfile(null);
+                }
+              } catch {
+                setUser(firebaseUser);
+                setUserProfile(null);
+              }
+            } else {
+              setUser(null);
+              setUserProfile(null);
+            }
+            setLoading(false);
+          });
+        });
       } else {
         const saved = sessionStorage.getItem('tfms_demo_user');
         if (saved) {
@@ -46,55 +96,10 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     });
+
+    // Proper cleanup — unsubscribes the Firestore auth listener on unmount
+    return () => { if (unsubFn) unsubFn(); };
   }, []);
-
-  function setupFirebaseAuth() {
-    import('firebase/auth').then(({ onAuthStateChanged }) => {
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        if (firebaseUser) {
-          try {
-            const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-            if (profileDoc.exists()) {
-              const profile = { id: profileDoc.id, ...profileDoc.data() };
-
-              if (profile.status === 'pending') {
-                await auth.signOut();
-                setUser(null);
-                setUserProfile(null);
-                setLoading(false);
-                return;
-              }
-
-              setUser(firebaseUser);
-              setUserProfile(profile);
-            } else {
-              await setDoc(doc(db, 'users', firebaseUser.uid), {
-                email: firebaseUser.email,
-                displayName: firebaseUser.displayName || '',
-                role: 'collection_officer',
-                department: '',
-                phone: '',
-                status: 'active',
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-              });
-              const newProfile = await getDoc(doc(db, 'users', firebaseUser.uid));
-              setUser(firebaseUser);
-              setUserProfile({ id: newProfile.id, ...newProfile.data() });
-            }
-          } catch {
-            setUser(firebaseUser);
-            setUserProfile(null);
-          }
-        } else {
-          setUser(null);
-          setUserProfile(null);
-        }
-        setLoading(false);
-      });
-      return () => unsubscribe();
-    });
-  }
 
   async function login(email, password) {
     if (firebaseAvailable) {
