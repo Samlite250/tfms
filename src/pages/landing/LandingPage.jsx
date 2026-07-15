@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import heroImg from "../../assets/hero.png";
+import teaBg from "../../assets/tea-bg.jpg";
 import {
   motion,
   useInView,
@@ -563,7 +563,7 @@ export default function LandingPage() {
       >
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroImg})` }}
+          style={{ backgroundImage: `url(${teaBg})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 via-gray-900/50 to-gray-900/30" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
