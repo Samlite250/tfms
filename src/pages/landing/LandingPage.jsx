@@ -657,31 +657,150 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
               className="relative hidden lg:flex items-center justify-center"
             >
+              {/* Decorative floating blobs */}
+              <div className="absolute -top-8 -right-8 w-32 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-accent/20 rounded-full blur-2xl pointer-events-none" />
+
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/5 rounded-3xl transform rotate-3 scale-105" />
-                <div className="relative bg-white rounded-3xl shadow-2xl shadow-gray-200/60 p-8 border border-gray-100">
-                  <FactorySVG className="w-full h-auto" />
-                  <div className="mt-5 grid grid-cols-3 gap-3">
-                    {[
-                      { label: "Farmers", value: "500+", icon: Users, color: "text-primary", bg: "bg-primary/10" },
-                      { label: "Batches", value: "234", icon: Package, color: "text-accent-dark", bg: "bg-accent/10" },
-                      { label: "Revenue", value: "RWF 2M+", icon: TrendingUp, color: "text-secondary", bg: "bg-secondary/10" },
-                    ].map((item) => (
-                      <div
-                        key={item.label}
-                        className="group relative text-center p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300"
-                      >
-                        <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${item.bg} mb-2`}>
-                          <item.icon className={`h-5 w-5 ${item.color}`} />
+                {/* Rotated background plate */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl transform rotate-2 scale-105 border border-primary/10" />
+
+                {/* Main card */}
+                <div
+                  className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/20"
+                  style={{
+                    background: "linear-gradient(145deg, #1a3d2b 0%, #1B5E20 55%, #2E7D32 100%)",
+                  }}
+                >
+                  {/* Card inner glow */}
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.07),transparent_60%)] pointer-events-none" />
+
+                  <div className="relative p-7">
+                    {/* Header row: title + live badge */}
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                          <Leaf className="w-4 h-4 text-accent" />
                         </div>
-                        <div className={`text-xl font-bold ${item.color}`}>
-                          {item.value}
-                        </div>
-                        <div className="text-[11px] text-gray-500 font-medium mt-0.5">
-                          {item.label}
+                        <div>
+                          <p className="text-white font-semibold text-sm leading-none">TFMS Overview</p>
+                          <p className="text-white/50 text-[10px] mt-0.5">Live factory data</p>
                         </div>
                       </div>
-                    ))}
+                      {/* Live badge */}
+                      <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                        </span>
+                        <span className="text-[10px] font-semibold text-green-300 tracking-wide">LIVE</span>
+                      </div>
+                    </div>
+
+                    {/* Factory illustration with glow ring */}
+                    <div className="relative flex items-center justify-center mb-5">
+                      <div className="absolute w-44 h-44 rounded-full bg-primary/20 blur-2xl" />
+                      <div className="absolute w-32 h-32 rounded-full border border-white/10" />
+                      <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/15 shadow-inner">
+                        <FactorySVG className="w-48 h-auto opacity-90" />
+                      </div>
+                    </div>
+
+                    {/* Stat cards row */}
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        {
+                          label: "Farmers",
+                          value: "500+",
+                          icon: Users,
+                          trend: "+12%",
+                          bars: [3, 5, 4, 6, 5, 8, 7],
+                          color: "#4ade80",
+                          bg: "rgba(74,222,128,0.12)",
+                        },
+                        {
+                          label: "Batches",
+                          value: "234",
+                          icon: Package,
+                          trend: "+8%",
+                          bars: [4, 3, 6, 5, 7, 6, 8],
+                          color: "#fbbf24",
+                          bg: "rgba(251,191,36,0.12)",
+                        },
+                        {
+                          label: "Revenue",
+                          value: "2M+",
+                          prefix: "RWF ",
+                          icon: TrendingUp,
+                          trend: "+21%",
+                          bars: [2, 4, 5, 4, 7, 6, 9],
+                          color: "#34d399",
+                          bg: "rgba(52,211,153,0.12)",
+                        },
+                      ].map((item, idx) => (
+                        <motion.div
+                          key={item.label}
+                          initial={{ opacity: 0, y: 16 }}
+                          animate={heroInView ? { opacity: 1, y: 0 } : {}}
+                          transition={{ duration: 0.5, delay: 0.7 + idx * 0.1 }}
+                          whileHover={{ scale: 1.04, transition: { duration: 0.18 } }}
+                          className="relative rounded-2xl p-3.5 border border-white/10 overflow-hidden cursor-default"
+                          style={{ background: item.bg }}
+                        >
+                          {/* Icon */}
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center mb-2"
+                            style={{ background: "rgba(255,255,255,0.1)" }}
+                          >
+                            <item.icon className="h-4 w-4" style={{ color: item.color }} />
+                          </div>
+
+                          {/* Value */}
+                          <div className="font-bold text-lg text-white leading-none mb-0.5">
+                            {item.prefix && <span className="text-[10px] font-medium opacity-70">{item.prefix}</span>}
+                            {item.value}
+                          </div>
+
+                          {/* Label */}
+                          <div className="text-[10px] text-white/50 font-medium mb-2">{item.label}</div>
+
+                          {/* Sparkline bars */}
+                          <div className="flex items-end gap-0.5 h-5">
+                            {item.bars.map((h, i) => (
+                              <motion.div
+                                key={i}
+                                initial={{ scaleY: 0 }}
+                                animate={heroInView ? { scaleY: 1 } : {}}
+                                transition={{ duration: 0.4, delay: 0.9 + idx * 0.1 + i * 0.04 }}
+                                className="flex-1 rounded-sm origin-bottom"
+                                style={{
+                                  height: `${(h / 9) * 100}%`,
+                                  background: item.color,
+                                  opacity: 0.3 + (i / item.bars.length) * 0.7,
+                                }}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Trend */}
+                          <div
+                            className="absolute top-3 right-3 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                            style={{ background: "rgba(255,255,255,0.1)", color: item.color }}
+                          >
+                            {item.trend}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Footer status line */}
+                    <div className="mt-4 flex items-center justify-between pt-4 border-t border-white/10">
+                      <div className="flex items-center gap-1.5">
+                        <Zap className="w-3 h-3 text-accent" />
+                        <span className="text-white/50 text-[10px]">System operational · All modules active</span>
+                      </div>
+                      <span className="text-white/30 text-[10px]">v2.0</span>
+                    </div>
                   </div>
                 </div>
               </div>
