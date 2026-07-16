@@ -37,6 +37,7 @@ const USERS = [
   { email: 'production@mahembe-coffee.rw', password: 'production123', displayName: 'Alexis Habimana', role: 'production_officer', department: 'Production', phone: '+250 788 100 203' },
   { email: 'store@mahembe-coffee.rw', password: 'store123', displayName: 'Anselme Rwegasira', role: 'store_keeper', department: 'Packaging', phone: '+250 788 100 204' },
   { email: 'accountant@mahembe-coffee.rw', password: 'accountant123', displayName: 'Arsene Nshimiyimana', role: 'accountant', department: 'Finance', phone: '+250 788 100 205' },
+  { email: 'farmer@mahembe-coffee.rw', password: 'farmer123', displayName: 'Jean Mugabo', role: 'farmer', department: '', phone: '+250 788 200 101' },
 ];
 
 const DEPARTMENTS = [
@@ -200,6 +201,7 @@ async function seed() {
   console.log('  Production:  production@mahembe-coffee.rw / production123');
   console.log('  Store:       store@mahembe-coffee.rw / store123');
   console.log('  Accountant:  accountant@mahembe-coffee.rw / accountant123');
+  console.log('  Farmer:      farmer@mahembe-coffee.rw / farmer123');
 }
 
 seed().catch(console.error);

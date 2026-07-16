@@ -7,6 +7,7 @@ const allMenuItems = [
   { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard', permission: 'dashboard' },
   { label: 'Farmers', path: '/farmers', icon: 'Users', permission: 'farmers' },
   { label: 'Coffee Collection', path: '/collections', icon: 'Coffee', permission: 'collections' },
+  { label: 'My Collections', path: '/my-collections', icon: 'Coffee', permission: 'my_collections' },
   { label: 'Production', path: '/production', icon: 'Factory', permission: 'production' },
   { label: 'Inventory', path: '/inventory', icon: 'Package', permission: 'inventory' },
   { label: 'Sales', path: '/sales', icon: 'ShoppingCart', permission: 'sales' },

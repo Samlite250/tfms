@@ -13,6 +13,7 @@ const DEMO_USERS = [
   { uid: 'production-001', email: 'production@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_PRODUCTION_PASSWORD || 'production123', displayName: 'Alexis Habimana', role: 'production_officer', status: 'active', department: 'Production', phone: '+250 788 100 203' },
   { uid: 'store-001', email: 'store@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_STORE_PASSWORD || 'store123', displayName: 'Anselme Rwegasira', role: 'store_keeper', status: 'active', department: 'Packaging', phone: '+250 788 100 204' },
   { uid: 'accountant-001', email: 'accountant@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_ACCOUNTANT_PASSWORD || 'accountant123', displayName: 'Arsene Nshimiyimana', role: 'accountant', status: 'active', department: 'Finance', phone: '+250 788 100 205' },
+  { uid: 'farmer-001', email: 'farmer@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_FARMER_PASSWORD || 'farmer123', displayName: 'Jean Mugabo', role: 'farmer', status: 'active', department: '', phone: '+250 788 200 101' },
 ];
 
 let firebaseAvailable = false;

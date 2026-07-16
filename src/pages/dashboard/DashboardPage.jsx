@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Coffee, Factory, Package, ShoppingCart, DollarSign, Users, TrendingUp,
-  Clock, FileText, ArrowRight,
+  Clock, FileText, ArrowRight, Weight,
   UserPlus, Receipt, ClipboardList, Tractor, AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
@@ -141,6 +141,26 @@ function getRoleConfig(role) {
           { id: 2, icon: Receipt, description: "Expense: RWF 1,850 for machinery maintenance", time: "4 hrs ago", module: "Expenses", color: "text-danger", bg: "bg-danger/10" },
           { id: 3, icon: DollarSign, description: "Payment received: RWF 5,200 from European Coffee Imports", time: "5 hrs ago", module: "Sales", color: "text-primary", bg: "bg-primary/10" },
           { id: 4, icon: FileText, description: "Monthly financial report generated", time: "Yesterday", module: "Reports", color: "text-accent-dark", bg: "bg-accent/10" },
+        ],
+      };
+
+    case ROLES.FARMER:
+      return {
+        subtitle: "View your coffee collections and payments",
+        stats: [
+          { label: "My Collections", value: "8", change: "Total deliveries", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Total Collected", value: "965 kg", change: "+120 kg this month", up: true, icon: Weight, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
+          { label: "Total Earnings", value: "RWF 4,027,500", change: "All time", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
+          { label: "Pending Payment", value: "RWF 1,017,000", change: "2 invoices", up: false, icon: Clock, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
+        ],
+        quickActions: [
+          { label: "My Collections", icon: Coffee, to: "/my-collections", color: "bg-primary" },
+        ],
+        activities: [
+          { id: 1, icon: Coffee, description: "Collection completed: 120 kg AA grade at Mahembe Central", time: "2 days ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
+          { id: 2, icon: DollarSign, description: "Payment of RWF 540,000 received for COL-5001", time: "2 days ago", module: "Payment", color: "text-success", bg: "bg-success/10" },
+          { id: 3, icon: Coffee, description: "Collection completed: 85 kg AB grade at Mahembe Central", time: "6 days ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
+          { id: 4, icon: Clock, description: "Payment pending for COL-5005: RWF 675,000", time: "1 week ago", module: "Payment", color: "text-warning", bg: "bg-warning/10" },
         ],
       };
 

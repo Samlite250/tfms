@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, Phone, Leaf, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, Phone, Leaf, ArrowLeft, CheckCircle2, Tractor } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from '../../utils/constants';
 
-const ROLE_OPTIONS = Object.entries(ROLE_LABELS)
-  .filter(([value]) => value !== ROLES.ADMIN)
+const STAFF_ROLE_OPTIONS = Object.entries(ROLE_LABELS)
+  .filter(([value]) => value !== ROLES.ADMIN && value !== ROLES.FARMER)
   .map(([value, label]) => ({ value, label }));
 
 const DEPARTMENT_OPTIONS = DEPARTMENTS.map((d) => ({ value: d, label: d }));
@@ -16,6 +16,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [regType, setRegType] = useState('farmer'); // 'farmer' or 'staff'
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
 
@@ -24,6 +25,7 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
+    reset,
   } = useForm({
     defaultValues: {
       displayName: '',
@@ -41,10 +43,12 @@ export default function RegisterPage() {
   const onSubmit = async (data) => {
     setAuthError('');
     try {
+      const role = regType === 'farmer' ? ROLES.FARMER : data.role;
+      const department = regType === 'farmer' ? '' : data.department;
       await registerUser(data.email, data.password, {
         displayName: data.displayName,
-        role: data.role,
-        department: data.department,
+        role,
+        department,
         phone: data.phone,
       });
       setSubmitted(true);
@@ -56,6 +60,20 @@ export default function RegisterPage() {
       else setAuthError(err?.message || 'Registration failed. Please try again.');
     }
   };
+
+  function switchRegType(type) {
+    setRegType(type);
+    setAuthError('');
+    reset({
+      displayName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      role: '',
+      department: '',
+      phone: '',
+    });
+  }
 
   if (submitted) {
     return (
@@ -167,7 +185,35 @@ export default function RegisterPage() {
           </Link>
 
           <h2 className="text-3xl font-bold text-text-primary">Create Account</h2>
-          <p className="text-text-secondary mt-2 mb-8">Fill in your details to register</p>
+          <p className="text-text-secondary mt-2 mb-6">Fill in your details to register</p>
+
+          {/* Registration Type Toggle */}
+          <div className="flex gap-2 mb-6 p-1 bg-gray-100 rounded-xl">
+            <button
+              type="button"
+              onClick={() => switchRegType('farmer')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                regType === 'farmer'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              <Tractor size={16} />
+              Farmer
+            </button>
+            <button
+              type="button"
+              onClick={() => switchRegType('staff')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                regType === 'staff'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              <User size={16} />
+              Staff
+            </button>
+          </div>
 
           <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
 
@@ -271,46 +317,55 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium text-text-primary mb-1.5 block">Role</label>
-                <select
-                  className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
-                    errors.role
-                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                      : 'border-border focus:ring-primary/30 focus:border-primary'
-                  }`}
-                  {...register('role', { required: 'Role is required' })}
-                >
-                  <option value="">Select role</option>
-                  {ROLE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.role && <p className="text-xs text-danger mt-1">{errors.role.message}</p>}
+            {regType === 'staff' && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-text-primary mb-1.5 block">Role</label>
+                  <select
+                    className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
+                      errors.role
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                    }`}
+                    {...register('role', regType === 'staff' ? { required: 'Role is required' } : {})}
+                  >
+                    <option value="">Select role</option>
+                    {STAFF_ROLE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.role && <p className="text-xs text-danger mt-1">{errors.role.message}</p>}
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-text-primary mb-1.5 block">Department</label>
+                  <select
+                    className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
+                      errors.department
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                    }`}
+                    {...register('department', regType === 'staff' ? { required: 'Department is required' } : {})}
+                  >
+                    <option value="">Select dept</option>
+                    {DEPARTMENT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.department && <p className="text-xs text-danger mt-1">{errors.department.message}</p>}
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-text-primary mb-1.5 block">Department</label>
-                <select
-                  className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
-                    errors.department
-                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                      : 'border-border focus:ring-primary/30 focus:border-primary'
-                  }`}
-                  {...register('department', { required: 'Department is required' })}
-                >
-                  <option value="">Select dept</option>
-                  {DEPARTMENT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.department && <p className="text-xs text-danger mt-1">{errors.department.message}</p>}
+            )}
+
+            {regType === 'farmer' && (
+              <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl">
+                <p className="text-xs text-primary font-medium">Farmer Account</p>
+                <p className="text-xs text-text-secondary mt-0.5">You will be able to view your collections and payments once approved.</p>
               </div>
-            </div>
+            )}
 
             <div>
               <label className="text-sm font-medium text-text-primary mb-1.5 block">Phone Number</label>

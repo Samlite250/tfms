@@ -5,6 +5,7 @@ export const ROLES = {
   PRODUCTION_OFFICER: 'production_officer',
   STORE_KEEPER: 'store_keeper',
   ACCOUNTANT: 'accountant',
+  FARMER: 'farmer',
 };
 
 export const ROLE_LABELS = {
@@ -14,6 +15,7 @@ export const ROLE_LABELS = {
   [ROLES.PRODUCTION_OFFICER]: 'Production Officer',
   [ROLES.STORE_KEEPER]: 'Store Keeper',
   [ROLES.ACCOUNTANT]: 'Accountant',
+  [ROLES.FARMER]: 'Farmer',
 };
 
 export const ROLE_PERMISSIONS = {
@@ -37,6 +39,9 @@ export const ROLE_PERMISSIONS = {
   [ROLES.ACCOUNTANT]: [
     'dashboard', 'sales', 'expenses', 'reports',
   ],
+  [ROLES.FARMER]: [
+    'dashboard', 'my_collections', 'settings',
+  ],
 };
 
 export const ROLE_REPORTS = {
@@ -46,6 +51,7 @@ export const ROLE_REPORTS = {
   [ROLES.PRODUCTION_OFFICER]: ['production', 'inventory'],
   [ROLES.STORE_KEEPER]: ['inventory'],
   [ROLES.ACCOUNTANT]: ['sales', 'expense', 'financial'],
+  [ROLES.FARMER]: ['collection'],
 };
 
 export const ROLE_SETTINGS_TABS = {
@@ -55,6 +61,7 @@ export const ROLE_SETTINGS_TABS = {
   [ROLES.PRODUCTION_OFFICER]: ['profile', 'notifications'],
   [ROLES.STORE_KEEPER]: ['profile', 'notifications'],
   [ROLES.ACCOUNTANT]: ['profile', 'notifications'],
+  [ROLES.FARMER]: ['profile', 'notifications'],
 };
 
 export const COLLECTIONS = {

@@ -51,6 +51,7 @@ import ExpenseDetailPage from './pages/expenses/ExpenseDetailPage';
 import ReportsPage from './pages/reports/ReportsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AdminPage from './pages/admin/AdminPage';
+import MyCollectionsPage from './pages/farmer/MyCollectionsPage';
 
 const routePermissionMap = {
   '/farmers': 'farmers',
@@ -178,6 +179,7 @@ function AppRoutes() {
       <Route path="/expenses/:id/edit" element={<AuthenticatedLayout><ExpenseFormPage /></AuthenticatedLayout>} />
       <Route path="/reports" element={<AuthenticatedLayout><ReportsPage /></AuthenticatedLayout>} />
       <Route path="/settings" element={<AuthenticatedLayout><SettingsPage /></AuthenticatedLayout>} />
+      <Route path="/my-collections" element={<AuthenticatedLayout><MyCollectionsPage /></AuthenticatedLayout>} />
       <Route path="/admin" element={<AuthenticatedLayout><AdminPage /></AuthenticatedLayout>} />
 
       {/* Catch all - redirect to landing */}

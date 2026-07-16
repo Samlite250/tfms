@@ -259,11 +259,11 @@ function LoginPage() {
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { email: 'admin@mahembe-coffee.rw', password: 'admin123', label: 'Admin', icon: Shield, color: 'bg-primary/10 text-primary' },
-                  { email: 'manager@mahembe-coffee.rw', password: 'manager123', label: 'Manager', icon: Users, color: 'bg-info/10 text-info' },
                   { email: 'collection@mahembe-coffee.rw', password: 'collection123', label: 'Collection', icon: Factory, color: 'bg-success/10 text-success' },
                   { email: 'production@mahembe-coffee.rw', password: 'production123', label: 'Production', icon: Package, color: 'bg-warning/10 text-warning' },
                   { email: 'store@mahembe-coffee.rw', password: 'store123', label: 'Store Keeper', icon: Receipt, color: 'bg-danger/10 text-danger' },
                   { email: 'accountant@mahembe-coffee.rw', password: 'accountant123', label: 'Accountant', icon: BarChart3, color: 'bg-accent/10 text-accent-dark' },
+                  { email: 'farmer@mahembe-coffee.rw', password: 'farmer123', label: 'Farmer', icon: Users, color: 'bg-blue-100 text-blue-600' },
                 ].map((demo) => (
                   <button
                     key={demo.email}

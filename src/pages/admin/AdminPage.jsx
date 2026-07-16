@@ -59,6 +59,7 @@ const ROLE_BADGE_VARIANT = {
   [ROLES.PRODUCTION_OFFICER]: "warning",
   [ROLES.STORE_KEEPER]: "default",
   [ROLES.ACCOUNTANT]: "info",
+  [ROLES.FARMER]: "success",
 };
 
 const ROLE_OPTIONS = Object.entries(ROLE_LABELS).map(([value, label]) => ({
@@ -110,6 +111,9 @@ const mockUsers = [
   { id: "USR014", name: "Kavisha Dissanayake", email: "k.dissanayake@coms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000014", status: "inactive", lastLogin: "2026-05-10 09:30", avatar: "KD" },
   { id: "USR015", name: "Mahinda Gamage", email: "m.gamage@coms.com", role: ROLES.ADMIN, department: "Processing", phone: "0771000015", status: "active", lastLogin: "2026-07-14 07:00", avatar: "MG" },
   { id: "USR016", name: "Lakshman Peris", email: "l.peris@coms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000016", status: "active", lastLogin: "2026-07-13 12:00", avatar: "LP" },
+  { id: "USR017", name: "Jean Mugabo", email: "j.mugabo@mahembe-coffee.rw", role: ROLES.FARMER, department: "Farmers", phone: "+250 788 200 101", status: "active", lastLogin: "2026-07-14 08:00", avatar: "JM" },
+  { id: "USR018", name: "Emmanuel Ndayisaba", email: "e.ndayisaba@mahembe-coffee.rw", role: ROLES.FARMER, department: "Farmers", phone: "+250 788 200 102", status: "active", lastLogin: "2026-07-13 14:30", avatar: "EN" },
+  { id: "USR019", name: "Marie Claire Uwimana", email: "m.uwimana@mahembe-coffee.rw", role: ROLES.FARMER, department: "Farmers", phone: "+250 788 200 103", status: "pending", lastLogin: "Never", avatar: "MU" },
 ];
 
 const mockActivities = [
