@@ -697,6 +697,46 @@ export default function AdminPage() {
     return () => { if (typeof unsub === "function") unsub(); };
   }, [activeTab, fetchPendingUsers]);
 
+  // Subscribe to pending farmers in real-time to keep the Farmers list synchronized
+  useEffect(() => {
+    if (activeTab !== "farmers" && activeTab !== "approvals") return;
+    let unsubscribe = null;
+
+    async function subscribeToPendingFarmers() {
+      const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
+      const isDemo = !apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20;
+      if (isDemo) {
+        try {
+          const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+          setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
+        } catch {
+          setPendingFarmersList([]);
+        }
+        return;
+      }
+
+      try {
+        const { collection: col, onSnapshot } = await import("firebase/firestore");
+        const { db } = await import("../../firebase/config");
+        unsubscribe = onSnapshot(
+          col(db, "pending_farmers"),
+          (snapshot) => setPendingFarmersList(snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }))),
+          () => setPendingFarmersList([])
+        );
+      } catch {
+        try {
+          const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+          setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
+        } catch {
+          setPendingFarmersList([]);
+        }
+      }
+    }
+
+    subscribeToPendingFarmers();
+    return () => { if (unsubscribe) unsubscribe(); };
+  }, [activeTab]);
+
   async function handleApproveUser(pendingUser) {
     try {
       await approveUser(pendingUser.id);

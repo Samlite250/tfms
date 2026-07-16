@@ -3,26 +3,33 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
+let transporter = null;
+
+function getTransporter() {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
         user: process.env.EMAIL_GMAIL_USER,
         pass: process.env.EMAIL_GMAIL_APP_PASSWORD,
-    },
-});
+      },
+    });
+  }
+  return transporter;
+}
 
 export async function sendEmail({ to, subject, html }) {
-    const mailOptions = {
-        from: `"COMS Notifications" <${process.env.EMAIL_GMAIL_USER}>`,
-        to,
-        subject,
-        html,
-    };
-    return transporter.sendMail(mailOptions);
+  const mailOptions = {
+    from: `"COMS Notifications" <${process.env.EMAIL_GMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  };
+  return getTransporter().sendMail(mailOptions);
 }
 
 export async function sendRegistrationConfirmation(to, name) {
-    const html = `
+  const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
       <h2 style="color: #1e3a8a; margin-top: 0;">Welcome, ${name}!</h2>
       <p style="font-size: 16px; color: #334155; line-height: 1.5;">
@@ -41,12 +48,12 @@ export async function sendRegistrationConfirmation(to, name) {
       </p>
     </div>
   `;
-    return sendEmail({ to, subject: 'COMS Registration Received', html });
+  return sendEmail({ to, subject: 'COMS Registration Received', html });
 }
 
 export async function sendAccountApproved(to, name, role) {
-    const formattedRole = role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    const html = `
+  const formattedRole = role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
       <h2 style="color: #15803d; margin-top: 0;">Account Approved!</h2>
       <p style="font-size: 16px; color: #334155; line-height: 1.5;">
@@ -68,11 +75,11 @@ export async function sendAccountApproved(to, name, role) {
       </p>
     </div>
   `;
-    return sendEmail({ to, subject: 'COMS Account Approved', html });
+  return sendEmail({ to, subject: 'COMS Account Approved', html });
 }
 
 export async function sendAccountRejected(to, name) {
-    const html = `
+  const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
       <h2 style="color: #b91c1c; margin-top: 0;">Registration Rejected</h2>
       <p style="font-size: 16px; color: #334155; line-height: 1.5;">
@@ -90,12 +97,12 @@ export async function sendAccountRejected(to, name) {
       </p>
     </div>
   `;
-    return sendEmail({ to, subject: 'COMS Registration Rejected', html });
+  return sendEmail({ to, subject: 'COMS Registration Rejected', html });
 }
 
 export async function sendAdminAlert(adminEmail, user) {
-    const formattedRole = user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    const html = `
+  const formattedRole = user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
       <h2 style="color: #2b6cb0; margin-top: 0;">New User Pending Approval</h2>
       <p style="font-size: 16px; color: #334155; line-height: 1.5;">
@@ -128,5 +135,5 @@ export async function sendAdminAlert(adminEmail, user) {
       </p>
     </div>
   `;
-    return sendEmail({ to: adminEmail, subject: 'COMS Alert: New Pending Registration', html });
+  return sendEmail({ to: adminEmail, subject: 'COMS Alert: New Pending Registration', html });
 }
