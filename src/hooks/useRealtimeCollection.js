@@ -37,7 +37,11 @@ export default function useRealtimeCollection(collectionName, options = {}) {
   const { filters = [], orderByField = null, orderDirection = "desc", seedData = null } = options;
 
   useEffect(() => {
+    let settled = false;
+
     const useOfflineFallback = (reason) => {
+      if (settled) return;
+      settled = true;
       console.warn(`Offline mode for ${collectionName}:`, reason);
       const stored = loadSeedFromStorage(collectionName);
       const items = stored && stored.length > 0 ? stored : (seedData || []);
@@ -45,6 +49,10 @@ export default function useRealtimeCollection(collectionName, options = {}) {
       setData(items);
       setLoading(false);
     };
+
+    const timeout = setTimeout(() => {
+      useOfflineFallback('Firestore connection timed out (no real Firebase configured)');
+    }, 3000);
 
     try {
       let q = collection(db, collectionName);
@@ -64,6 +72,10 @@ export default function useRealtimeCollection(collectionName, options = {}) {
       const unsubscribe = onSnapshot(
         q,
         async (snapshot) => {
+          clearTimeout(timeout);
+          if (settled) { unsubscribe(); return; }
+          settled = true;
+
           const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 
           if (items.length === 0 && seedData && seedData.length > 0 && !seededRef.current) {
@@ -86,13 +98,15 @@ export default function useRealtimeCollection(collectionName, options = {}) {
           setLoading(false);
         },
         (err) => {
+          clearTimeout(timeout);
           console.error(`Real-time error for ${collectionName}:`, err);
           useOfflineFallback(err.message);
         }
       );
 
-      return () => unsubscribe();
+      return () => { clearTimeout(timeout); unsubscribe(); };
     } catch (err) {
+      clearTimeout(timeout);
       useOfflineFallback(err.message);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
