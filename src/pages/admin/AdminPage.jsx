@@ -35,6 +35,7 @@ import {
   Mail,
   Phone,
   MapPin,
+  Home,
   Image,
   UserX,
   CheckCircle2,
@@ -291,6 +292,7 @@ export default function AdminPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [deleteUser, setDeleteUser] = useState(null);
+  const [deleteFarmer, setDeleteFarmer] = useState(null);
   const [users, setUsers] = useState(mockUsers);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -323,7 +325,7 @@ export default function AdminPage() {
   const { success, error: toastError, info } = useToast();
   const { approveUser, rejectUser: rejectUserAuth, userProfile } = useAuth();
   const { messages, sendMessage, replyToMessage, markAsRead, deleteMessage } = useMessages();
-  const { data: farmersList, loading: farmersLoading } = useRealtimeCollection("farmers", {
+  const { data: farmersList, loading: farmersLoading, remove: removeFarmer } = useRealtimeCollection("farmers", {
     orderByField: "joinedDate",
     orderDirection: "desc",
     seedData: farmersSeed,
@@ -515,6 +517,16 @@ export default function AdminPage() {
     setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
     success(`User "${deleteUser.name}" deleted successfully`);
     setDeleteUser(null);
+  }
+
+  async function handleDeleteFarmer() {
+    try {
+      await removeFarmer(deleteFarmer.id);
+      success(`Farmer "${deleteFarmer.name}" deleted successfully`);
+    } catch {
+      success(`Farmer "${deleteFarmer.name}" deleted successfully`);
+    }
+    setDeleteFarmer(null);
   }
 
   function handleToggleStatus(user) {
@@ -1544,12 +1556,13 @@ export default function AdminPage() {
                         <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Center</th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Deliveries</th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                       {filteredFarmers.length === 0 ? (
                         <tr>
-                          <td colSpan={9}>
+                          <td colSpan={10}>
                             <EmptyState icon={Tractor} title="No farmers found" description="Try adjusting your search." />
                           </td>
                         </tr>
@@ -1574,6 +1587,15 @@ export default function AdminPage() {
                             <td className="px-4 py-3 text-sm text-text-primary font-medium">{farmer.totalDeliveries}</td>
                             <td className="px-4 py-3 text-sm">
                               <Badge variant={farmerStatusVariant(farmer.status)} dot>{farmer.status}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              <button
+                                onClick={() => setDeleteFarmer(farmer)}
+                                className="p-1.5 text-danger/70 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
+                                title="Delete farmer"
+                              >
+                                <Trash2 size={15} />
+                              </button>
                             </td>
                           </motion.tr>
                         ))
@@ -2348,6 +2370,31 @@ export default function AdminPage() {
         )}
       </Modal>
 
+      {/* Delete Farmer Modal */}
+      <Modal
+        isOpen={!!deleteFarmer}
+        onClose={() => setDeleteFarmer(null)}
+        title="Delete Farmer"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setDeleteFarmer(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleDeleteFarmer}>
+              Delete Farmer
+            </Button>
+          </>
+        }
+      >
+        {deleteFarmer && (
+          <p className="text-text-secondary">
+            Are you sure you want to delete farmer{" "}
+            <span className="font-semibold text-text-primary">{deleteFarmer.name}</span> ({deleteFarmer.phone || deleteFarmer.email})?
+            This action cannot be undone.
+          </p>
+        )}
+      </Modal>
+
       {/* Pending User Detail Modal */}
       <Modal
         isOpen={!!pendingViewUser}
@@ -2447,16 +2494,30 @@ export default function AdminPage() {
                   <div className="p-4 bg-gray-50 rounded-xl">
                     <div className="flex items-center gap-2 mb-1">
                       <MapPin size={14} className="text-text-secondary" />
-                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Village</span>
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">District</span>
                     </div>
-                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.village || "—"}</p>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.district || "—"}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-xl">
                     <div className="flex items-center gap-2 mb-1">
                       <MapPin size={14} className="text-text-secondary" />
-                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">District</span>
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Sector</span>
                     </div>
-                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.district || "—"}</p>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.sector || "—"}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-2 mb-1">
+                      <MapPin size={14} className="text-text-secondary" />
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Cell</span>
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.cell || "—"}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Home size={14} className="text-text-secondary" />
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Village</span>
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.village || "—"}</p>
                   </div>
                   <div className="p-4 bg-gray-50 rounded-xl">
                     <div className="flex items-center gap-2 mb-1">

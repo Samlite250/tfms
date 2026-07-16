@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, Phone, Leaf, ArrowLeft, CheckCircle2, Tractor, MapPin, Home, Scale, Coffee } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from '../../utils/constants';
-import { RWANDA_DISTRICTS } from '../../data/rwandaDistricts';
+import { RWANDA_LOCATIONS } from '../../data/rwandaLocations';
 
-const DISTRICT_OPTIONS = Object.keys(RWANDA_DISTRICTS)
+const DISTRICT_OPTIONS = Object.keys(RWANDA_LOCATIONS)
   .sort()
   .map((d) => ({ value: d, label: d }));
 
@@ -56,8 +56,10 @@ export default function RegisterPage() {
       role: '',
       department: '',
       phone: '',
-      village: '',
       district: '',
+      sector: '',
+      cell: '',
+      village: '',
       farmSize: '',
       coffeeVariety: '',
       collectionCenter: '',
@@ -66,13 +68,25 @@ export default function RegisterPage() {
 
   const password = watch('password');
   const selectedDistrict = watch('district');
+  const selectedSector = watch('sector');
+  const selectedCell = watch('cell');
+
+  const sectorOptions = useMemo(() => {
+    if (!selectedDistrict || !RWANDA_LOCATIONS[selectedDistrict]) return [];
+    return Object.keys(RWANDA_LOCATIONS[selectedDistrict]).sort().map((s) => ({ value: s, label: s }));
+  }, [selectedDistrict]);
+
+  const cellOptions = useMemo(() => {
+    if (!selectedDistrict || !selectedSector || !RWANDA_LOCATIONS[selectedDistrict]?.[selectedSector]) return [];
+    return Object.keys(RWANDA_LOCATIONS[selectedDistrict][selectedSector]).sort().map((c) => ({ value: c, label: c }));
+  }, [selectedDistrict, selectedSector]);
 
   const villageOptions = useMemo(() => {
-    if (!selectedDistrict || !RWANDA_DISTRICTS[selectedDistrict]) return [];
-    return RWANDA_DISTRICTS[selectedDistrict]
+    if (!selectedDistrict || !selectedSector || !selectedCell) return [];
+    return (RWANDA_LOCATIONS[selectedDistrict]?.[selectedSector]?.[selectedCell] || [])
       .sort()
       .map((v) => ({ value: v, label: v }));
-  }, [selectedDistrict]);
+  }, [selectedDistrict, selectedSector, selectedCell]);
 
   const onSubmit = async (data) => {
     setAuthError('');
@@ -80,8 +94,10 @@ export default function RegisterPage() {
       const role = regType === 'farmer' ? ROLES.FARMER : data.role;
       const department = regType === 'farmer' ? '' : data.department;
       const farmerData = regType === 'farmer' ? {
-        village: data.village,
         district: data.district,
+        sector: data.sector,
+        cell: data.cell,
+        village: data.village,
         farmSize: parseFloat(data.farmSize) || 0,
         coffeeVariety: data.coffeeVariety,
         collectionCenter: data.collectionCenter,
@@ -114,8 +130,10 @@ export default function RegisterPage() {
       role: '',
       department: '',
       phone: '',
-      village: '',
       district: '',
+      sector: '',
+      cell: '',
+      village: '',
       farmSize: '',
       coffeeVariety: '',
       collectionCenter: '',
@@ -427,6 +445,8 @@ export default function RegisterPage() {
                         {...register('district', { required: 'District is required' })}
                         onChange={(e) => {
                           register('district').onChange(e);
+                          setValue('sector', '');
+                          setValue('cell', '');
                           setValue('village', '');
                         }}
                       >
@@ -439,19 +459,72 @@ export default function RegisterPage() {
                     {errors.district && <p className="text-xs text-danger mt-1">{errors.district.message}</p>}
                   </div>
                   <div>
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Sector</label>
+                    <div className="relative">
+                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                      <select
+                        disabled={!selectedDistrict}
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                          errors.sector
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                        {...register('sector', { required: selectedDistrict ? 'Sector is required' : false })}
+                        onChange={(e) => {
+                          register('sector').onChange(e);
+                          setValue('cell', '');
+                          setValue('village', '');
+                        }}
+                      >
+                        <option value="">{selectedDistrict ? 'Select sector' : 'Select district first'}</option>
+                        {sectorOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {errors.sector && <p className="text-xs text-danger mt-1">{errors.sector.message}</p>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Cell</label>
+                    <div className="relative">
+                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                      <select
+                        disabled={!selectedSector}
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                          errors.cell
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                        {...register('cell', { required: selectedSector ? 'Cell is required' : false })}
+                        onChange={(e) => {
+                          register('cell').onChange(e);
+                          setValue('village', '');
+                        }}
+                      >
+                        <option value="">{selectedSector ? 'Select cell' : 'Select sector first'}</option>
+                        {cellOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {errors.cell && <p className="text-xs text-danger mt-1">{errors.cell.message}</p>}
+                  </div>
+                  <div>
                     <label className="text-sm font-medium text-text-primary mb-1.5 block">Village</label>
                     <div className="relative">
                       <Home size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
                       <select
-                        disabled={!selectedDistrict}
+                        disabled={!selectedCell}
                         className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${
                           errors.village
                             ? 'border-danger focus:ring-danger/30 focus:border-danger'
                             : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
-                        {...register('village', { required: selectedDistrict ? 'Village is required' : false })}
+                        {...register('village', { required: selectedCell ? 'Village is required' : false })}
                       >
-                        <option value="">{selectedDistrict ? 'Select village' : 'Select district first'}</option>
+                        <option value="">{selectedCell ? 'Select village' : 'Select cell first'}</option>
                         {villageOptions.map((opt) => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
