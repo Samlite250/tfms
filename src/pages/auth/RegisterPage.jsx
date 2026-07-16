@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, Phone, Leaf, ArrowLeft, CheckCircle2, Tractor, MapPin, Home, Scale, Coffee } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from '../../utils/constants';
+import { RWANDA_DISTRICTS } from '../../data/rwandaDistricts';
+
+const DISTRICT_OPTIONS = Object.keys(RWANDA_DISTRICTS)
+  .sort()
+  .map((d) => ({ value: d, label: d }));
 
 const STAFF_ROLE_OPTIONS = Object.entries(ROLE_LABELS)
   .filter(([value]) => value !== ROLES.ADMIN && value !== ROLES.FARMER)
@@ -40,6 +45,7 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
+    setValue,
     reset,
   } = useForm({
     defaultValues: {
@@ -59,6 +65,14 @@ export default function RegisterPage() {
   });
 
   const password = watch('password');
+  const selectedDistrict = watch('district');
+
+  const villageOptions = useMemo(() => {
+    if (!selectedDistrict || !RWANDA_DISTRICTS[selectedDistrict]) return [];
+    return RWANDA_DISTRICTS[selectedDistrict]
+      .sort()
+      .map((v) => ({ value: v, label: v }));
+  }, [selectedDistrict]);
 
   const onSubmit = async (data) => {
     setAuthError('');
@@ -401,38 +415,49 @@ export default function RegisterPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Village</label>
-                    <div className="relative">
-                      <Home size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <input
-                        type="text"
-                        placeholder="e.g. Mahembe"
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                          errors.village
-                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                            : 'border-border focus:ring-primary/30 focus:border-primary'
-                        }`}
-                        {...register('village', { required: 'Village is required' })}
-                      />
-                    </div>
-                    {errors.village && <p className="text-xs text-danger mt-1">{errors.village.message}</p>}
-                  </div>
-                  <div>
                     <label className="text-sm font-medium text-text-primary mb-1.5 block">District</label>
                     <div className="relative">
-                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <input
-                        type="text"
-                        placeholder="e.g. Muhanga"
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
+                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                      <select
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none ${
                           errors.district
                             ? 'border-danger focus:ring-danger/30 focus:border-danger'
                             : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
                         {...register('district', { required: 'District is required' })}
-                      />
+                        onChange={(e) => {
+                          register('district').onChange(e);
+                          setValue('village', '');
+                        }}
+                      >
+                        <option value="">Select district</option>
+                        {DISTRICT_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
                     </div>
                     {errors.district && <p className="text-xs text-danger mt-1">{errors.district.message}</p>}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Village</label>
+                    <div className="relative">
+                      <Home size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                      <select
+                        disabled={!selectedDistrict}
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                          errors.village
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                        {...register('village', { required: selectedDistrict ? 'Village is required' : false })}
+                      >
+                        <option value="">{selectedDistrict ? 'Select village' : 'Select district first'}</option>
+                        {villageOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {errors.village && <p className="text-xs text-danger mt-1">{errors.village.message}</p>}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
