@@ -566,21 +566,45 @@ export default function AdminPage() {
   const fetchPendingUsers = useCallback(async () => {
     setPendingLoading(true);
     try {
-      const { collection, query, where, getDocs } = await import("firebase/firestore");
+      const { collection, query, where, getDocs, doc, getDoc } = await import("firebase/firestore");
       const { db } = await import("../../firebase/config");
       const q = query(collection(db, "users"), where("status", "==", "pending"));
       const snapshot = await getDocs(q);
-      const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setPendingUsers(list.filter((u) => u.status === "pending"));
+      const rawList = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const usersList = rawList.filter((u) => u.status === "pending");
+      
+      const mergedList = await Promise.all(
+        usersList.map(async (u) => {
+          if (u.role === "farmer") {
+            try {
+              const pendingFarmerDoc = await getDoc(doc(db, "pending_farmers", u.id));
+              if (pendingFarmerDoc.exists()) {
+                return { ...u, ...pendingFarmerDoc.data() };
+              }
+            } catch (e) {
+              console.error("Error fetching pending farmer doc:", e);
+            }
+          }
+          return u;
+        })
+      );
+      setPendingUsers(mergedList);
     } catch {
       // Offline/dev mode: read from localStorage
       try {
         const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
-        setPendingUsers(
-          pending
-            .filter((u) => u.status === "pending")
-            .map((u) => ({ id: u.uid, ...u }))
-        );
+        const pendingFarmers = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+        const usersList = pending.filter((u) => u.status === "pending").map((u) => ({ id: u.uid, ...u }));
+        const mergedList = usersList.map((u) => {
+          if (u.role === "farmer") {
+            const farmerProfile = pendingFarmers.find((f) => f.userId === u.id || f.id === u.id);
+            if (farmerProfile) {
+              return { ...u, ...farmerProfile };
+            }
+          }
+          return u;
+        });
+        setPendingUsers(mergedList);
       } catch {
         setPendingUsers([]);
       }
