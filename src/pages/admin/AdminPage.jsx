@@ -338,6 +338,7 @@ export default function AdminPage() {
   const [msgComposeBody, setMsgComposeBody] = useState("");
   const [msgShowCompose, setMsgShowCompose] = useState(false);
   const [msgReplyTarget, setMsgReplyTarget] = useState(null);
+  const [msgComposeRecipient, setMsgComposeRecipient] = useState(null);
 
   const {
     register,
@@ -646,15 +647,15 @@ export default function AdminPage() {
 
   const tabs = [
     { key: "users", label: "Users", icon: Users },
+    { key: "messages", label: "Messages", icon: MessageSquare, badge: unreadMessages },
     { key: "collections", label: "Collections", icon: Coffee },
     { key: "production", label: "Production", icon: Factory },
-    { key: "store", label: "Store Management", icon: Package },
+    { key: "store", label: "Store", icon: Package },
     { key: "accounting", label: "Accounting", icon: DollarSign },
     { key: "farmers", label: "Farmers", icon: Tractor },
-    { key: "messages", label: "Messages", icon: MessageSquare, badge: unreadMessages },
-    { key: "approvals", label: "Pending Approvals", icon: Clock, badge: pendingUsers.length },
-    { key: "activity", label: "Activity Log", icon: Activity },
-    { key: "settings", label: "System Settings", icon: Settings },
+    { key: "approvals", label: "Approvals", icon: Clock, badge: pendingUsers.length },
+    { key: "activity", label: "Activity", icon: Activity },
+    { key: "settings", label: "Settings", icon: Settings },
   ];
 
   function renderUserFormModal(isEdit) {
@@ -894,13 +895,14 @@ export default function AdminPage() {
   }
 
   function msgSendCompose() {
-    if (!msgComposeSubject.trim() || !msgComposeBody.trim() || !msgReplyTarget) return;
+    const recipient = msgReplyTarget || msgComposeRecipient;
+    if (!msgComposeSubject.trim() || !msgComposeBody.trim() || !recipient) return;
     sendMessage({
       from: "Jean-Paul Habimana",
       fromEmail: "admin@mahembe-coffee.rw",
       fromRole: "admin",
-      to: msgReplyTarget.from,
-      toEmail: msgReplyTarget.fromEmail,
+      to: recipient.from || recipient.name,
+      toEmail: recipient.fromEmail || recipient.email,
       subject: msgComposeSubject.trim(),
       body: msgComposeBody.trim(),
     });
@@ -908,14 +910,25 @@ export default function AdminPage() {
     setMsgComposeBody("");
     setMsgShowCompose(false);
     setMsgReplyTarget(null);
+    setMsgComposeRecipient(null);
     success("Message sent successfully");
   }
 
   function msgStartReplyTo(msg) {
     setMsgReplyTarget(msg);
+    setMsgComposeRecipient(null);
     setMsgShowCompose(true);
     setMsgSelected(null);
     setMsgComposeSubject(`Re: ${msg.subject}`);
+    setMsgComposeBody("");
+  }
+
+  function msgStartNewCompose() {
+    setMsgReplyTarget(null);
+    setMsgComposeRecipient(null);
+    setMsgShowCompose(true);
+    setMsgSelected(null);
+    setMsgComposeSubject("");
     setMsgComposeBody("");
   }
 
@@ -948,6 +961,22 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+        <button
+          onClick={() => setActiveTab("messages")}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all cursor-pointer ${
+            unreadMessages > 0
+              ? "bg-primary text-white border-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+              : "bg-white text-text-primary border-border hover:border-primary/30 hover:bg-primary/5"
+          }`}
+        >
+          <MessageSquare size={18} />
+          <span className="text-sm font-medium">Messages</span>
+          {unreadMessages > 0 && (
+            <span className="inline-flex items-center justify-center min-w-[20px] h-5 text-[10px] font-bold rounded-full bg-white/25 text-white px-1">
+              {unreadMessages}
+            </span>
+          )}
+        </button>
       </motion.div>
 
       {/* Dashboard Stats */}
@@ -1564,6 +1593,11 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Left: Tabs + List */}
                 <Card padding="none" className="lg:col-span-1">
+                  <div className="p-3 border-b border-border">
+                    <Button icon={Send} onClick={msgStartNewCompose} className="w-full" size="sm">
+                      Compose New Message
+                    </Button>
+                  </div>
                   <div className="flex border-b border-border">
                     {[
                       { key: "inbox", label: "Inbox", icon: Inbox, count: unreadMessages },
@@ -1649,19 +1683,37 @@ export default function AdminPage() {
                               {msgReplyTarget ? `Reply to ${msgReplyTarget.from}` : "New Message"}
                             </h3>
                           </div>
-                          <button onClick={() => { setMsgShowCompose(false); setMsgReplyTarget(null); }} className="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Cancel</button>
+                          <button onClick={() => { setMsgShowCompose(false); setMsgReplyTarget(null); setMsgComposeRecipient(null); }} className="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Cancel</button>
                         </div>
                       }
                     >
                       <div className="space-y-4">
                         <div>
                           <label className="text-sm font-medium text-text-primary mb-1.5 block">To</label>
-                          <input
-                            type="text"
-                            value={msgReplyTarget ? `${msgReplyTarget.from} (${msgReplyTarget.fromEmail})` : ""}
-                            disabled
-                            className="w-full rounded-xl border border-border bg-gray-50 px-4 py-2.5 text-sm text-text-secondary"
-                          />
+                          {msgReplyTarget ? (
+                            <input
+                              type="text"
+                              value={`${msgReplyTarget.from} (${msgReplyTarget.fromEmail})`}
+                              disabled
+                              className="w-full rounded-xl border border-border bg-gray-50 px-4 py-2.5 text-sm text-text-secondary"
+                            />
+                          ) : (
+                            <select
+                              value={msgComposeRecipient ? msgComposeRecipient.email : ""}
+                              onChange={(e) => {
+                                const user = users.find((u) => u.email === e.target.value);
+                                if (user) setMsgComposeRecipient({ name: user.name, email: user.email });
+                              }}
+                              className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
+                            >
+                              <option value="">Select a recipient...</option>
+                              {users.filter((u) => u.status === "active").map((u) => (
+                                <option key={u.id} value={u.email}>
+                                  {u.name} ({ROLE_LABELS[u.role] || u.role})
+                                </option>
+                              ))}
+                            </select>
+                          )}
                         </div>
                         <div>
                           <label className="text-sm font-medium text-text-primary mb-1.5 block">Subject</label>
@@ -1684,8 +1736,8 @@ export default function AdminPage() {
                           />
                         </div>
                         <div className="flex justify-end gap-3">
-                          <Button variant="ghost" onClick={() => { setMsgShowCompose(false); setMsgReplyTarget(null); }}>Cancel</Button>
-                          <Button icon={Send} onClick={msgSendCompose} disabled={!msgComposeSubject.trim() || !msgComposeBody.trim()}>
+                          <Button variant="ghost" onClick={() => { setMsgShowCompose(false); setMsgReplyTarget(null); setMsgComposeRecipient(null); }}>Cancel</Button>
+                          <Button icon={Send} onClick={msgSendCompose} disabled={!msgComposeSubject.trim() || !msgComposeBody.trim() || (!msgReplyTarget && !msgComposeRecipient)}>
                             Send Message
                           </Button>
                         </div>

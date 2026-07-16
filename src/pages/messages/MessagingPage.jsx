@@ -53,7 +53,7 @@ export default function MessagingPage() {
 
   const inbox = useMemo(() => {
     return messages
-      .filter((m) => m.toEmail === userEmail || m.to === "admin")
+      .filter((m) => m.toEmail === userEmail)
       .filter((m) => !search || m.subject.toLowerCase().includes(search.toLowerCase()) || m.from.toLowerCase().includes(search.toLowerCase()));
   }, [messages, userEmail, search]);
 

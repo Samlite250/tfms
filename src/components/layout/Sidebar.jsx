@@ -16,6 +16,8 @@ import {
   ChevronRight,
   X,
   Leaf,
+  MessageSquare,
+  Tractor,
 } from 'lucide-react';
 import { ROLE_LABELS } from '../../utils/constants';
 
@@ -31,6 +33,8 @@ const iconMap = {
   UserCog,
   Settings,
   Shield,
+  MessageSquare,
+  Tractor,
 };
 
 const sidebarVariants = {
@@ -137,12 +141,20 @@ export default function Sidebar({
                       animate={{ opacity: 1, width: 'auto' }}
                       exit={{ opacity: 0, width: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                      className="text-sm font-medium whitespace-nowrap overflow-hidden flex-1"
                     >
                       {item.label}
                     </motion.span>
                   )}
                 </AnimatePresence>
+                {!collapsed && item.badge > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full bg-accent text-primary-dark px-1">
+                    {item.badge}
+                  </span>
+                )}
+                {collapsed && item.badge > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-accent border-2 border-primary-dark" />
+                )}
                 {collapsed && (
                   <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
                     {item.label}
