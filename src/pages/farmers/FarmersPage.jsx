@@ -63,7 +63,7 @@ function statusBadge(status) {
 
 function FarmersPage() {
   const navigate = useNavigate();
-  const { success } = useToast();
+  const { success, error: toastError } = useToast();
   const { data: farmersList, loading, error, remove } = useRealtimeCollection("farmers", {
     orderByField: "joinedDate",
     orderDirection: "desc",
@@ -154,7 +154,7 @@ function FarmersPage() {
       await remove(deleteModal.farmer.id);
       success(`Farmer ${deleteModal.farmer.name} has been removed.`);
     } catch (err) {
-      console.error("Delete failed:", err);
+      toastError(`Failed to delete farmer. ${err.message}`);
     }
     setDeleteModal({ open: false, farmer: null });
   }

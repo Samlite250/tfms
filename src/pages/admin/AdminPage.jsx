@@ -532,8 +532,8 @@ export default function AdminPage() {
     try {
       await removeFarmer(deleteFarmer.id);
       success(`Farmer "${deleteFarmer.name}" deleted successfully`);
-    } catch {
-      success(`Farmer "${deleteFarmer.name}" deleted successfully`);
+    } catch (err) {
+      toastError(`Failed to delete farmer "${deleteFarmer.name}". ${err.message}`);
     }
     setDeleteFarmer(null);
   }

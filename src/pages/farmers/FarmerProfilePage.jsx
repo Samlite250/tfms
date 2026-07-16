@@ -24,6 +24,8 @@ import Badge from "../../components/ui/Badge";
 import Modal from "../../components/ui/Modal";
 import DataTable from "../../components/ui/DataTable";
 import { useToast } from "../../components/ui/Toast";
+import useRealtimeCollection from "../../hooks/useRealtimeCollection";
+import { farmersSeed } from "../../firebase/seedData";
 
 const farmers = [
   { id: "FRM-001", name: "Mugisha Patrick", phone: "+256 772 123456", email: "mugisha.p@gmail.com", village: "Kyanja", district: "Kampala", province: "Central", country: "Uganda", farmSize: 2.5, coffeeVariety: "Red Bourbon", collectionCenter: "Kyanja CC", totalDeliveries: 48, totalWeight: 1240, status: "Active", joinedDate: "2024-03-15", gender: "Male", dateOfBirth: "1985-06-15" },
@@ -65,12 +67,15 @@ const staggerItem = {
 function FarmerProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { success } = useToast();
+  const { success, error } = useToast();
   const [deleteModal, setDeleteModal] = useState(false);
+  const { data: farmersList, remove: removeFarmer } = useRealtimeCollection("farmers", {
+    seedData: farmersSeed,
+  });
 
   const farmer = useMemo(() => {
-    return farmers.find((f) => f.id === id) || farmers[0];
-  }, [id]);
+    return farmersList.find((f) => f.id === id) || farmers.find((f) => f.id === id) || farmers[0];
+  }, [id, farmersList]);
 
   const stats = useMemo(() => ({
     totalDeliveries: farmer.totalDeliveries,
@@ -80,10 +85,16 @@ function FarmerProfilePage() {
 
   const initials = farmer.name.split(" ").map((n) => n[0]).join("");
 
-  function handleDelete() {
-    success(`Farmer ${farmer.name} has been removed.`);
-    setDeleteModal(false);
-    navigate("/farmers");
+  async function handleDelete() {
+    try {
+      await removeFarmer(farmer.id);
+      success(`Farmer ${farmer.name} has been removed.`);
+      setDeleteModal(false);
+      navigate("/farmers");
+    } catch (err) {
+      error(`Failed to delete farmer. ${err.message}`);
+      setDeleteModal(false);
+    }
   }
 
   const deliveryColumns = [
