@@ -41,7 +41,7 @@ export default function useRealtimeCollection(collectionName, options = {}) {
   useEffect(() => {
     let settled = false;
 
-    const useOfflineFallback = (reason, silent = false) => {
+    const activateOfflineFallback = (reason, silent = false) => {
       if (settled) return;
       settled = true;
       if (!silent) console.warn(`Offline mode for ${collectionName}:`, reason);
@@ -66,12 +66,12 @@ export default function useRealtimeCollection(collectionName, options = {}) {
     // Skip Firestore entirely when running with a demo/placeholder API key
     const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
     if (!apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20) {
-      useOfflineFallback("demo API key — using localStorage", true);
+      activateOfflineFallback("demo API key — using localStorage", true);
       return;
     }
 
     const timeout = setTimeout(() => {
-      useOfflineFallback('Firestore connection timed out (no real Firebase configured)');
+      activateOfflineFallback('Firestore connection timed out (no real Firebase configured)');
     }, 3000);
 
     try {
@@ -140,14 +140,14 @@ export default function useRealtimeCollection(collectionName, options = {}) {
         (err) => {
           clearTimeout(timeout);
           console.error(`Real-time error for ${collectionName}:`, err);
-          useOfflineFallback(err.message);
+          activateOfflineFallback(err.message);
         }
       );
 
       return () => { clearTimeout(timeout); unsubscribe(); };
     } catch (err) {
       clearTimeout(timeout);
-      useOfflineFallback(err.message);
+      activateOfflineFallback(err.message);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionName, JSON.stringify(filters), orderByField, orderDirection]);
