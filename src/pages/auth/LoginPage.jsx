@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, LogIn, Leaf, Users, Shield, Factory, Package, Receipt, BarChart3 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, Leaf } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const TeaLeafSVG = ({ className }) => (
@@ -36,7 +36,7 @@ const TeaLeafSVG = ({ className }) => (
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
-  const { login, demoUsers } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -59,16 +59,6 @@ function LoginPage() {
       else if (code === 'auth/invalid-email') setAuthError('Invalid email address.');
       else if (code === 'auth/too-many-requests') setAuthError('Too many attempts. Please try again later.');
       else setAuthError(err?.message || 'Failed to sign in. Please check your credentials.');
-    }
-  };
-
-  const handleDemoLogin = async (email, password) => {
-    setAuthError('');
-    try {
-      await login(email, password);
-      navigate('/dashboard');
-    } catch (err) {
-      setAuthError(err?.message || 'Demo login failed.');
     }
   };
 
@@ -247,40 +237,6 @@ function LoginPage() {
             Don't have an account?{' '}
             <Link to="/register" className="font-medium text-primary hover:text-primary-dark transition-colors">Create Account</Link>
           </p>
-
-          {demoUsers && demoUsers.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="mt-6 p-4 bg-primary/5 border border-primary/10 rounded-xl"
-            >
-              <p className="text-xs font-semibold text-primary mb-3 uppercase tracking-wide">Quick Demo Login</p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { email: 'admin@mahembe-coffee.rw', password: 'admin123', label: 'Admin', icon: Shield, color: 'bg-primary/10 text-primary' },
-                  { email: 'collection@mahembe-coffee.rw', password: 'collection123', label: 'Collection', icon: Factory, color: 'bg-success/10 text-success' },
-                  { email: 'production@mahembe-coffee.rw', password: 'production123', label: 'Production', icon: Package, color: 'bg-warning/10 text-warning' },
-                  { email: 'store@mahembe-coffee.rw', password: 'store123', label: 'Store Keeper', icon: Receipt, color: 'bg-danger/10 text-danger' },
-                  { email: 'accountant@mahembe-coffee.rw', password: 'accountant123', label: 'Accountant', icon: BarChart3, color: 'bg-accent/10 text-accent-dark' },
-                  { email: 'farmer@mahembe-coffee.rw', password: 'farmer123', label: 'Farmer', icon: Users, color: 'bg-blue-100 text-blue-600' },
-                ].map((demo) => (
-                  <button
-                    key={demo.email}
-                    type="button"
-                    onClick={() => handleDemoLogin(demo.email, demo.password)}
-                    disabled={isSubmitting}
-                    className="flex items-center gap-2 px-3 py-2 bg-white border border-border rounded-lg hover:border-primary/30 hover:shadow-sm transition-all text-left disabled:opacity-50 cursor-pointer"
-                  >
-                    <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${demo.color}`}>
-                      <demo.icon className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="text-xs font-medium text-text-primary">{demo.label}</span>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
         </motion.div>
       </div>
     </div>

@@ -5,17 +5,6 @@ import { auth, db } from '../firebase/config';
 
 const AuthContext = createContext(null);
 
-// ⚠️ SECURITY NOTE: These are DEMO-ONLY credentials for offline/dev use.
-// NEVER use plaintext passwords in production. Replace with env vars before shipping.
-const DEMO_USERS = [
-  { uid: 'admin-001', email: 'admin@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'admin123', displayName: 'Jean-Paul Habimana', role: 'admin', status: 'active', department: 'Administration', phone: '+250 788 100 200' },
-  { uid: 'collection-001', email: 'collection@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_COLLECTION_PASSWORD || 'collection123', displayName: 'Epiphanie Mukamana', role: 'collection_officer', status: 'active', department: 'Collection', phone: '+250 788 100 202' },
-  { uid: 'production-001', email: 'production@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_PRODUCTION_PASSWORD || 'production123', displayName: 'Alexis Habimana', role: 'production_officer', status: 'active', department: 'Production', phone: '+250 788 100 203' },
-  { uid: 'store-001', email: 'store@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_STORE_PASSWORD || 'store123', displayName: 'Anselme Rwegasira', role: 'store_keeper', status: 'active', department: 'Packaging', phone: '+250 788 100 204' },
-  { uid: 'accountant-001', email: 'accountant@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_ACCOUNTANT_PASSWORD || 'accountant123', displayName: 'Arsene Nshimiyimana', role: 'accountant', status: 'active', department: 'Finance', phone: '+250 788 100 205' },
-  { uid: 'farmer-001', email: 'farmer@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_FARMER_PASSWORD || 'farmer123', displayName: 'Jean Mugabo', role: 'farmer', status: 'active', department: '', phone: '+250 788 200 101' },
-];
-
 let firebaseAvailable = false;
 
 async function checkFirebase() {
@@ -86,14 +75,6 @@ export function AuthProvider({ children }) {
           });
         });
       } else {
-        const saved = sessionStorage.getItem('coms_demo_user');
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            setUser({ uid: parsed.uid, email: parsed.email, displayName: parsed.displayName });
-            setUserProfile(parsed);
-          } catch { /* ignore */ }
-        }
         setLoading(false);
       }
     });
@@ -123,17 +104,7 @@ export function AuthProvider({ children }) {
       return result.user;
     }
 
-    const found = DEMO_USERS.find(u => u.email === email && u.password === password);
-    if (!found) {
-      throw new Error('Invalid email or password. Try one of the demo accounts below.');
-    }
-
-    const u = { uid: found.uid, email: found.email, displayName: found.displayName };
-    const profile = { uid: found.uid, email: found.email, displayName: found.displayName, role: found.role, status: found.status, department: found.department };
-    setUser(u);
-    setUserProfile(profile);
-    sessionStorage.setItem('coms_demo_user', JSON.stringify(profile));
-    return u;
+    throw new Error('Firebase is not configured. Please set up Firebase to use this application.');
   }
 
   async function register(email, password, profileData) {
@@ -191,7 +162,6 @@ export function AuthProvider({ children }) {
   async function logout() {
     setUserProfile(null);
     setUser(null);
-    sessionStorage.removeItem('coms_demo_user');
     if (firebaseAvailable) {
       const { signOut } = await import('firebase/auth');
       await signOut(auth);
@@ -224,7 +194,6 @@ export function AuthProvider({ children }) {
     deleteUserAccount,
     forgotPassword,
     resetPassword,
-    demoUsers: firebaseAvailable ? [] : DEMO_USERS,
   };
 
   return (

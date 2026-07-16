@@ -38,6 +38,10 @@ import {
   Image,
   UserX,
   CheckCircle2,
+  Coffee,
+  Factory,
+  Package,
+  DollarSign,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
@@ -120,7 +124,7 @@ const mockActivities = [
   { id: 1, user: "Kamal Perera", action: "Created", module: "Collection", details: "Recorded coffee collection: 450 kg from Kigali cooperative", timestamp: "2026-07-14 09:15:00" },
   { id: 2, user: "Nimal Silva", action: "Updated", module: "Farmers", details: "Updated farmer profile: Jean Mugabo - contact info changed", timestamp: "2026-07-14 09:05:00" },
   { id: 3, user: "Dissanayake Bandara", action: "Deleted", module: "Users", details: "Deactivated user account: Lakshman Peris", timestamp: "2026-07-14 08:50:00" },
-  { id: 4, user: "Ravi Wickrama", action: "Created", module: "Expenses", details: "Logged expense: RWF 1,850 for machinery maintenance", timestamp: "2026-07-14 08:40:00" },
+  { id: 4, user: "Ravi Wickrama", action: "Created", module: "Expenses", details: "Logged expense: RWF 1,850,000 for machinery maintenance", timestamp: "2026-07-14 08:40:00" },
   { id: 5, user: "Dilani Herath", action: "Updated", module: "Production", details: "Updated batch #1042 status to 'In Progress'", timestamp: "2026-07-14 08:30:00" },
   { id: 6, user: "Chaminda Rajapaksa", action: "Created", module: "Inventory", details: "Added new stock entry: 500 kg Black Coffee AA", timestamp: "2026-07-14 08:15:00" },
   { id: 7, user: "Kamal Perera", action: "Updated", module: "Employees", details: "Shift assignment updated for evening crew", timestamp: "2026-07-14 08:00:00" },
@@ -133,7 +137,7 @@ const mockActivities = [
   { id: 14, user: "Priya Bandara", action: "Deleted", module: "Collection", details: "Removed duplicate collection record #C-4521", timestamp: "2026-07-13 17:00:00" },
   { id: 15, user: "Kamal Perera", action: "Created", module: "Inventory", details: "Stock transfer: 200 kg from Warehouse A to Processing", timestamp: "2026-07-13 16:45:00" },
   { id: 16, user: "Nimal Silva", action: "Created", module: "Farmers", details: "Registered new farmer: Emmanuel Ndayisaba - 2.5 hectares", timestamp: "2026-07-13 16:30:00" },
-  { id: 17, user: "Ravi Wickrama", action: "Created", module: "Sales", details: "Generated invoice #2090: RWF 5,200 to Nairobi Traders", timestamp: "2026-07-13 16:15:00" },
+  { id: 17, user: "Ravi Wickrama", action: "Created", module: "Sales", details: "Generated invoice #2090: RWF 5,200,000 to Nairobi Traders", timestamp: "2026-07-13 16:15:00" },
   { id: 18, user: "Anita Jayawardena", action: "Updated", module: "Employees", details: "Updated leave request for Dilani Herath - Approved", timestamp: "2026-07-13 16:00:00" },
   { id: 19, user: "Dilani Herath", action: "Updated", module: "Production", details: "Quality check passed for batch #1040", timestamp: "2026-07-13 15:45:00" },
   { id: 20, user: "Chaminda Rajapaksa", action: "Deleted", module: "Inventory", details: "Removed expired stock entry: Fertilizer batch #FB-203", timestamp: "2026-07-13 15:30:00" },
@@ -152,6 +156,57 @@ const mockActivities = [
   { id: 33, user: "Mahinda Gamage", action: "Updated", module: "Production", details: "Machine maintenance log updated - CTC Line 2", timestamp: "2026-07-13 12:15:00" },
   { id: 34, user: "Kamal Perera", action: "Created", module: "Sales", details: "Processed bulk order: 2,500 kg to Mombasa Coffee Co.", timestamp: "2026-07-13 12:00:00" },
   { id: 35, user: "Dissanayake Bandara", action: "Created", module: "Users", details: "Created new admin account for system auditor", timestamp: "2026-07-13 11:45:00" },
+];
+
+const mockCollections = [
+  { id: "COL-2001", date: "2026-07-14", farmer: "Jean Mugabo", quantity: 450, grade: "AA", center: "Mahembe Central", status: "Received", value: 3825000 },
+  { id: "COL-2002", date: "2026-07-13", farmer: "Emmanuel Ndayisaba", quantity: 320, grade: "AB", center: "Muhanga Hub", status: "Received", value: 2304000 },
+  { id: "COL-2003", date: "2026-07-12", farmer: "Marie Claire Uwimana", quantity: 280, grade: "PB", center: "Ruyanza CC", status: "Pending QC", value: 1820000 },
+  { id: "COL-2004", date: "2026-07-11", farmer: "Patrick Habimana", quantity: 520, grade: "AA", center: "Mahembe Central", status: "Approved", value: 4680000 },
+  { id: "COL-2005", date: "2026-07-10", farmer: "Claudine Mukamana", quantity: 190, grade: "C", center: "Muhanga Hub", status: "Received", value: 1045000 },
+  { id: "COL-2006", date: "2026-07-09", farmer: "Sylvestre Niyongabo", quantity: 380, grade: "AA", center: "Mahembe Central", status: "Rejected", value: 0 },
+  { id: "COL-2007", date: "2026-07-08", farmer: "Vestine Uwizeyimana", quantity: 250, grade: "AB", center: "Ruyanza CC", status: "Approved", value: 1875000 },
+  { id: "COL-2008", date: "2026-07-07", farmer: "Ignace Gahamanyi", quantity: 410, grade: "AA", center: "Mahembe Central", status: "Received", value: 3485000 },
+];
+
+const mockProduction = [
+  { id: "BAT-1040", startDate: "2026-07-08", cherryInput: 1200, output: 192, grade: "AA", process: "Washed", status: "Completed", manager: "Dilani Herath" },
+  { id: "BAT-1041", startDate: "2026-07-10", cherryInput: 950, output: 152, grade: "AB", process: "Washed", status: "Completed", manager: "Sunil Fernando" },
+  { id: "BAT-1042", startDate: "2026-07-12", cherryInput: 1500, output: 240, grade: "AA", process: "Natural", status: "In Progress", manager: "Dilani Herath" },
+  { id: "BAT-1043", startDate: "2026-07-13", cherryInput: 800, output: 0, grade: "PB", process: "Washed", status: "In Progress", manager: "Sunil Fernando" },
+  { id: "BAT-1044", startDate: "2026-07-14", cherryInput: 600, output: 0, grade: "AB", process: "Natural", status: "Planned", manager: "Wasantha Jayasuriya" },
+  { id: "BAT-1039", startDate: "2026-07-06", cherryInput: 1100, output: 176, grade: "C", process: "Washed", status: "Cancelled", manager: "Mahinda Gamage" },
+];
+
+const mockInventory = [
+  { id: "INV-001", name: "Green Coffee AA", category: "Coffee", quantity: 4200, unit: "kg", location: "Warehouse A", status: "In Stock", lastUpdated: "2026-07-14" },
+  { id: "INV-002", name: "Green Coffee AB", category: "Coffee", quantity: 2800, unit: "kg", location: "Warehouse A", status: "In Stock", lastUpdated: "2026-07-14" },
+  { id: "INV-003", name: "Jute Bags", category: "Packaging", quantity: 350, unit: "pieces", location: "Warehouse B", status: "In Stock", lastUpdated: "2026-07-13" },
+  { id: "INV-004", name: "GrainPro Bags", category: "Packaging", quantity: 200, unit: "pieces", location: "Warehouse B", status: "Low Stock", lastUpdated: "2026-07-12" },
+  { id: "INV-005", name: "Organic Fertilizer", category: "Inputs", quantity: 1500, unit: "kg", location: "Store C", status: "In Stock", lastUpdated: "2026-07-11" },
+  { id: "INV-006", name: "Diesel Fuel", category: "Fuel", quantity: 450, unit: "liters", location: "Fuel Depot", status: "Low Stock", lastUpdated: "2026-07-14" },
+  { id: "INV-007", name: "Depulper Spare Parts", category: "Spare Parts", quantity: 12, unit: "pieces", location: "Workshop", status: "In Stock", lastUpdated: "2026-07-10" },
+  { id: "INV-008", name: "Polypropylene Liners", category: "Packaging", quantity: 500, unit: "pieces", location: "Warehouse B", status: "In Stock", lastUpdated: "2026-07-09" },
+];
+
+const mockAccounting = [
+  { id: "FIN-1001", date: "2026-07-14", type: "Income", description: "Coffee sale to Nairobi Traders - 2,500 kg AA", amount: 21250000, category: "Coffee Sales", status: "Paid", recordedBy: "Ravi Wickrama" },
+  { id: "FIN-1002", date: "2026-07-13", type: "Income", description: "Coffee sale to Mombasa Coffee Co. - 1,800 kg AB", amount: 12960000, category: "Coffee Sales", status: "Paid", recordedBy: "Thilina Weerasinghe" },
+  { id: "FIN-1003", date: "2026-07-12", type: "Expense", description: "Monthly labor wages - 45 workers", amount: 3375000, category: "Labor", status: "Paid", recordedBy: "Ravi Wickrama" },
+  { id: "FIN-1004", date: "2026-07-11", type: "Expense", description: "Transport cost - Mahembe to Kigali warehouse", amount: 450000, category: "Transport", status: "Paid", recordedBy: "Thilina Weerasinghe" },
+  { id: "FIN-1005", date: "2026-07-10", type: "Income", description: "Green coffee sale to Local Roasters Ltd - 800 kg PB", amount: 5600000, category: "Coffee Sales", status: "Pending", recordedBy: "Ravi Wickrama" },
+  { id: "FIN-1006", date: "2026-07-09", type: "Expense", description: "Depulper machine maintenance and parts", amount: 780000, category: "Maintenance", status: "Paid", recordedBy: "Thilina Weerasinghe" },
+  { id: "FIN-1007", date: "2026-07-08", type: "Expense", description: "GrainPro bags and jute bag procurement", amount: 560000, category: "Packaging", status: "Paid", recordedBy: "Ravi Wickrama" },
+  { id: "FIN-1008", date: "2026-07-07", type: "Income", description: "Specialty coffee export to European Buyer - 600 kg AA", amount: 7800000, category: "Coffee Sales", status: "Pending", recordedBy: "Thilina Weerasinghe" },
+];
+
+const mockFarmers = [
+  { id: "FAR-001", name: "Jean Mugabo", phone: "+250 788 301 201", village: "Muhanga", farmSize: 2.5, variety: "Red Bourbon", center: "Mahembe Central", totalDeliveries: 28, status: "Active" },
+  { id: "FAR-002", name: "Emmanuel Ndayisaba", phone: "+250 788 301 202", village: "Nyamabuye", farmSize: 1.8, variety: "Jackson", center: "Muhanga Hub", totalDeliveries: 15, status: "Active" },
+  { id: "FAR-003", name: "Marie Claire Uwimana", phone: "+250 788 301 203", village: "Kibangu", farmSize: 3.0, variety: "BM 139", center: "Ruyanza CC", totalDeliveries: 42, status: "Active" },
+  { id: "FAR-004", name: "Patrick Habimana", phone: "+250 788 301 204", village: "Muhanga", farmSize: 1.2, variety: "Red Bourbon", center: "Mahembe Central", totalDeliveries: 10, status: "Active" },
+  { id: "FAR-005", name: "Claudine Mukamana", phone: "+250 788 301 205", village: "Rugendabari", farmSize: 0.8, variety: "Jackson", center: "Muhanga Hub", totalDeliveries: 5, status: "Inactive" },
+  { id: "FAR-006", name: "Ignace Gahamanyi", phone: "+250 788 301 206", village: "Cyarubari", farmSize: 4.1, variety: "Red Bourbon", center: "Mahembe Central", totalDeliveries: 56, status: "Active" },
 ];
 
 const ACTION_COLORS = {
@@ -211,6 +266,10 @@ function formatTimeAgo(dateStr) {
   return `${diffDays}d ago`;
 }
 
+function formatRWF(amount) {
+  return `RWF ${amount.toLocaleString()}`;
+}
+
 const AVATAR_COLORS = [
   "bg-primary/15 text-primary",
   "bg-blue-100 text-blue-600",
@@ -254,6 +313,12 @@ export default function AdminPage() {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(false);
   const [pendingSearch, setPendingSearch] = useState("");
+
+  const [collectionsSearch, setCollectionsSearch] = useState("");
+  const [productionSearch, setProductionSearch] = useState("");
+  const [inventorySearch, setInventorySearch] = useState("");
+  const [accountingSearch, setAccountingSearch] = useState("");
+  const [farmersSearch, setFarmersSearch] = useState("");
 
   const { success, error: toastError, info } = useToast();
   const { approveUser, rejectUser: rejectUserAuth } = useAuth();
@@ -328,6 +393,73 @@ export default function AdminPage() {
     () => [...new Set(mockActivities.map((a) => a.module))].sort(),
     []
   );
+
+  const filteredCollections = useMemo(() => {
+    if (!collectionsSearch) return mockCollections;
+    const s = collectionsSearch.toLowerCase();
+    return mockCollections.filter(
+      (c) =>
+        c.id.toLowerCase().includes(s) ||
+        c.farmer.toLowerCase().includes(s) ||
+        c.grade.toLowerCase().includes(s) ||
+        c.center.toLowerCase().includes(s) ||
+        c.status.toLowerCase().includes(s)
+    );
+  }, [collectionsSearch]);
+
+  const filteredProduction = useMemo(() => {
+    if (!productionSearch) return mockProduction;
+    const s = productionSearch.toLowerCase();
+    return mockProduction.filter(
+      (p) =>
+        p.id.toLowerCase().includes(s) ||
+        p.grade.toLowerCase().includes(s) ||
+        p.process.toLowerCase().includes(s) ||
+        p.status.toLowerCase().includes(s) ||
+        p.manager.toLowerCase().includes(s)
+    );
+  }, [productionSearch]);
+
+  const filteredInventory = useMemo(() => {
+    if (!inventorySearch) return mockInventory;
+    const s = inventorySearch.toLowerCase();
+    return mockInventory.filter(
+      (i) =>
+        i.id.toLowerCase().includes(s) ||
+        i.name.toLowerCase().includes(s) ||
+        i.category.toLowerCase().includes(s) ||
+        i.location.toLowerCase().includes(s) ||
+        i.status.toLowerCase().includes(s)
+    );
+  }, [inventorySearch]);
+
+  const filteredAccounting = useMemo(() => {
+    if (!accountingSearch) return mockAccounting;
+    const s = accountingSearch.toLowerCase();
+    return mockAccounting.filter(
+      (a) =>
+        a.id.toLowerCase().includes(s) ||
+        a.description.toLowerCase().includes(s) ||
+        a.type.toLowerCase().includes(s) ||
+        a.category.toLowerCase().includes(s) ||
+        a.status.toLowerCase().includes(s) ||
+        a.recordedBy.toLowerCase().includes(s)
+    );
+  }, [accountingSearch]);
+
+  const filteredFarmers = useMemo(() => {
+    if (!farmersSearch) return mockFarmers;
+    const s = farmersSearch.toLowerCase();
+    return mockFarmers.filter(
+      (f) =>
+        f.id.toLowerCase().includes(s) ||
+        f.name.toLowerCase().includes(s) ||
+        f.village.toLowerCase().includes(s) ||
+        f.variety.toLowerCase().includes(s) ||
+        f.center.toLowerCase().includes(s) ||
+        f.status.toLowerCase().includes(s)
+    );
+  }, [farmersSearch]);
 
   function handleAddUser(data) {
     const newUser = {
@@ -498,6 +630,11 @@ export default function AdminPage() {
 
   const tabs = [
     { key: "users", label: "Users", icon: Users },
+    { key: "collections", label: "Collections", icon: Coffee },
+    { key: "production", label: "Production", icon: Factory },
+    { key: "store", label: "Store Management", icon: Package },
+    { key: "accounting", label: "Accounting", icon: DollarSign },
+    { key: "farmers", label: "Farmers", icon: Tractor },
     { key: "approvals", label: "Pending Approvals", icon: Clock, badge: pendingUsers.length },
     { key: "activity", label: "Activity Log", icon: Activity },
     { key: "settings", label: "System Settings", icon: Settings },
@@ -642,6 +779,52 @@ export default function AdminPage() {
     );
   }
 
+  const collectionsStatusVariant = (status) => {
+    switch (status) {
+      case "Received": return "info";
+      case "Approved": return "success";
+      case "Pending QC": return "warning";
+      case "Rejected": return "danger";
+      default: return "default";
+    }
+  };
+
+  const productionStatusVariant = (status) => {
+    switch (status) {
+      case "Completed": return "success";
+      case "In Progress": return "info";
+      case "Planned": return "warning";
+      case "Cancelled": return "danger";
+      default: return "default";
+    }
+  };
+
+  const inventoryStatusVariant = (status) => {
+    switch (status) {
+      case "In Stock": return "success";
+      case "Low Stock": return "warning";
+      case "Out of Stock": return "danger";
+      default: return "default";
+    }
+  };
+
+  const accountingStatusVariant = (status) => {
+    switch (status) {
+      case "Paid": return "success";
+      case "Pending": return "warning";
+      case "Overdue": return "danger";
+      default: return "default";
+    }
+  };
+
+  const farmerStatusVariant = (status) => {
+    switch (status) {
+      case "Active": return "success";
+      case "Inactive": return "default";
+      default: return "default";
+    }
+  };
+
   return (
     <motion.div
       className="min-h-screen space-y-6 p-6 lg:p-8"
@@ -692,12 +875,12 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <motion.div variants={itemVariants}>
-        <div className="flex items-center gap-1 border-b border-border mb-6">
+        <div className="flex items-center gap-1 border-b border-border mb-6 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 cursor-pointer -mb-px ${
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 cursor-pointer -mb-px whitespace-nowrap ${
                   activeTab === tab.key
                     ? "border-primary text-primary"
                     : "border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300"
@@ -839,6 +1022,433 @@ export default function AdminPage() {
             </motion.div>
           )}
 
+          {/* Collections Tab */}
+          {activeTab === "collections" && (
+            <motion.div
+              key="collections"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <Card padding="none">
+                <div className="p-4 border-b border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Coffee size={20} className="text-primary" />
+                      <h3 className="text-base font-semibold text-text-primary">Coffee Collections</h3>
+                      <Badge variant="info">{filteredCollections.length}</Badge>
+                    </div>
+                    <SearchInput
+                      value={collectionsSearch}
+                      onChange={setCollectionsSearch}
+                      placeholder="Search collections..."
+                      className="sm:w-72"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Farmer</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Quantity (kg)</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Grade</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Collection Center</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Value (RWF)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filteredCollections.length === 0 ? (
+                        <tr>
+                          <td colSpan={8}>
+                            <EmptyState icon={Coffee} title="No collections found" description="Try adjusting your search." />
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredCollections.map((record, idx) => (
+                          <motion.tr
+                            key={record.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.02 }}
+                            className="hover:bg-primary/5 transition-colors"
+                          >
+                            <td className="px-4 py-3 text-sm font-medium text-text-primary">{record.id}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{record.date}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{record.farmer}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{record.quantity}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">
+                              <Badge variant="default">{record.grade}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{record.center}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <Badge variant={collectionsStatusVariant(record.status)} dot>{record.status}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary text-right font-medium">{formatRWF(record.value)}</td>
+                          </motion.tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredCollections.length > 0 && (
+                  <div className="px-4 py-3 border-t border-border text-sm text-text-secondary">
+                    Showing {filteredCollections.length} of {mockCollections.length} records
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Production Tab */}
+          {activeTab === "production" && (
+            <motion.div
+              key="production"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <Card padding="none">
+                <div className="p-4 border-b border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Factory size={20} className="text-primary" />
+                      <h3 className="text-base font-semibold text-text-primary">Production Batches</h3>
+                      <Badge variant="info">{filteredProduction.length}</Badge>
+                    </div>
+                    <SearchInput
+                      value={productionSearch}
+                      onChange={setProductionSearch}
+                      placeholder="Search production..."
+                      className="sm:w-72"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Batch ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Start Date</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Cherry Input (kg)</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Output (kg)</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Grade</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Process</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Manager</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filteredProduction.length === 0 ? (
+                        <tr>
+                          <td colSpan={8}>
+                            <EmptyState icon={Factory} title="No production records found" description="Try adjusting your search." />
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredProduction.map((batch, idx) => (
+                          <motion.tr
+                            key={batch.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.02 }}
+                            className="hover:bg-primary/5 transition-colors"
+                          >
+                            <td className="px-4 py-3 text-sm font-medium text-text-primary">{batch.id}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{batch.startDate}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{batch.cherryInput.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{batch.output > 0 ? batch.output.toLocaleString() : "—"}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <Badge variant="default">{batch.grade}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{batch.process}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <Badge variant={productionStatusVariant(batch.status)} dot>{batch.status}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{batch.manager}</td>
+                          </motion.tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredProduction.length > 0 && (
+                  <div className="px-4 py-3 border-t border-border text-sm text-text-secondary">
+                    Showing {filteredProduction.length} of {mockProduction.length} batches
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Store Management Tab */}
+          {activeTab === "store" && (
+            <motion.div
+              key="store"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <Card padding="none">
+                <div className="p-4 border-b border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Package size={20} className="text-primary" />
+                      <h3 className="text-base font-semibold text-text-primary">Inventory / Warehouse</h3>
+                      <Badge variant="info">{filteredInventory.length}</Badge>
+                    </div>
+                    <SearchInput
+                      value={inventorySearch}
+                      onChange={setInventorySearch}
+                      placeholder="Search inventory..."
+                      className="sm:w-72"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Item ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Name</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Category</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Quantity</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Unit</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Location</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Last Updated</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filteredInventory.length === 0 ? (
+                        <tr>
+                          <td colSpan={8}>
+                            <EmptyState icon={Package} title="No inventory items found" description="Try adjusting your search." />
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredInventory.map((item, idx) => (
+                          <motion.tr
+                            key={item.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.02 }}
+                            className="hover:bg-primary/5 transition-colors"
+                          >
+                            <td className="px-4 py-3 text-sm font-medium text-text-primary">{item.id}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{item.name}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{item.category}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary font-medium">{item.quantity.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{item.unit}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{item.location}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <Badge variant={inventoryStatusVariant(item.status)} dot>{item.status}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{item.lastUpdated}</td>
+                          </motion.tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredInventory.length > 0 && (
+                  <div className="px-4 py-3 border-t border-border text-sm text-text-secondary">
+                    Showing {filteredInventory.length} of {mockInventory.length} items
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Accounting Tab */}
+          {activeTab === "accounting" && (
+            <motion.div
+              key="accounting"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <Card padding="none">
+                <div className="p-4 border-b border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <DollarSign size={20} className="text-primary" />
+                      <h3 className="text-base font-semibold text-text-primary">Financial Records</h3>
+                      <Badge variant="info">{filteredAccounting.length}</Badge>
+                    </div>
+                    <SearchInput
+                      value={accountingSearch}
+                      onChange={setAccountingSearch}
+                      placeholder="Search transactions..."
+                      className="sm:w-72"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Record ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Type</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Description</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Amount (RWF)</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Category</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Recorded By</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filteredAccounting.length === 0 ? (
+                        <tr>
+                          <td colSpan={8}>
+                            <EmptyState icon={DollarSign} title="No financial records found" description="Try adjusting your search." />
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredAccounting.map((record, idx) => (
+                          <motion.tr
+                            key={record.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.02 }}
+                            className="hover:bg-primary/5 transition-colors"
+                          >
+                            <td className="px-4 py-3 text-sm font-medium text-text-primary">{record.id}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{record.date}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <Badge variant={record.type === "Income" ? "success" : "danger"}>{record.type}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary max-w-xs truncate">{record.description}</td>
+                            <td className={`px-4 py-3 text-sm font-medium text-right ${record.type === "Income" ? "text-green-600" : "text-red-600"}`}>
+                              {record.type === "Expense" ? "-" : ""}{formatRWF(record.amount)}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{record.category}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <Badge variant={accountingStatusVariant(record.status)} dot>{record.status}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{record.recordedBy}</td>
+                          </motion.tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredAccounting.length > 0 && (
+                  <div className="px-4 py-3 border-t border-border text-sm text-text-secondary">
+                    Showing {filteredAccounting.length} of {mockAccounting.length} records
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Farmers Tab */}
+          {activeTab === "farmers" && (
+            <motion.div
+              key="farmers"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <Card padding="none">
+                <div className="p-4 border-b border-border">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Tractor size={20} className="text-primary" />
+                      <h3 className="text-base font-semibold text-text-primary">Registered Farmers</h3>
+                      <Badge variant="info">{filteredFarmers.length}</Badge>
+                    </div>
+                    <SearchInput
+                      value={farmersSearch}
+                      onChange={setFarmersSearch}
+                      placeholder="Search farmers..."
+                      className="sm:w-72"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Name</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Phone</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Village</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Farm Size (ha)</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Variety</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Center</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Deliveries</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filteredFarmers.length === 0 ? (
+                        <tr>
+                          <td colSpan={9}>
+                            <EmptyState icon={Tractor} title="No farmers found" description="Try adjusting your search." />
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredFarmers.map((farmer, idx) => (
+                          <motion.tr
+                            key={farmer.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.02 }}
+                            className="hover:bg-primary/5 transition-colors"
+                          >
+                            <td className="px-4 py-3 text-sm font-medium text-text-primary">{farmer.id}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{farmer.name}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{farmer.phone}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{farmer.village}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{farmer.farmSize}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <Badge variant="default">{farmer.variety}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{farmer.center}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary font-medium">{farmer.totalDeliveries}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <Badge variant={farmerStatusVariant(farmer.status)} dot>{farmer.status}</Badge>
+                            </td>
+                          </motion.tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {filteredFarmers.length > 0 && (
+                  <div className="px-4 py-3 border-t border-border text-sm text-text-secondary">
+                    Showing {filteredFarmers.length} of {mockFarmers.length} farmers
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          )}
+
           {/* Pending Approvals Tab */}
           {activeTab === "approvals" && (
             <motion.div
@@ -918,11 +1528,11 @@ export default function AdminPage() {
                           <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary">
                             <span className="inline-flex items-center gap-1">
                               <Briefcase size={12} />
-                              {ROLE_LABELS[pendingUser.role] || pendingUser.role || "—"}
+                              {ROLE_LABELS[pendingUser.role] || pendingUser.role || "\u2014"}
                             </span>
                             <span className="inline-flex items-center gap-1">
                               <Building2 size={12} />
-                              {pendingUser.department || "—"}
+                              {pendingUser.department || "\u2014"}
                             </span>
                             {pendingUser.phone && (
                               <span className="inline-flex items-center gap-1">
