@@ -560,9 +560,14 @@ export default function AdminPage() {
       const snapshot = await getDocs(q);
       const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
       setPendingUsers(list);
-    } catch (e) {
-      console.error("Failed to fetch pending users:", e);
-      setPendingUsers([]);
+    } catch {
+      // Offline/dev mode: read from localStorage
+      try {
+        const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
+        setPendingUsers(pending.map((u) => ({ id: u.uid, ...u })));
+      } catch {
+        setPendingUsers([]);
+      }
     } finally {
       setPendingLoading(false);
     }

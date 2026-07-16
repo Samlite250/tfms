@@ -107,9 +107,19 @@ export function AuthProvider({ children }) {
     }
 
     // Offline/dev mode: create a local admin session from the email
+    // First check if this email is a registered pending/approved user
+    const approvedUsers = JSON.parse(localStorage.getItem('coms_approved_users') || '[]');
+    const pendingUsers = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
+    const approvedUser = approvedUsers.find((u) => u.email === email);
+    const pendingUser = pendingUsers.find((u) => u.email === email);
+
+    if (pendingUser && !approvedUser) {
+      throw new Error('Your account is pending admin approval. Please wait for an administrator to activate your account.');
+    }
+
     const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    const localUser = { uid: `local-${Date.now()}`, email, displayName: name };
-    const localProfile = { uid: localUser.uid, email, displayName: name, role: 'admin', status: 'active', department: 'Administration', phone: '' };
+    const localUser = { uid: approvedUser?.uid || `local-${Date.now()}`, email, displayName: approvedUser?.displayName || name };
+    const localProfile = approvedUser || { uid: localUser.uid, email, displayName: name, role: 'admin', status: 'active', department: 'Administration', phone: '' };
     setUser(localUser);
     setUserProfile(localProfile);
     return localUser;
@@ -137,7 +147,23 @@ export function AuthProvider({ children }) {
       return firebaseUser;
     }
 
-    throw new Error('Registration is only available when Firebase is configured.');
+    // Offline/dev mode: create a local pending user
+    const localProfile = {
+      uid: `local-reg-${Date.now()}`,
+      email,
+      displayName: profileData.displayName,
+      role: profileData.role,
+      department: profileData.department,
+      phone: profileData.phone,
+      status: 'pending',
+    };
+
+    // Store in localStorage so admin can approve it
+    const pending = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
+    pending.push(localProfile);
+    localStorage.setItem('coms_pending_users', JSON.stringify(pending));
+
+    return localProfile;
   }
 
   async function approveUser(uid) {
@@ -147,6 +173,17 @@ export function AuthProvider({ children }) {
         status: 'active',
         updatedAt: serverTimestamp(),
       });
+    } else {
+      const pending = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
+      const approved = pending.find((u) => u.uid === uid);
+      if (approved) {
+        approved.status = 'active';
+        localStorage.setItem('coms_pending_users', JSON.stringify(pending));
+        // Also add to approved users list
+        const approvedUsers = JSON.parse(localStorage.getItem('coms_approved_users') || '[]');
+        approvedUsers.push(approved);
+        localStorage.setItem('coms_approved_users', JSON.stringify(approvedUsers));
+      }
     }
   }
 
@@ -157,6 +194,9 @@ export function AuthProvider({ children }) {
         status: 'rejected',
         updatedAt: serverTimestamp(),
       });
+    } else {
+      const pending = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
+      localStorage.setItem('coms_pending_users', JSON.stringify(pending.filter((u) => u.uid !== uid)));
     }
   }
 
