@@ -111,7 +111,7 @@ function PublicRoute({ children }) {
   return children;
 }
 
-function AppRoutes() {
+function AuthenticatedLayout({ children }) {
   const { user, userProfile, logout } = useAuth();
 
   const mockUser = {
@@ -121,23 +121,16 @@ function AppRoutes() {
     avatar: null,
   };
 
-  const mockNotifications = [
-    { id: 1, message: 'Low stock alert: Jute Bags', time: '5 min ago', read: false },
-    { id: 2, message: 'New collection recorded by Epiphanie', time: '1 hour ago', read: false },
-    { id: 3, message: 'Monthly report is ready', time: '3 hours ago', read: true },
-    { id: 4, message: 'Payment received from Nairobi Coffee Merchants', time: '1 day ago', read: true },
-  ];
+  return (
+    <ProtectedRoute>
+      <DashboardLayout user={mockUser} onLogout={logout} notifications={[]}>
+        {children}
+      </DashboardLayout>
+    </ProtectedRoute>
+  );
+}
 
-  function AuthenticatedLayout({ children }) {
-    return (
-      <ProtectedRoute>
-        <DashboardLayout user={mockUser} onLogout={logout} notifications={mockNotifications}>
-          {children}
-        </DashboardLayout>
-      </ProtectedRoute>
-    );
-  }
-
+function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
