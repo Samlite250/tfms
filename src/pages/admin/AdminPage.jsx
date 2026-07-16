@@ -319,6 +319,7 @@ export default function AdminPage() {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(false);
   const [pendingSearch, setPendingSearch] = useState("");
+  const [pendingViewUser, setPendingViewUser] = useState(null);
 
   const [collectionsSearch, setCollectionsSearch] = useState("");
   const [productionSearch, setProductionSearch] = useState("");
@@ -559,12 +560,16 @@ export default function AdminPage() {
       const q = query(collection(db, "users"), where("status", "==", "pending"));
       const snapshot = await getDocs(q);
       const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setPendingUsers(list);
+      setPendingUsers(list.filter((u) => u.status === "pending"));
     } catch {
       // Offline/dev mode: read from localStorage
       try {
         const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
-        setPendingUsers(pending.map((u) => ({ id: u.uid, ...u })));
+        setPendingUsers(
+          pending
+            .filter((u) => u.status === "pending")
+            .map((u) => ({ id: u.uid, ...u }))
+        );
       } catch {
         setPendingUsers([]);
       }
@@ -1940,6 +1945,14 @@ export default function AdminPage() {
                         <div className="flex items-center gap-2 shrink-0">
                           <Button
                             size="sm"
+                            variant="ghost"
+                            icon={Eye}
+                            onClick={() => setPendingViewUser(pendingUser)}
+                          >
+                            View
+                          </Button>
+                          <Button
+                            size="sm"
                             icon={UserCheck}
                             onClick={() => handleApproveUser(pendingUser)}
                             className="bg-success text-white hover:bg-success/90"
@@ -2333,6 +2346,98 @@ export default function AdminPage() {
             <span className="font-semibold text-text-primary">{deleteUser.name}</span> ({deleteUser.email})?
             This action cannot be undone.
           </p>
+        )}
+      </Modal>
+
+      {/* Pending User Detail Modal */}
+      <Modal
+        isOpen={!!pendingViewUser}
+        onClose={() => setPendingViewUser(null)}
+        title="Registration Details"
+        size="lg"
+        footer={
+          pendingViewUser && (
+            <>
+              <Button variant="ghost" onClick={() => setPendingViewUser(null)}>
+                Close
+              </Button>
+              <Button
+                variant="danger"
+                icon={UserX}
+                onClick={() => { handleRejectUser(pendingViewUser); setPendingViewUser(null); }}
+              >
+                Reject
+              </Button>
+              <Button
+                icon={UserCheck}
+                className="bg-success text-white hover:bg-success/90"
+                onClick={() => { handleApproveUser(pendingViewUser); setPendingViewUser(null); }}
+              >
+                Approve
+              </Button>
+            </>
+          )
+        }
+      >
+        {pendingViewUser && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+                <span className="text-xl font-bold text-warning">
+                  {(pendingViewUser.displayName || pendingViewUser.email || "?")
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-text-primary">{pendingViewUser.displayName || "No Name"}</h3>
+                <p className="text-sm text-text-secondary">{pendingViewUser.email}</p>
+                <Badge variant="warning" className="mt-1">Pending Approval</Badge>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Briefcase size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Role</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">
+                  {ROLE_LABELS[pendingViewUser.role] || pendingViewUser.role || "Not specified"}
+                </p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Building2 size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Department</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">
+                  {pendingViewUser.department || "Not specified"}
+                </p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Phone size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Phone</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">
+                  {pendingViewUser.phone || "Not provided"}
+                </p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Mail size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Email</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">
+                  {pendingViewUser.email}
+                </p>
+              </div>
+            </div>
+          </div>
         )}
       </Modal>
     </motion.div>

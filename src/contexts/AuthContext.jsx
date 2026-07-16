@@ -178,11 +178,10 @@ export function AuthProvider({ children }) {
       const approved = pending.find((u) => u.uid === uid);
       if (approved) {
         approved.status = 'active';
-        localStorage.setItem('coms_pending_users', JSON.stringify(pending));
-        // Also add to approved users list
         const approvedUsers = JSON.parse(localStorage.getItem('coms_approved_users') || '[]');
         approvedUsers.push(approved);
         localStorage.setItem('coms_approved_users', JSON.stringify(approvedUsers));
+        localStorage.setItem('coms_pending_users', JSON.stringify(pending.filter((u) => u.uid !== uid)));
       }
     }
   }
