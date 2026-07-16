@@ -72,7 +72,7 @@ export default function useRealtimeCollection(collectionName, options = {}) {
 
     const timeout = setTimeout(() => {
       activateOfflineFallback('Firestore connection timed out (no real Firebase configured)');
-    }, 3000);
+    }, 12000);
 
     try {
       let q = collection(db, collectionName);
