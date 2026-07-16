@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { sendMessageNotification } from '../services/emailService';
 
 const MessagesContext = createContext(null);
 
@@ -34,6 +35,17 @@ export function MessagesProvider({ children }) {
       ...msg,
     };
     setMessages((prev) => [newMsg, ...prev]);
+    if (newMsg.toEmail) {
+      sendMessageNotification({
+        to: newMsg.toEmail,
+        recipientName: newMsg.to,
+        senderName: newMsg.from,
+        subject: newMsg.subject,
+        body: newMsg.body,
+      }).then((result) => {
+        if (!result?.success) console.warn('Message email notification failed:', result?.error);
+      });
+    }
     return newMsg;
   }, []);
 

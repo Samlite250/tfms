@@ -1,11 +1,16 @@
 import express from 'express';
 import cors from 'cors';
+import { loadEnvFile } from 'node:process';
 import {
     sendRegistrationConfirmation,
     sendAccountApproved,
     sendAccountRejected,
     sendAdminAlert
 } from './email.js';
+
+// Vite reads .env itself, while this standalone Node server does not.
+// Load it only for local development; Vercel injects production variables.
+try { loadEnvFile('.env'); } catch { /* .env is optional */ }
 
 const app = express();
 app.use(cors());

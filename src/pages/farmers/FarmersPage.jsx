@@ -75,15 +75,19 @@ function FarmersPage() {
   const [centerFilter, setCenterFilter] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, farmer: null });
 
-  // Load pending (registered but not yet approved) farmers
+  // Keep pending registrations in sync so a newly registered farmer appears
+  // immediately, without requiring the administrator to refresh the page.
   useEffect(() => {
-    async function loadPendingFarmers() {
+    let unsubscribe;
+    async function subscribeToPendingFarmers() {
       try {
-        const { collection: col, getDocs: gd } = await import("firebase/firestore");
+        const { collection: col, onSnapshot } = await import("firebase/firestore");
         const { db } = await import("../../firebase/config");
-        const snapshot = await gd(col(db, "pending_farmers"));
-        const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }));
-        setPendingFarmersList(list);
+        unsubscribe = onSnapshot(
+          col(db, "pending_farmers"),
+          (snapshot) => setPendingFarmersList(snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }))),
+          () => setPendingFarmersList([])
+        );
       } catch {
         // Offline fallback
         try {
@@ -94,7 +98,8 @@ function FarmersPage() {
         }
       }
     }
-    loadPendingFarmers();
+    subscribeToPendingFarmers();
+    return () => unsubscribe?.();
   }, []);
 
   // Merge: pending farmers at top, deduplicated with active list

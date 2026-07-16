@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { type, to, name, role, user } = req.body;
+    const { type, to, name, role, user, recipientName, senderName, subject, body } = req.body;
     console.log(`Email handler triggered: type=${type}, to=${to}`);
 
     if (!process.env.EMAIL_GMAIL_USER || !process.env.EMAIL_GMAIL_APP_PASSWORD) {
@@ -158,6 +158,22 @@ export default async function handler(req, res) {
                 );
                 break;
             }
+
+            case 'message_notification':
+                if (!to || !subject || !body) {
+                    return res.status(400).json({ error: 'Recipient, subject, and message are required' });
+                }
+                await send(
+                    `COMS: ${subject}`,
+                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+                      <h2 style="color: #1e3a8a; margin-top: 0;">New COMS Message</h2>
+                      <p style="color: #334155;">Hello ${recipientName || 'there'},</p>
+                      <p style="color: #334155;"><strong>${senderName || 'A COMS user'}</strong> sent you a message:</p>
+                      <div style="white-space: pre-wrap; margin: 16px 0; padding: 16px; background: #f8fafc; border-radius: 8px; color: #334155;">${body}</div>
+                      <p style="font-size: 12px; color: #64748b;">Please sign in to COMS to reply.</p>
+                    </div>`
+                );
+                break;
 
             default:
                 return res.status(400).json({ error: `Unknown email type: ${type}` });

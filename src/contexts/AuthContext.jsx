@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
@@ -29,6 +29,10 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  // A newly registered user is briefly authenticated while their pending
+  // profile is being created. Do not let the auth observer sign them out in
+  // the middle of that transaction.
+  const registrationInProgressRef = useRef(false);
 
   useEffect(() => {
     // Hold a ref to unsubscribe so we can clean up when the component unmounts
@@ -38,6 +42,7 @@ export function AuthProvider({ children }) {
       if (firebaseAvailable) {
         import('firebase/auth').then(({ onAuthStateChanged }) => {
           unsubFn = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (registrationInProgressRef.current) return;
             if (firebaseUser) {
               try {
                 const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
@@ -133,65 +138,64 @@ export function AuthProvider({ children }) {
 
   async function register(email, password, profileData) {
     if (firebaseAvailable) {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
+      registrationInProgressRef.current = true;
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const firebaseUser = userCredential.user;
 
-      await updateProfile(firebaseUser, { displayName: profileData.displayName });
+        await updateProfile(firebaseUser, { displayName: profileData.displayName });
 
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
-        email: firebaseUser.email,
-        displayName: profileData.displayName,
-        role: profileData.role,
-        department: profileData.department,
-        phone: profileData.phone,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
-      if (profileData.role === 'farmer') {
-        await setDoc(doc(db, 'pending_farmers', firebaseUser.uid), {
-          userId: firebaseUser.uid,
+        await setDoc(doc(db, 'users', firebaseUser.uid), {
           email: firebaseUser.email,
-          name: profileData.displayName,
-          phone: profileData.phone,
-          district: profileData.district || '',
-          sector: profileData.sector || '',
-          cell: profileData.cell || '',
-          village: profileData.village || '',
-          province: 'Southern',
-          country: 'Rwanda',
-          farmSize: profileData.farmSize || 0,
-          coffeeVariety: profileData.coffeeVariety || '',
-          collectionCenter: profileData.collectionCenter || '',
-          totalDeliveries: 0,
-          totalWeight: 0,
-          status: 'Pending',
-          joinedDate: new Date().toISOString().split('T')[0],
-          createdAt: serverTimestamp(),
-        });
-      }
-
-      // Trigger Email Notification
-      try {
-        await sendRegistrationConfirmation(firebaseUser.email, profileData.displayName);
-      } catch (err) {
-        console.warn("Failed to send signup confirmation email:", err);
-      }
-
-      try {
-        await sendAdminAlert({
           displayName: profileData.displayName,
-          email: firebaseUser.email,
           role: profileData.role,
+          department: profileData.department,
           phone: profileData.phone,
+          status: 'pending',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
-      } catch (err) {
-        console.warn("Failed to send admin signup alert email:", err);
-      }
 
-      await auth.signOut();
-      return firebaseUser;
+        if (profileData.role === 'farmer') {
+          await setDoc(doc(db, 'pending_farmers', firebaseUser.uid), {
+            userId: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: profileData.displayName,
+            phone: profileData.phone,
+            district: profileData.district || '',
+            sector: profileData.sector || '',
+            cell: profileData.cell || '',
+            village: profileData.village || '',
+            province: 'Southern',
+            country: 'Rwanda',
+            farmSize: profileData.farmSize || 0,
+            coffeeVariety: profileData.coffeeVariety || '',
+            collectionCenter: profileData.collectionCenter || '',
+            totalDeliveries: 0,
+            totalWeight: 0,
+            status: 'Pending',
+            joinedDate: new Date().toISOString().split('T')[0],
+            createdAt: serverTimestamp(),
+          });
+        }
+
+        try {
+          await sendRegistrationConfirmation(firebaseUser.email, profileData.displayName);
+          await sendAdminAlert({
+            displayName: profileData.displayName,
+            email: firebaseUser.email,
+            role: profileData.role,
+            phone: profileData.phone,
+          });
+        } catch (err) {
+          console.warn("Registration email notification failed:", err);
+        }
+
+        await auth.signOut();
+        return firebaseUser;
+      } finally {
+        registrationInProgressRef.current = false;
+      }
     }
 
     // Offline/dev mode: create a local pending user

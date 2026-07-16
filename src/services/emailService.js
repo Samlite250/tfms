@@ -35,3 +35,7 @@ export async function sendAccountRejected(to, name) {
 export async function sendAdminAlert(user) {
     return triggerEmail({ type: 'admin_alert', user });
 }
+
+export async function sendMessageNotification({ to, recipientName, senderName, subject, body }) {
+    return triggerEmail({ type: 'message_notification', to, recipientName, senderName, subject, body });
+}
