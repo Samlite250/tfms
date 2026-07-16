@@ -65,22 +65,6 @@ function FarmersPage() {
   const [centerFilter, setCenterFilter] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, farmer: null });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <Loader2 size={36} className="animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <p className="text-danger text-sm">Failed to load farmers: {error}</p>
-      </div>
-    );
-  }
-
   const filteredFarmers = useMemo(() => {
     return farmersList.filter((f) => {
       const matchesSearch =
@@ -106,6 +90,22 @@ function FarmersPage() {
     }).length;
     return { total, active, inactive, newThisMonth };
   }, [farmersList]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <Loader2 size={36} className="animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="text-danger text-sm">Failed to load farmers: {error}</p>
+      </div>
+    );
+  }
 
   const statCards = [
     { label: "Total Farmers", value: stats.total, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
