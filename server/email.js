@@ -66,7 +66,7 @@ export async function sendAccountApproved(to, name, role) {
         <p style="margin: 0; font-weight: 600; color: #15803d;">Role: ${formattedRole}</p>
         <p style="margin: 4px 0 0 0; font-weight: 600; color: #15803d;">Status: Active / Approved</p>
       </div>
-      <a href="http://localhost:3000/login" style="display: inline-block; padding: 12px 24px; background-color: #2b6cb0; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
+      <a href="https://mahembefactory.vercel.app/login" style="display: inline-block; padding: 12px 24px; background-color: #2b6cb0; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
         Go to Login Portal
       </a>
       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
@@ -126,7 +126,7 @@ export async function sendAdminAlert(adminEmail, user) {
           <td style="padding: 10px 0; color: #0f172a;">${user.phone || '—'}</td>
         </tr>
       </table>
-      <a href="http://localhost:3000/admin" style="display: inline-block; padding: 12px 24px; background-color: #2b6cb0; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
+      <a href="https://mahembefactory.vercel.app/admin" style="display: inline-block; padding: 12px 24px; background-color: #2b6cb0; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
         Review Pending Approvals
       </a>
       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
