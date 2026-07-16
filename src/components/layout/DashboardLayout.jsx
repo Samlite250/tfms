@@ -44,9 +44,7 @@ export default function DashboardLayout({ children, user, onLogout, notification
   const permissions = ROLE_PERMISSIONS[role] || [];
   const userEmail = user?.email || '';
 
-  const unreadMsgCount = role === 'admin'
-    ? messages.filter((m) => m.to === 'admin' && !m.read).length
-    : messages.filter((m) => m.toEmail === userEmail && !m.read).length;
+  const unreadMsgCount = messages.filter((m) => m.toEmail === userEmail && !m.read).length;
 
   const menuItems = allMenuItems
     .filter((item) => permissions.includes(item.permission))

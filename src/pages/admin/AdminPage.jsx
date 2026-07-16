@@ -327,8 +327,10 @@ export default function AdminPage() {
   const [farmersSearch, setFarmersSearch] = useState("");
 
   const { success, error: toastError, info } = useToast();
-  const { approveUser, rejectUser: rejectUserAuth } = useAuth();
+  const { approveUser, rejectUser: rejectUserAuth, userProfile } = useAuth();
   const { messages, sendMessage, replyToMessage, markAsRead, deleteMessage } = useMessages();
+
+  const adminEmail = userProfile?.email || "admin@mahembe-coffee.rw";
 
   const [msgActiveTab, setMsgActiveTab] = useState("inbox");
   const [msgSelected, setMsgSelected] = useState(null);
@@ -836,21 +838,21 @@ export default function AdminPage() {
   };
 
   const unreadMessages = useMemo(
-    () => messages.filter((m) => m.to === "admin" && !m.read).length,
-    [messages]
+    () => messages.filter((m) => m.toEmail === adminEmail && !m.read).length,
+    [messages, adminEmail]
   );
 
   const msgInbox = useMemo(() => {
     return messages
-      .filter((m) => m.to === "admin")
+      .filter((m) => m.toEmail === adminEmail)
       .filter((m) => !msgSearch || m.subject.toLowerCase().includes(msgSearch.toLowerCase()) || m.from.toLowerCase().includes(msgSearch.toLowerCase()));
-  }, [messages, msgSearch]);
+  }, [messages, msgSearch, adminEmail]);
 
   const msgSent = useMemo(() => {
     return messages
-      .filter((m) => m.fromEmail === "admin@mahembe-coffee.rw")
+      .filter((m) => m.fromEmail === adminEmail)
       .filter((m) => !msgSearch || m.subject.toLowerCase().includes(msgSearch.toLowerCase()));
-  }, [messages, msgSearch]);
+  }, [messages, msgSearch, adminEmail]);
 
   const msgCurrentList = msgActiveTab === "inbox" ? msgInbox : msgSent;
 
@@ -879,8 +881,8 @@ export default function AdminPage() {
   function msgSendReply() {
     if (!msgReplyText.trim() || !msgSelected) return;
     replyToMessage(msgSelected.id, {
-      from: "Jean-Paul Habimana",
-      fromEmail: "admin@mahembe-coffee.rw",
+      from: userProfile?.displayName || "Admin",
+      fromEmail: adminEmail,
       body: msgReplyText.trim(),
     });
     setMsgSelected((prev) => ({
@@ -888,7 +890,7 @@ export default function AdminPage() {
       read: true,
       replies: [
         ...(prev.replies || []),
-        { id: `reply-${Date.now()}`, from: "Jean-Paul Habimana", fromEmail: "admin@mahembe-coffee.rw", body: msgReplyText.trim(), timestamp: new Date().toISOString() },
+        { id: `reply-${Date.now()}`, from: userProfile?.displayName || "Admin", fromEmail: adminEmail, body: msgReplyText.trim(), timestamp: new Date().toISOString() },
       ],
     }));
     setMsgReplyText("");
@@ -898,8 +900,8 @@ export default function AdminPage() {
     const recipient = msgReplyTarget || msgComposeRecipient;
     if (!msgComposeSubject.trim() || !msgComposeBody.trim() || !recipient) return;
     sendMessage({
-      from: "Jean-Paul Habimana",
-      fromEmail: "admin@mahembe-coffee.rw",
+      from: userProfile?.displayName || "Admin",
+      fromEmail: adminEmail,
       fromRole: "admin",
       to: recipient.from || recipient.name,
       toEmail: recipient.fromEmail || recipient.email,
