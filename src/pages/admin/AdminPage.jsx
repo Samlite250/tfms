@@ -530,7 +530,17 @@ export default function AdminPage() {
 
   async function handleDeleteFarmer() {
     try {
-      await removeFarmer(deleteFarmer.id);
+      const farmerId = deleteFarmer.id;
+      await removeFarmer(farmerId);
+
+      try {
+        const { doc: firestoreDoc, deleteDoc: firestoreDeleteDoc } = await import("firebase/firestore");
+        const { db } = await import("../../firebase/config");
+        await firestoreDeleteDoc(firestoreDoc(db, "users", farmerId));
+      } catch (err) {
+        console.warn("Failed to delete corresponding user account:", err);
+      }
+
       success(`Farmer "${deleteFarmer.name}" deleted successfully`);
     } catch (err) {
       toastError(`Failed to delete farmer "${deleteFarmer.name}". ${err.message}`);

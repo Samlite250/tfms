@@ -87,7 +87,17 @@ function FarmerProfilePage() {
 
   async function handleDelete() {
     try {
-      await removeFarmer(farmer.id);
+      const farmerId = farmer.id;
+      await removeFarmer(farmerId);
+
+      try {
+        const { doc: firestoreDoc, deleteDoc: firestoreDeleteDoc } = await import("firebase/firestore");
+        const { db } = await import("../../firebase/config");
+        await firestoreDeleteDoc(firestoreDoc(db, "users", farmerId));
+      } catch (err) {
+        console.warn("Failed to delete corresponding user account:", err);
+      }
+
       success(`Farmer ${farmer.name} has been removed.`);
       setDeleteModal(false);
       navigate("/farmers");

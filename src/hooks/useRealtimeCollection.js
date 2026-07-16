@@ -11,6 +11,8 @@ import {
   orderBy,
   serverTimestamp,
   getDocs,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 
@@ -44,7 +46,18 @@ export default function useRealtimeCollection(collectionName, options = {}) {
       settled = true;
       console.warn(`Offline mode for ${collectionName}:`, reason);
       const stored = loadSeedFromStorage(collectionName);
-      const items = stored && stored.length > 0 ? stored : (seedData || []);
+      const seededKey = `coms_seeded_${collectionName}`;
+      const isSeeded = localStorage.getItem(seededKey) === "true";
+      let items;
+      if (stored && stored.length > 0) {
+        items = stored;
+        localStorage.setItem(seededKey, "true");
+      } else if (isSeeded) {
+        items = [];
+      } else {
+        items = seedData || [];
+        localStorage.setItem(seededKey, "true");
+      }
       saveToStorage(collectionName, items);
       setData(items);
       setLoading(false);
@@ -78,19 +91,39 @@ export default function useRealtimeCollection(collectionName, options = {}) {
 
           const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-          if (items.length === 0 && seedData && seedData.length > 0 && !seededRef.current) {
+          if (items.length > 0) {
+            try {
+              localStorage.setItem(`coms_seeded_${collectionName}`, "true");
+              const statusDocRef = doc(db, "system_status", collectionName);
+              getDoc(statusDocRef).then((statusSnap) => {
+                if (!statusSnap.exists() || !statusSnap.data().seeded) {
+                  setDoc(statusDocRef, { seeded: true, updatedAt: serverTimestamp() });
+                }
+              }).catch(() => { });
+            } catch { }
+          } else if (seedData && seedData.length > 0 && !seededRef.current) {
             seededRef.current = true;
             try {
-              for (const item of seedData) {
-                const { id: _id, ...rest } = item;
-                await addDoc(collection(db, collectionName), {
-                  ...rest,
-                  createdAt: serverTimestamp(),
-                  updatedAt: serverTimestamp(),
-                });
+              const statusDocRef = doc(db, "system_status", collectionName);
+              const statusSnap = await getDoc(statusDocRef);
+              if (statusSnap.exists() && statusSnap.data().seeded) {
+                console.log(`Collection ${collectionName} was already seeded online.`);
+                localStorage.setItem(`coms_seeded_${collectionName}`, "true");
+              } else {
+                console.log(`Seeding ${collectionName} online...`);
+                for (const item of seedData) {
+                  const { id: _id, ...rest } = item;
+                  await addDoc(collection(db, collectionName), {
+                    ...rest,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                  });
+                }
+                await setDoc(statusDocRef, { seeded: true, updatedAt: serverTimestamp() });
+                localStorage.setItem(`coms_seeded_${collectionName}`, "true");
               }
             } catch (err) {
-              console.error(`Error seeding ${collectionName}:`, err);
+              console.error(`Error checking/seeding ${collectionName}:`, err);
             }
           }
 

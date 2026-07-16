@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { MessagesProvider } from './contexts/MessagesContext';
@@ -185,6 +186,49 @@ function AppRoutes() {
 }
 
 export default function App() {
+  useEffect(() => {
+    try {
+      const cleanedKey = 'coms_dummy_farmers_cleaned';
+      if (localStorage.getItem(cleanedKey) !== 'true') {
+        console.log("Purging dummy farmers from local storage...");
+
+        // Clean active farmers
+        const farmersRaw = localStorage.getItem('coms_collection_farmers');
+        if (farmersRaw) {
+          const farmers = JSON.parse(farmersRaw);
+          const cleanedFarmers = farmers.filter(f => !f.id.startsWith('FRM-') && !f.userId?.startsWith('FRM-'));
+          localStorage.setItem('coms_collection_farmers', JSON.stringify(cleanedFarmers));
+        }
+
+        // Clean pending farmers
+        const pendingFarmersRaw = localStorage.getItem('coms_pending_farmers');
+        if (pendingFarmersRaw) {
+          const pendingFarmers = JSON.parse(pendingFarmersRaw);
+          const cleanedPending = pendingFarmers.filter(f => !f.id.startsWith('FRM-') && !f.userId?.startsWith('FRM-'));
+          localStorage.setItem('coms_pending_farmers', JSON.stringify(cleanedPending));
+        }
+
+        // Clean users matching dummy farmers
+        // Note: dummy farmers don't have registered accounts in user list in seed, but let's clear them just in case
+        const usersRaw = localStorage.getItem('coms_collection_users');
+        if (usersRaw) {
+          const users = JSON.parse(usersRaw);
+          const cleanedUsers = users.filter(u => !u.id.startsWith('FRM-') && !u.uid?.startsWith('FRM-'));
+          localStorage.setItem('coms_collection_users', JSON.stringify(cleanedUsers));
+        }
+
+        // Mark as seeded so useRealtimeCollection doesn't re-seed
+        localStorage.setItem('coms_seeded_farmers', 'true');
+
+        // Mark as cleaned
+        localStorage.setItem(cleanedKey, 'true');
+        console.log("Dummy farmers purge complete.");
+      }
+    } catch (e) {
+      console.error("Local storage dummy farmers cleanup failed:", e);
+    }
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
