@@ -587,6 +587,31 @@ export default function AdminPage() {
     setPendingLoading(true);
     let unsubscribe = null;
 
+    // In demo/offline mode, skip Firestore entirely and read from localStorage
+    const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
+    const isDemo = !apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20;
+    if (isDemo) {
+      try {
+        const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
+        const pendingFarmers = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+        const usersList = pending
+          .filter((u) => u.status === "pending")
+          .map((u) => ({ id: u.uid || u.id, ...u }));
+        const mergedList = usersList.map((u) => {
+          if (u.role === "farmer") {
+            const fp = pendingFarmers.find((f) => f.userId === u.id || f.id === u.id);
+            if (fp) return { ...u, ...fp };
+          }
+          return u;
+        });
+        setPendingUsers(mergedList);
+      } catch {
+        setPendingUsers([]);
+      }
+      setPendingLoading(false);
+      return;
+    }
+
     import("firebase/firestore").then(({ collection, query, where, onSnapshot, doc, getDoc }) =>
       import("../../firebase/config").then(({ db }) => {
         const q = query(collection(db, "users"), where("status", "==", "pending"));
@@ -1037,6 +1062,20 @@ export default function AdminPage() {
   // Real-time listener for pending farmers (shown in Farmers tab with Pending badge)
   useEffect(() => {
     let unsubscribe = null;
+
+    // In demo/offline mode, skip Firestore and read from localStorage immediately
+    const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
+    const isDemo = !apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20;
+    if (isDemo) {
+      try {
+        const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+        setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
+      } catch {
+        setPendingFarmersList([]);
+      }
+      return;
+    }
+
     import("firebase/firestore").then(({ collection: col, onSnapshot: onSnap }) =>
       import("../../firebase/config").then(({ db: firestoreDb }) => {
         unsubscribe = onSnap(

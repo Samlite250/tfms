@@ -41,10 +41,10 @@ export default function useRealtimeCollection(collectionName, options = {}) {
   useEffect(() => {
     let settled = false;
 
-    const useOfflineFallback = (reason) => {
+    const useOfflineFallback = (reason, silent = false) => {
       if (settled) return;
       settled = true;
-      console.warn(`Offline mode for ${collectionName}:`, reason);
+      if (!silent) console.warn(`Offline mode for ${collectionName}:`, reason);
       const stored = loadSeedFromStorage(collectionName);
       const seededKey = `coms_seeded_${collectionName}`;
       const isSeeded = localStorage.getItem(seededKey) === "true";
@@ -62,6 +62,13 @@ export default function useRealtimeCollection(collectionName, options = {}) {
       setData(items);
       setLoading(false);
     };
+
+    // Skip Firestore entirely when running with a demo/placeholder API key
+    const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
+    if (!apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20) {
+      useOfflineFallback("demo API key — using localStorage", true);
+      return;
+    }
 
     const timeout = setTimeout(() => {
       useOfflineFallback('Firestore connection timed out (no real Firebase configured)');
