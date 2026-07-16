@@ -48,7 +48,7 @@ const MOCK_COLLECTIONS = {
     pricePerKg: 850,
     amount: 38675,
     collectedBy: "Michael Otieno",
-    qualityNotes: "Excellent leaf quality with fine tips. Well processed, good moisture content at 12%. Uniform leaf size indicating careful plucking during optimal flush period.",
+    qualityNotes: "Excellent cherry quality with fine beans. Well processed, good moisture content at 12%. Uniform bean size indicating careful picking during optimal harvest period.",
     status: "Verified",
   },
   "COL-0002": {
@@ -65,7 +65,7 @@ const MOCK_COLLECTIONS = {
     pricePerKg: 750,
     amount: 46500,
     collectedBy: "Patricia Wambui",
-    qualityNotes: "Good quality CTC processed tea. Consistent granule size. Moisture content within acceptable range.",
+    qualityNotes: "Good quality washed coffee. Consistent bean size. Moisture content within acceptable range.",
     status: "Pending",
   },
 };
@@ -84,7 +84,7 @@ const DEFAULT_COLLECTION = {
   pricePerKg: 850,
   amount: 38675,
   collectedBy: "Michael Otieno",
-  qualityNotes: "Excellent leaf quality with fine tips. Well processed, good moisture content at 12%. Uniform leaf size indicating careful plucking during optimal flush period.",
+  qualityNotes: "Excellent cherry quality with fine beans. Well processed, good moisture content at 12%. Uniform bean size indicating careful picking during optimal harvest period.",
   status: "Verified",
 };
 
@@ -177,8 +177,8 @@ function CollectionDetailPage() {
                   <Leaf size={28} className="text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Tea Collection Receipt</h2>
-                  <p className="text-sm text-gray-500">Tea Factory Management System</p>
+                  <h2 className="text-xl font-bold text-gray-900">Coffee Collection Receipt</h2>
+                  <p className="text-sm text-gray-500">Coffee Factory Management System</p>
                 </div>
               </div>
               <div className="text-right">
@@ -232,7 +232,7 @@ function CollectionDetailPage() {
             <Card padding="md" className="print:shadow-none print:border print:border-gray-200">
               <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
                 <Tag size={16} className="text-primary" />
-                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Tea Info</h3>
+                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Coffee Info</h3>
               </div>
               <DetailRow icon={Weight} label="Weight" value={`${collection.weight.toFixed(1)} kg`} iconColor="text-primary" />
               <div className="flex items-start gap-3 py-2.5">
@@ -240,7 +240,7 @@ function CollectionDetailPage() {
                   <Tag size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 mb-0.5">Tea Grade</p>
+                  <p className="text-xs text-gray-500 mb-0.5">Coffee Grade</p>
                   <Badge variant={gradeBadgeVariant[collection.grade]} dot>{collection.grade}</Badge>
                 </div>
               </div>

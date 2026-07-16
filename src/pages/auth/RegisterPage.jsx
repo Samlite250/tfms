@@ -114,10 +114,10 @@ export default function RegisterPage() {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/15 rounded-2xl backdrop-blur-sm mb-8">
               <Leaf className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-4xl font-bold mb-4 tracking-tight">Join TFMS</h1>
+            <h1 className="text-4xl font-bold mb-4 tracking-tight">Join COMS</h1>
             <div className="w-16 h-1 bg-accent rounded-full mx-auto mb-6" />
             <p className="text-lg text-white/80 max-w-sm leading-relaxed">
-              Create your account to access the Tea Factory Management System. Admin approval is required.
+              Create your account to access the Coffee Factory Operation Management System. Admin approval is required.
             </p>
           </motion.div>
 
@@ -129,7 +129,7 @@ export default function RegisterPage() {
           >
             {[
               'Real-time production monitoring',
-              'Tea collection & inventory tracking',
+              'Coffee collection & inventory tracking',
               'Sales & expense management',
               'Detailed analytics & reports',
             ].map((feature) => (
@@ -155,7 +155,7 @@ export default function RegisterPage() {
             <div className="inline-flex items-center justify-center w-10 h-10 bg-primary rounded-xl">
               <Leaf className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-primary">TFMS</span>
+            <span className="text-lg font-bold text-primary">COMS</span>
           </div>
 
           <Link

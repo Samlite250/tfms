@@ -1,5 +1,5 @@
 /**
- * Firebase Seed Script
+ * Firebase Seed Script - COMS
  * Run: node scripts/seed.js
  */
 
@@ -31,41 +31,41 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const USERS = [
-  { email: 'admin@tfms.com', password: 'admin123', displayName: 'James Mwangi', role: 'admin', department: 'Administration', phone: '+254 700 100 200' },
-  { email: 'manager@tfms.com', password: 'manager123', displayName: 'Sarah Wanjiku', role: 'factory_manager', department: 'Administration', phone: '+254 700 100 201' },
-  { email: 'collection@tfms.com', password: 'collection123', displayName: 'Peter Kamau', role: 'collection_officer', department: 'Collection', phone: '+254 700 100 202' },
-  { email: 'production@tfms.com', password: 'production123', displayName: 'Mary Njeri', role: 'production_officer', department: 'Production', phone: '+254 700 100 203' },
-  { email: 'store@tfms.com', password: 'store123', displayName: 'David Omondi', role: 'store_keeper', department: 'Packaging', phone: '+254 700 100 204' },
-  { email: 'accountant@tfms.com', password: 'accountant123', displayName: 'Grace Akinyi', role: 'accountant', department: 'Finance', phone: '+254 700 100 205' },
+  { email: 'admin@mahembe-coffee.rw', password: 'admin123', displayName: 'Jean-Paul Habimana', role: 'admin', department: 'Administration', phone: '+250 788 100 200' },
+  { email: 'manager@mahembe-coffee.rw', password: 'manager123', displayName: 'Marie Claire Uwimana', role: 'factory_manager', department: 'Administration', phone: '+250 788 100 201' },
+  { email: 'collection@mahembe-coffee.rw', password: 'collection123', displayName: 'Epiphanie Mukamana', role: 'collection_officer', department: 'Collection', phone: '+250 788 100 202' },
+  { email: 'production@mahembe-coffee.rw', password: 'production123', displayName: 'Alexis Habimana', role: 'production_officer', department: 'Production', phone: '+250 788 100 203' },
+  { email: 'store@mahembe-coffee.rw', password: 'store123', displayName: 'Anselme Rwegasira', role: 'store_keeper', department: 'Packaging', phone: '+250 788 100 204' },
+  { email: 'accountant@mahembe-coffee.rw', password: 'accountant123', displayName: 'Arsene Nshimiyimana', role: 'accountant', department: 'Finance', phone: '+250 788 100 205' },
 ];
 
 const DEPARTMENTS = [
   { id: 'dept-1', name: 'Administration', description: 'General administration and management', status: 'active' },
-  { id: 'dept-2', name: 'Production', description: 'Tea processing and manufacturing', status: 'active' },
-  { id: 'dept-3', name: 'Collection', description: 'Green leaf collection and farmer relations', status: 'active' },
-  { id: 'dept-4', name: 'Packaging', description: 'Tea packaging and storage', status: 'active' },
+  { id: 'dept-2', name: 'Production', description: 'Coffee processing and manufacturing', status: 'active' },
+  { id: 'dept-3', name: 'Collection', description: 'Coffee cherry collection and farmer relations', status: 'active' },
+  { id: 'dept-4', name: 'Packaging', description: 'Coffee packaging and storage', status: 'active' },
   { id: 'dept-5', name: 'Finance', description: 'Financial management and accounting', status: 'active' },
   { id: 'dept-6', name: 'Quality Control', description: 'Product quality testing and assurance', status: 'active' },
   { id: 'dept-7', name: 'Maintenance', description: 'Equipment and facility maintenance', status: 'active' },
 ];
 
-const TEA_GRADES = [
-  { id: 'grade-1', name: 'PF1', description: 'Premium First Grade', pricePerKg: 850 },
-  { id: 'grade-2', name: 'PF2', description: 'Premium Second Grade', pricePerKg: 750 },
-  { id: 'grade-3', name: 'PF3', description: 'Premium Third Grade', pricePerKg: 650 },
-  { id: 'grade-4', name: 'PD', description: 'Pekoe Dust', pricePerKg: 550 },
-  { id: 'grade-5', name: 'Dust', description: 'Tea Dust', pricePerKg: 450 },
-  { id: 'grade-6', name: 'Fannings', description: 'Tea Fannings', pricePerKg: 500 },
-  { id: 'grade-7', name: 'BOP', description: 'Broken Orange Pekoe', pricePerKg: 700 },
-  { id: 'grade-8', name: 'BOPSM', description: 'Broken Orange Pekoe Superior Medium', pricePerKg: 680 },
+const COFFEE_GRADES = [
+  { id: 'grade-1', name: 'AA', description: 'Screen 17/18 Large Bean', pricePerKg: 1200 },
+  { id: 'grade-2', name: 'AB', description: 'Screen 15/16 Medium Bean', pricePerKg: 1000 },
+  { id: 'grade-3', name: 'PB', description: 'Peaberry', pricePerKg: 1100 },
+  { id: 'grade-4', name: 'C', description: 'Small Bean', pricePerKg: 800 },
+  { id: 'grade-5', name: 'TT', description: 'Light Beans from AA/AB', pricePerKg: 700 },
+  { id: 'grade-6', name: 'T', description: 'Smallest Beans', pricePerKg: 600 },
+  { id: 'grade-7', name: 'E', description: 'Elephant Bean', pricePerKg: 900 },
+  { id: 'grade-8', name: 'FNGS', description: 'Fines', pricePerKg: 500 },
 ];
 
 const COLLECTION_CENTERS = [
-  { id: 'center-1', name: 'Central Collection Point', location: 'Kericho Town', manager: 'John Kiprop', status: 'active', farmerCount: 120 },
-  { id: 'center-2', name: 'Northern Hub', location: 'Nandi Hills', manager: 'Alice Chebet', status: 'active', farmerCount: 85 },
-  { id: 'center-3', name: 'Southern Hub', location: 'Kisii Town', manager: 'Robert Onyango', status: 'active', farmerCount: 95 },
-  { id: 'center-4', name: 'Eastern Hub', location: 'Kakamega Town', manager: 'Jane Wambui', status: 'active', farmerCount: 70 },
-  { id: 'center-5', name: 'Western Hub', location: 'Bungoma Town', manager: 'Samuel Wekesa', status: 'inactive', farmerCount: 45 },
+  { id: 'center-1', name: 'Mahembe Central', location: 'Muhanga Town', manager: 'Jean-Paul Habimana', status: 'active', farmerCount: 120 },
+  { id: 'center-2', name: 'Muhanga Hub', location: 'Muhanga District', manager: 'Epiphanie Mukamana', status: 'active', farmerCount: 85 },
+  { id: 'center-3', name: 'Ruyanza Collection Point', location: 'Ruyanza Sector', manager: 'Emmanuel Ndayisaba', status: 'active', farmerCount: 95 },
+  { id: 'center-4', name: 'Kabuga Station', location: 'Kabuga Sector', manager: 'Jean Mugabo', status: 'active', farmerCount: 70 },
+  { id: 'center-5', name: 'Nyamagana Center', location: 'Nyamagana Sector', manager: 'Theogene Bigirimana', status: 'inactive', farmerCount: 45 },
 ];
 
 function waitForAuth(auth) {
@@ -78,7 +78,7 @@ function waitForAuth(auth) {
 }
 
 async function seed() {
-  console.log('🌱 Starting TFMS seed...\n');
+  console.log('🌱 Starting COMS seed...\n');
 
   // Step 1: Create Auth users
   for (const userData of USERS) {
@@ -100,11 +100,11 @@ async function seed() {
   // Step 2: Sign in as admin to write Firestore data
   console.log('\n🔐 Signing in as admin...');
   try {
-    await signInWithEmailAndPassword(auth, 'admin@tfms.com', 'admin123');
+    await signInWithEmailAndPassword(auth, 'admin@mahembe-coffee.rw', 'admin123');
     console.log('  ✅ Signed in as admin');
   } catch (error) {
     console.error(`  ❌ Sign-in failed: ${error.message}`);
-    console.log('  ⚠️ Skipping Firestore seed. Please ensure admin@tfms.com exists in Firebase Auth.');
+    console.log('  ⚠️ Skipping Firestore seed. Please ensure admin@mahembe-coffee.rw exists in Firebase Auth.');
     return;
   }
 
@@ -150,10 +150,10 @@ async function seed() {
   }
   await batch1.commit();
 
-  // Step 6: Write tea grades
-  console.log('\n🍃 Seeding tea grades...');
+  // Step 6: Write coffee grades
+  console.log('\n☕ Seeding coffee grades...');
   const batch2 = writeBatch(db);
-  for (const grade of TEA_GRADES) {
+  for (const grade of COFFEE_GRADES) {
     batch2.set(doc(db, 'settings', `grade-${grade.id}`), { ...grade, type: 'grade', createdAt: serverTimestamp() });
     console.log(`  ✅ ${grade.name} - ${grade.description}`);
   }
@@ -171,17 +171,17 @@ async function seed() {
   // Step 8: Write factory settings
   console.log('\n⚙️ Seeding factory settings...');
   await setDoc(doc(db, 'settings', 'factory'), {
-    name: 'Kericho Premium Tea Factory',
-    registrationNumber: 'TF-2024-001',
-    address: 'Kericho-Nakuru Highway',
-    city: 'Kericho',
-    province: 'Kericho County',
-    country: 'Kenya',
-    phone: '+254 52 22000',
-    email: 'info@kerichotea.co.ke',
-    website: 'www.kerichotea.co.ke',
-    currency: 'KES',
-    timezone: 'Africa/Nairobi',
+    name: 'Mahembe Coffee Factory',
+    registrationNumber: 'COMS-2024-001',
+    address: 'Muhanga-Nyanza Road',
+    city: 'Muhanga',
+    province: 'Southern Province',
+    country: 'Rwanda',
+    phone: '+250 788 500 000',
+    email: 'info@mahembe-coffee.rw',
+    website: 'www.mahembe-coffee.rw',
+    currency: 'RWF',
+    timezone: 'Africa/Kigali',
     workingHoursStart: '06:00',
     workingHoursEnd: '18:00',
     createdAt: serverTimestamp(),
@@ -194,12 +194,12 @@ async function seed() {
 
   console.log('\n🎉 Seed complete!');
   console.log('\nYou can now log in with:');
-  console.log('  Admin:       admin@tfms.com / admin123');
-  console.log('  Manager:     manager@tfms.com / manager123');
-  console.log('  Collection:  collection@tfms.com / collection123');
-  console.log('  Production:  production@tfms.com / production123');
-  console.log('  Store:       store@tfms.com / store123');
-  console.log('  Accountant:  accountant@tfms.com / accountant123');
+  console.log('  Admin:       admin@mahembe-coffee.rw / admin123');
+  console.log('  Manager:     manager@mahembe-coffee.rw / manager123');
+  console.log('  Collection:  collection@mahembe-coffee.rw / collection123');
+  console.log('  Production:  production@mahembe-coffee.rw / production123');
+  console.log('  Store:       store@mahembe-coffee.rw / store123');
+  console.log('  Accountant:  accountant@mahembe-coffee.rw / accountant123');
 }
 
 seed().catch(console.error);

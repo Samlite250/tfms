@@ -31,23 +31,23 @@ const STATUS_VARIANT = {
 };
 
 const mockEmployees = [
-  { id: "EMP001", firstName: "Kamal", lastName: "Perera", department: "Production", position: "Factory Supervisor", phone: "0771234567", email: "kamal.p@tfms.com", status: "Active", joinDate: "2020-03-15", gender: "Male", employmentType: "Full-time" },
-  { id: "EMP002", firstName: "Nimal", lastName: "Silva", department: "Collection", position: "Collection Officer", phone: "0772345678", email: "nimal.s@tfms.com", status: "Active", joinDate: "2021-06-01", gender: "Male", employmentType: "Full-time" },
-  { id: "EMP003", firstName: "Sunil", lastName: "Fernando", department: "Production", position: "Machine Operator", phone: "0773456789", email: "sunil.f@tfms.com", status: "Active", joinDate: "2019-11-20", gender: "Male", employmentType: "Full-time" },
-  { id: "EMP004", firstName: "Anita", lastName: "Jayawardena", department: "Administration", position: "HR Manager", phone: "0774567890", email: "anita.j@tfms.com", status: "Active", joinDate: "2018-01-10", gender: "Female", employmentType: "Full-time" },
-  { id: "EMP005", firstName: "Ravi", lastName: "Wickrama", department: "Finance", position: "Senior Accountant", phone: "0775678901", email: "ravi.w@tfms.com", status: "Active", joinDate: "2019-05-22", gender: "Male", employmentType: "Full-time" },
-  { id: "EMP006", firstName: "Dilani", lastName: "Herath", department: "Packaging", position: "Packaging Lead", phone: "0776789012", email: "dilani.h@tfms.com", status: "On Leave", joinDate: "2020-08-14", gender: "Female", employmentType: "Full-time" },
-  { id: "EMP007", firstName: "Chaminda", lastName: "Rajapaksa", department: "Production", position: "Quality Inspector", phone: "0777890123", email: "chaminda.r@tfms.com", status: "Active", joinDate: "2021-02-28", gender: "Male", employmentType: "Full-time" },
-  { id: "EMP008", firstName: "Priya", lastName: "Bandara", department: "Collection", position: "Tea Grader", phone: "0778901234", email: "priya.b@tfms.com", status: "Active", joinDate: "2022-01-05", gender: "Female", employmentType: "Part-time" },
-  { id: "EMP009", firstName: "Mahinda", lastName: "Gamage", department: "Production", position: "Maintenance Tech", phone: "0779012345", email: "mahinda.g@tfms.com", status: "Inactive", joinDate: "2017-09-12", gender: "Male", employmentType: "Full-time" },
-  { id: "EMP010", firstName: "Kavisha", lastName: "Dissanayake", department: "Administration", position: "Office Assistant", phone: "0770123456", email: "kavisha.d@tfms.com", status: "Active", joinDate: "2023-04-18", gender: "Female", employmentType: "Contract" },
-  { id: "EMP011", firstName: "Thilina", lastName: "Weerasinghe", department: "Finance", position: "Accounts Clerk", phone: "0771122334", email: "thilina.w@tfms.com", status: "Active", joinDate: "2022-07-01", gender: "Male", employmentType: "Full-time" },
-  { id: "EMP012", firstName: "Sanduni", lastName: "Ranasinghe", department: "Packaging", position: "Packaging Operator", phone: "0772233445", email: "sanduni.r@tfms.com", status: "On Leave", joinDate: "2021-10-15", gender: "Female", employmentType: "Part-time" },
-  { id: "EMP013", firstName: "Wasantha", lastName: "Jayasuriya", department: "Production", position: "Shift Supervisor", phone: "0773344556", email: "wasantha.j@tfms.com", status: "Active", joinDate: "2018-06-20", gender: "Male", employmentType: "Full-time" },
-  { id: "EMP014", firstName: "Madhavi", lastName: "Liyanage", department: "Collection", position: "Field Coordinator", phone: "0774455667", email: "madhavi.l@tfms.com", status: "Active", joinDate: "2023-02-10", gender: "Female", employmentType: "Full-time" },
-  { id: "EMP015", firstName: "Lakshman", lastName: "Peris", department: "Administration", position: "Admin Officer", phone: "0775566778", email: "lakshman.p@tfms.com", status: "Suspended", joinDate: "2020-12-01", gender: "Male", employmentType: "Contract" },
-  { id: "EMP016", firstName: "Nipuni", lastName: "Wijesinghe", department: "Finance", position: "Payroll Officer", phone: "0776677889", email: "nipuni.w@tfms.com", status: "Active", joinDate: "2021-09-05", gender: "Female", employmentType: "Full-time" },
-  { id: "EMP017", firstName: "Duminda", lastName: "Senaratne", department: "Production", position: "Process Engineer", phone: "0777788990", email: "duminda.s@tfms.com", status: "Active", joinDate: "2022-03-15", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP001", firstName: "Kamal", lastName: "Perera", department: "Production", position: "Factory Supervisor", phone: "0771234567", email: "kamal.p@coms.com", status: "Active", joinDate: "2020-03-15", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP002", firstName: "Nimal", lastName: "Silva", department: "Collection", position: "Collection Officer", phone: "0772345678", email: "nimal.s@coms.com", status: "Active", joinDate: "2021-06-01", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP003", firstName: "Sunil", lastName: "Fernando", department: "Production", position: "Machine Operator", phone: "0773456789", email: "sunil.f@coms.com", status: "Active", joinDate: "2019-11-20", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP004", firstName: "Anita", lastName: "Jayawardena", department: "Administration", position: "HR Manager", phone: "0774567890", email: "anita.j@coms.com", status: "Active", joinDate: "2018-01-10", gender: "Female", employmentType: "Full-time" },
+  { id: "EMP005", firstName: "Ravi", lastName: "Wickrama", department: "Finance", position: "Senior Accountant", phone: "0775678901", email: "ravi.w@coms.com", status: "Active", joinDate: "2019-05-22", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP006", firstName: "Dilani", lastName: "Herath", department: "Packaging", position: "Packaging Lead", phone: "0776789012", email: "dilani.h@coms.com", status: "On Leave", joinDate: "2020-08-14", gender: "Female", employmentType: "Full-time" },
+  { id: "EMP007", firstName: "Chaminda", lastName: "Rajapaksa", department: "Production", position: "Quality Inspector", phone: "0777890123", email: "chaminda.r@coms.com", status: "Active", joinDate: "2021-02-28", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP008", firstName: "Priya", lastName: "Bandara", department: "Collection", position: "Coffee Grader", phone: "0778901234", email: "priya.b@coms.com", status: "Active", joinDate: "2022-01-05", gender: "Female", employmentType: "Part-time" },
+  { id: "EMP009", firstName: "Mahinda", lastName: "Gamage", department: "Production", position: "Maintenance Tech", phone: "0779012345", email: "mahinda.g@coms.com", status: "Inactive", joinDate: "2017-09-12", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP010", firstName: "Kavisha", lastName: "Dissanayake", department: "Administration", position: "Office Assistant", phone: "0770123456", email: "kavisha.d@coms.com", status: "Active", joinDate: "2023-04-18", gender: "Female", employmentType: "Contract" },
+  { id: "EMP011", firstName: "Thilina", lastName: "Weerasinghe", department: "Finance", position: "Accounts Clerk", phone: "0771122334", email: "thilina.w@coms.com", status: "Active", joinDate: "2022-07-01", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP012", firstName: "Sanduni", lastName: "Ranasinghe", department: "Packaging", position: "Packaging Operator", phone: "0772233445", email: "sanduni.r@coms.com", status: "On Leave", joinDate: "2021-10-15", gender: "Female", employmentType: "Part-time" },
+  { id: "EMP013", firstName: "Wasantha", lastName: "Jayasuriya", department: "Production", position: "Shift Supervisor", phone: "0773344556", email: "wasantha.j@coms.com", status: "Active", joinDate: "2018-06-20", gender: "Male", employmentType: "Full-time" },
+  { id: "EMP014", firstName: "Madhavi", lastName: "Liyanage", department: "Collection", position: "Field Coordinator", phone: "0774455667", email: "madhavi.l@coms.com", status: "Active", joinDate: "2023-02-10", gender: "Female", employmentType: "Full-time" },
+  { id: "EMP015", firstName: "Lakshman", lastName: "Peris", department: "Administration", position: "Admin Officer", phone: "0775566778", email: "lakshman.p@coms.com", status: "Suspended", joinDate: "2020-12-01", gender: "Male", employmentType: "Contract" },
+  { id: "EMP016", firstName: "Nipuni", lastName: "Wijesinghe", department: "Finance", position: "Payroll Officer", phone: "0776677889", email: "nipuni.w@coms.com", status: "Active", joinDate: "2021-09-05", gender: "Female", employmentType: "Full-time" },
+  { id: "EMP017", firstName: "Duminda", lastName: "Senaratne", department: "Production", position: "Process Engineer", phone: "0777788990", email: "duminda.s@coms.com", status: "Active", joinDate: "2022-03-15", gender: "Male", employmentType: "Full-time" },
 ];
 
 export default function EmployeesPage() {
@@ -137,7 +137,7 @@ export default function EmployeesPage() {
             <UserCog size={28} className="text-primary" />
             Employee Management
           </h1>
-          <p className="text-text-secondary mt-1">Manage all employees of the tea factory</p>
+          <p className="text-text-secondary mt-1">Manage all employees of the coffee factory</p>
         </div>
         <Link to="/employees/new">
           <Button icon={UserPlus}>Add Employee</Button>

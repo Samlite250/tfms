@@ -10,15 +10,15 @@ import Select from "../../components/ui/Select";
 import { useToast } from "../../components/ui/Toast";
 
 const MOCK_LOW_STOCK = [
-  { id: 4, name: "White Tea Buds", category: "Tea Stock", quantity: 85, minStock: 100, unit: "kg", costPerUnit: 22.0, supplier: "Silver Tip Farms", severity: "critical" },
-  { id: 5, name: "Matcha Powder", category: "Tea Stock", quantity: 45, minStock: 50, unit: "kg", costPerUnit: 35.0, supplier: "ShadeGrown Co.", severity: "critical" },
+  { id: 4, name: "Robusta Coffee Beans", category: "Coffee Stock", quantity: 85, minStock: 100, unit: "kg", costPerUnit: 22.0, supplier: "Silver Tip Farms", severity: "critical" },
+  { id: 5, name: "Coffee Grade C", category: "Coffee Stock", quantity: 45, minStock: 50, unit: "kg", costPerUnit: 35.0, supplier: "ShadeGrown Co.", severity: "critical" },
   { id: 21, name: "Water Purifier Tablets", category: "Chemicals", quantity: 50, minStock: 100, unit: "pieces", costPerUnit: 0.5, supplier: "PureWater Solutions", severity: "critical" },
   { id: 28, name: "Bioethanol", category: "Fuel", quantity: 30, minStock: 40, unit: "liters", costPerUnit: 2.0, supplier: "GreenFuel Inc.", severity: "critical" },
   { id: 23, name: "Citric Acid", category: "Chemicals", quantity: 15, minStock: 10, unit: "kg", costPerUnit: 4.0, supplier: "ChemPro Ltd.", severity: "warning" },
   { id: 8, name: "Cardamom Pods", category: "Raw Materials", quantity: 65, minStock: 50, unit: "kg", costPerUnit: 28.0, supplier: "Spice Islands Ltd.", severity: "warning" },
   { id: 10, name: "Lemon Grass", category: "Raw Materials", quantity: 40, minStock: 30, unit: "kg", costPerUnit: 5.0, supplier: "Herb Garden Supply", severity: "warning" },
   { id: 22, name: "pH Testing Strips", category: "Chemicals", quantity: 200, minStock: 100, unit: "pieces", costPerUnit: 0.3, supplier: "LabSupply Co.", severity: "warning" },
-  { id: 33, name: "Essential Oil (Tea Tree)", category: "Chemicals", quantity: 12, minStock: 8, unit: "liters", costPerUnit: 15.0, supplier: "AromaPure Ltd.", severity: "warning" },
+  { id: 33, name: "Coffee Flavoring Oil", category: "Chemicals", quantity: 12, minStock: 8, unit: "liters", costPerUnit: 15.0, supplier: "AromaPure Ltd.", severity: "warning" },
   { id: 35, name: "Jasmine Flowers", category: "Raw Materials", quantity: 18, minStock: 15, unit: "kg", costPerUnit: 20.0, supplier: "Floral Harvest Co.", severity: "warning" },
 ];
 

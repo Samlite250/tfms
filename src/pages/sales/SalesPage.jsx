@@ -31,27 +31,27 @@ const STATUS_OPTIONS = [
 ];
 
 const CUSTOMERS = [
-  "Emerald Tea Traders",
+  "Emerald Coffee Traders",
   "Green Valley Imports",
   "Pacific Rim Beverages",
   "Highland Exports Ltd.",
-  "Oriental Tea House",
+  "Oriental Coffee House",
   "Zenith Beverages Co.",
   "Sunrise Trading",
   "Mountain Dew Distributors",
-  "Royal Tea Merchants",
-  "Global Leaf Co.",
-  "Aroma Tea International",
+  "Royal Coffee Merchants",
+  "Global Bean Co.",
+  "Aroma Coffee International",
   "Herbal Harmony Ltd.",
-  "Leaf & Cup Co.",
+  "Bean & Cup Co.",
   "Misty Morning Imports",
-  "Silk Road Tea Co.",
+  "Silk Road Coffee Co.",
 ];
 
-const TEA_GRADES = [
-  "OP1", "OPA", "OPB", "OPC", "OPD", "BOP1", "BOP", "BOPF",
-  "BPS1", "BPS", "PF1", "PD1", "D1", "D2", "Dust1", "Dust2",
-  "Green Tea Premium", "Green Tea Standard", "Oolong", "White Tea",
+const COFFEE_GRADES = [
+  "AA", "AB", "PB", "C", "E", "MH", "ML", "SC",
+  "T", "UG", "Y1", "Y2",
+  "Specialty Grade 1", "Specialty Grade 2", "Premium Arabica", "Standard Robusta",
 ];
 
 function generateInvoiceNo(idx) {
@@ -66,7 +66,7 @@ function randomItems() {
   for (let i = 0; i < count; i++) {
     let grade;
     do {
-      grade = TEA_GRADES[Math.floor(Math.random() * TEA_GRADES.length)];
+      grade = COFFEE_GRADES[Math.floor(Math.random() * COFFEE_GRADES.length)];
     } while (used.has(grade));
     used.add(grade);
     const qty = Math.floor(Math.random() * 200) + 10;

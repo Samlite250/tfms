@@ -96,11 +96,11 @@ function LoginPage() {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/15 rounded-2xl backdrop-blur-sm mb-8">
               <Leaf className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-4xl font-bold mb-4 tracking-tight">Tea Factory</h1>
-            <h2 className="text-4xl font-bold mb-6 tracking-tight">Management System</h2>
+            <h1 className="text-4xl font-bold mb-4 tracking-tight">Coffee Factory</h1>
+            <h2 className="text-4xl font-bold mb-6 tracking-tight">Operation Management</h2>
             <div className="w-16 h-1 bg-accent rounded-full mx-auto mb-6" />
             <p className="text-lg text-white/80 max-w-sm leading-relaxed">
-              Streamline your tea production workflow with real-time monitoring and analytics.
+              Streamline your coffee production workflow with real-time monitoring and analytics.
             </p>
           </motion.div>
 
@@ -137,7 +137,7 @@ function LoginPage() {
             <div className="inline-flex items-center justify-center w-10 h-10 bg-primary rounded-xl">
               <Leaf className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-primary">TFMS</span>
+            <span className="text-lg font-bold text-primary">COMS</span>
           </div>
 
           <h2 className="text-3xl font-bold text-text-primary">Welcome Back</h2>
@@ -258,12 +258,12 @@ function LoginPage() {
               <p className="text-xs font-semibold text-primary mb-3 uppercase tracking-wide">Quick Demo Login</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { email: 'admin@tfms.com', password: 'admin123', label: 'Admin', icon: Shield, color: 'bg-primary/10 text-primary' },
-                  { email: 'manager@tfms.com', password: 'manager123', label: 'Manager', icon: Users, color: 'bg-info/10 text-info' },
-                  { email: 'collection@tfms.com', password: 'collection123', label: 'Collection', icon: Factory, color: 'bg-success/10 text-success' },
-                  { email: 'production@tfms.com', password: 'production123', label: 'Production', icon: Package, color: 'bg-warning/10 text-warning' },
-                  { email: 'store@tfms.com', password: 'store123', label: 'Store Keeper', icon: Receipt, color: 'bg-danger/10 text-danger' },
-                  { email: 'accountant@tfms.com', password: 'accountant123', label: 'Accountant', icon: BarChart3, color: 'bg-accent/10 text-accent-dark' },
+                  { email: 'admin@mahembe-coffee.rw', password: 'admin123', label: 'Admin', icon: Shield, color: 'bg-primary/10 text-primary' },
+                  { email: 'manager@mahembe-coffee.rw', password: 'manager123', label: 'Manager', icon: Users, color: 'bg-info/10 text-info' },
+                  { email: 'collection@mahembe-coffee.rw', password: 'collection123', label: 'Collection', icon: Factory, color: 'bg-success/10 text-success' },
+                  { email: 'production@mahembe-coffee.rw', password: 'production123', label: 'Production', icon: Package, color: 'bg-warning/10 text-warning' },
+                  { email: 'store@mahembe-coffee.rw', password: 'store123', label: 'Store Keeper', icon: Receipt, color: 'bg-danger/10 text-danger' },
+                  { email: 'accountant@mahembe-coffee.rw', password: 'accountant123', label: 'Accountant', icon: BarChart3, color: 'bg-accent/10 text-accent-dark' },
                 ].map((demo) => (
                   <button
                     key={demo.email}

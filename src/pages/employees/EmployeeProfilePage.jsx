@@ -34,7 +34,7 @@ const mockEmployee = {
   department: "Production",
   position: "Factory Supervisor",
   phone: "0771234567",
-  email: "kamal.p@tfms.com",
+  email: "kamal.p@coms.com",
   status: "Active",
   joinDate: "2020-03-15",
   dateOfBirth: "1985-06-15",

@@ -22,24 +22,24 @@ import { useToast } from "../../components/ui/Toast";
 import StatCard from "../../components/ui/StatCard";
 
 const MOCK_CUSTOMERS = [
-  { id: 1, name: "James Mitchell", company: "Emerald Tea Traders Ltd.", email: "james@emeraldtea.com", phone: "+1 (555) 234-5678", totalPurchases: 12500, outstandingBalance: 0 },
+  { id: 1, name: "James Mitchell", company: "Emerald Coffee Traders Ltd.", email: "james@emeraldcoffee.com", phone: "+1 (555) 234-5678", totalPurchases: 12500, outstandingBalance: 0 },
   { id: 2, name: "Sarah Chen", company: "Green Valley Imports Inc.", email: "sarah@greenvalley.com", phone: "+1 (555) 345-6789", totalPurchases: 8750, outstandingBalance: 2100 },
   { id: 3, name: "David Okafor", company: "Pacific Rim Beverages", email: "david@pacificrim.com", phone: "+1 (555) 456-7890", totalPurchases: 15200, outstandingBalance: 0 },
   { id: 4, name: "Maria Garcia", company: "Highland Exports Ltd.", email: "maria@highlandexports.com", phone: "+1 (555) 567-8901", totalPurchases: 6300, outstandingBalance: 850 },
-  { id: 5, name: "Wei Zhang", company: "Oriental Tea House", email: "wei@orientalteahouse.com", phone: "+1 (555) 678-9012", totalPurchases: 22400, outstandingBalance: 0 },
+  { id: 5, name: "Wei Zhang", company: "Oriental Coffee House", email: "wei@orientalcoffeehouse.com", phone: "+1 (555) 678-9012", totalPurchases: 22400, outstandingBalance: 0 },
   { id: 6, name: "Aisha Patel", company: "Zenith Beverages Co.", email: "aisha@zenithbev.com", phone: "+1 (555) 789-0123", totalPurchases: 9800, outstandingBalance: 3200 },
   { id: 7, name: "Thomas Brown", company: "Sunrise Trading", email: "thomas@sunrisetrading.com", phone: "+1 (555) 890-1234", totalPurchases: 4200, outstandingBalance: 0 },
   { id: 8, name: "Yuki Tanaka", company: "Mountain Dew Distributors", email: "yuki@mtn-dist.com", phone: "+1 (555) 901-2345", totalPurchases: 18500, outstandingBalance: 1500 },
-  { id: 9, name: "Robert Williams", company: "Royal Tea Merchants", email: "robert@royalteas.com", phone: "+1 (555) 012-3456", totalPurchases: 31200, outstandingBalance: 0 },
-  { id: 10, name: "Fatima Al-Hassan", company: "Global Leaf Co.", email: "fatima@g.globalleaf.com", phone: "+1 (555) 123-4567", totalPurchases: 7600, outstandingBalance: 920 },
-  { id: 11, name: "Lucas Fernandes", company: "Aroma Tea International", email: "lucas@aromatea.com", phone: "+1 (555) 234-5679", totalPurchases: 14300, outstandingBalance: 0 },
+  { id: 9, name: "Robert Williams", company: "Royal Coffee Merchants", email: "robert@royalcoffee.com", phone: "+1 (555) 012-3456", totalPurchases: 31200, outstandingBalance: 0 },
+  { id: 10, name: "Fatima Al-Hassan", company: "Global Bean Co.", email: "fatima@globalbean.com", phone: "+1 (555) 123-4567", totalPurchases: 7600, outstandingBalance: 920 },
+  { id: 11, name: "Lucas Fernandes", company: "Aroma Coffee International", email: "lucas@aromacoffee.com", phone: "+1 (555) 234-5679", totalPurchases: 14300, outstandingBalance: 0 },
   { id: 12, name: "Emma Thompson", company: "Herbal Harmony Ltd.", email: "emma@herbalharm.com", phone: "+1 (555) 345-6780", totalPurchases: 5900, outstandingBalance: 450 },
-  { id: 13, name: "Ahmed Khan", company: "Leaf & Cup Co.", email: "ahmed@leafcup.com", phone: "+1 (555) 456-7891", totalPurchases: 11200, outstandingBalance: 0 },
+  { id: 13, name: "Ahmed Khan", company: "Bean & Cup Co.", email: "ahmed@leafcup.com", phone: "+1 (555) 456-7891", totalPurchases: 11200, outstandingBalance: 0 },
   { id: 14, name: "Olivia Martin", company: "Misty Morning Imports", email: "olivia@mistymorning.com", phone: "+1 (555) 567-8902", totalPurchases: 8100, outstandingBalance: 1800 },
-  { id: 15, name: "Raj Sharma", company: "Silk Road Tea Co.", email: "raj@silkroadtea.com", phone: "+1 (555) 678-9013", totalPurchases: 19800, outstandingBalance: 0 },
-  { id: 16, name: "Isabella Rossi", company: "Tuscany Tea Traders", email: "isabella@tuscanitea.com", phone: "+1 (555) 789-0124", totalPurchases: 3400, outstandingBalance: 600 },
+  { id: 15, name: "Raj Sharma", company: "Silk Road Coffee Co.", email: "raj@silkroadcoffee.com", phone: "+1 (555) 678-9013", totalPurchases: 19800, outstandingBalance: 0 },
+  { id: 16, name: "Isabella Rossi", company: "Tuscany Coffee Traders", email: "isabella@tuscanicoffee.com", phone: "+1 (555) 789-0124", totalPurchases: 3400, outstandingBalance: 600 },
   { id: 17, name: "Daniel Kim", company: "Seoul Sip Co.", email: "daniel@seoulsip.com", phone: "+1 (555) 890-1235", totalPurchases: 16700, outstandingBalance: 0 },
-  { id: 18, name: "Grace Oduya", company: "Nairobi Leaf Co.", email: "grace@nairobileaf.com", phone: "+1 (555) 901-2346", totalPurchases: 9500, outstandingBalance: 2750 },
+  { id: 18, name: "Grace Oduya", company: "Nairobi Coffee Co.", email: "grace@nairobinbean.com", phone: "+1 (555) 901-2346", totalPurchases: 9500, outstandingBalance: 2750 },
 ];
 
 const fadeIn = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
@@ -292,7 +292,7 @@ function CustomersPage() {
           />
           <Input
             label="Company"
-            placeholder="e.g. Tea Trading Co."
+            placeholder="e.g. Coffee Trading Co."
             icon={Building2}
             error={formErrors.company}
             value={formData.company}

@@ -8,11 +8,11 @@ const AuthContext = createContext(null);
 // ⚠️ SECURITY NOTE: These are DEMO-ONLY credentials for offline/dev use.
 // NEVER use plaintext passwords in production. Replace with env vars before shipping.
 const DEMO_USERS = [
-  { uid: 'admin-001', email: 'admin@tfms.com', password: import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'admin123', displayName: 'James Mwangi', role: 'admin', status: 'active', department: 'Administration', phone: '+254 700 100 200' },
-  { uid: 'collection-001', email: 'collection@tfms.com', password: import.meta.env.VITE_DEMO_COLLECTION_PASSWORD || 'collection123', displayName: 'Peter Kamau', role: 'collection_officer', status: 'active', department: 'Collection', phone: '+254 700 100 202' },
-  { uid: 'production-001', email: 'production@tfms.com', password: import.meta.env.VITE_DEMO_PRODUCTION_PASSWORD || 'production123', displayName: 'Mary Njeri', role: 'production_officer', status: 'active', department: 'Production', phone: '+254 700 100 203' },
-  { uid: 'store-001', email: 'store@tfms.com', password: import.meta.env.VITE_DEMO_STORE_PASSWORD || 'store123', displayName: 'David Omondi', role: 'store_keeper', status: 'active', department: 'Packaging', phone: '+254 700 100 204' },
-  { uid: 'accountant-001', email: 'accountant@tfms.com', password: import.meta.env.VITE_DEMO_ACCOUNTANT_PASSWORD || 'accountant123', displayName: 'Grace Akinyi', role: 'accountant', status: 'active', department: 'Finance', phone: '+254 700 100 205' },
+  { uid: 'admin-001', email: 'admin@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'admin123', displayName: 'Jean-Paul Habimana', role: 'admin', status: 'active', department: 'Administration', phone: '+250 788 100 200' },
+  { uid: 'collection-001', email: 'collection@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_COLLECTION_PASSWORD || 'collection123', displayName: 'Epiphanie Mukamana', role: 'collection_officer', status: 'active', department: 'Collection', phone: '+250 788 100 202' },
+  { uid: 'production-001', email: 'production@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_PRODUCTION_PASSWORD || 'production123', displayName: 'Alexis Habimana', role: 'production_officer', status: 'active', department: 'Production', phone: '+250 788 100 203' },
+  { uid: 'store-001', email: 'store@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_STORE_PASSWORD || 'store123', displayName: 'Anselme Rwegasira', role: 'store_keeper', status: 'active', department: 'Packaging', phone: '+250 788 100 204' },
+  { uid: 'accountant-001', email: 'accountant@mahembe-coffee.rw', password: import.meta.env.VITE_DEMO_ACCOUNTANT_PASSWORD || 'accountant123', displayName: 'Arsene Nshimiyimana', role: 'accountant', status: 'active', department: 'Finance', phone: '+250 788 100 205' },
 ];
 
 let firebaseAvailable = false;
@@ -85,7 +85,7 @@ export function AuthProvider({ children }) {
           });
         });
       } else {
-        const saved = sessionStorage.getItem('tfms_demo_user');
+        const saved = sessionStorage.getItem('coms_demo_user');
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
@@ -131,7 +131,7 @@ export function AuthProvider({ children }) {
     const profile = { uid: found.uid, email: found.email, displayName: found.displayName, role: found.role, status: found.status, department: found.department };
     setUser(u);
     setUserProfile(profile);
-    sessionStorage.setItem('tfms_demo_user', JSON.stringify(profile));
+    sessionStorage.setItem('coms_demo_user', JSON.stringify(profile));
     return u;
   }
 
@@ -190,7 +190,7 @@ export function AuthProvider({ children }) {
   async function logout() {
     setUserProfile(null);
     setUser(null);
-    sessionStorage.removeItem('tfms_demo_user');
+    sessionStorage.removeItem('coms_demo_user');
     if (firebaseAvailable) {
       const { signOut } = await import('firebase/auth');
       await signOut(auth);

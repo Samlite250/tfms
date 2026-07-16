@@ -89,22 +89,22 @@ const collectionRecords = [
 ];
 
 const productionData = [
-  { month: "Jan", greenTea: 8200, blackTea: 6400, oolong: 2100, total: 16700 },
-  { month: "Feb", greenTea: 7500, blackTea: 5800, oolong: 1900, total: 15200 },
-  { month: "Mar", greenTea: 9100, blackTea: 7200, oolong: 2500, total: 18800 },
-  { month: "Apr", greenTea: 8400, blackTea: 6800, oolong: 2300, total: 17500 },
-  { month: "May", greenTea: 10200, blackTea: 7900, oolong: 2800, total: 20900 },
-  { month: "Jun", greenTea: 11500, blackTea: 8600, oolong: 3100, total: 23200 },
-  { month: "Jul", greenTea: 9800, blackTea: 7400, oolong: 2600, total: 19800 },
+  { month: "Jan", greenCoffee: 8200, blackCoffee: 6400, robusta: 2100, total: 16700 },
+  { month: "Feb", greenCoffee: 7500, blackCoffee: 5800, robusta: 1900, total: 15200 },
+  { month: "Mar", greenCoffee: 9100, blackCoffee: 7200, robusta: 2500, total: 18800 },
+  { month: "Apr", greenCoffee: 8400, blackCoffee: 6800, robusta: 2300, total: 17500 },
+  { month: "May", greenCoffee: 10200, blackCoffee: 7900, robusta: 2800, total: 20900 },
+  { month: "Jun", greenCoffee: 11500, blackCoffee: 8600, robusta: 3100, total: 23200 },
+  { month: "Jul", greenCoffee: 9800, blackCoffee: 7400, robusta: 2600, total: 19800 },
 ];
 
 const productionBatches = [
-  { id: "BAT-1048", date: "2026-07-14", type: "Green Tea", input: 1200, output: 285, yield: 23.75, quality: "A+", status: "Completed" },
-  { id: "BAT-1047", date: "2026-07-13", type: "Black Tea", input: 1500, output: 340, yield: 22.67, quality: "A", status: "Completed" },
-  { id: "BAT-1046", date: "2026-07-12", type: "Oolong Tea", input: 800, output: 178, yield: 22.25, quality: "A+", status: "Completed" },
-  { id: "BAT-1045", date: "2026-07-11", type: "Green Tea", input: 1100, output: 262, yield: 23.82, quality: "A", status: "Completed" },
-  { id: "BAT-1044", date: "2026-07-10", type: "Black Tea", input: 1400, output: 310, yield: 22.14, quality: "B+", status: "Completed" },
-  { id: "BAT-1043", date: "2026-07-09", type: "Green Tea", input: 1300, output: 312, yield: 24.0, quality: "A+", status: "Completed" },
+  { id: "BAT-1048", date: "2026-07-14", type: "Green Coffee", input: 1200, output: 285, yield: 23.75, quality: "A+", status: "Completed" },
+  { id: "BAT-1047", date: "2026-07-13", type: "Black Coffee", input: 1500, output: 340, yield: 22.67, quality: "A", status: "Completed" },
+  { id: "BAT-1046", date: "2026-07-12", type: "Robusta", input: 800, output: 178, yield: 22.25, quality: "A+", status: "Completed" },
+  { id: "BAT-1045", date: "2026-07-11", type: "Green Coffee", input: 1100, output: 262, yield: 23.82, quality: "A", status: "Completed" },
+  { id: "BAT-1044", date: "2026-07-10", type: "Black Coffee", input: 1400, output: 310, yield: 22.14, quality: "B+", status: "Completed" },
+  { id: "BAT-1043", date: "2026-07-09", type: "Green Coffee", input: 1300, output: 312, yield: 24.0, quality: "A+", status: "Completed" },
 ];
 
 const salesData = [
@@ -118,12 +118,12 @@ const salesData = [
 ];
 
 const salesRecords = [
-  { id: "INV-2087", date: "2026-07-14", customer: "Nairobi Traders Ltd", items: "Green Tea (Premium)", quantity: 500, amount: 6250, status: "Paid" },
-  { id: "INV-2086", date: "2026-07-13", customer: "Kampala Exports Co", items: "Black Tea (Grade A)", quantity: 800, amount: 8000, status: "Paid" },
-  { id: "INV-2085", date: "2026-07-12", customer: "Dar es Salaam Tea House", items: "Oolong Tea", quantity: 350, amount: 5250, status: "Pending" },
-  { id: "INV-2084", date: "2026-07-11", customer: "Addis Fine Foods", items: "Green Tea (Grade A)", quantity: 600, amount: 6000, status: "Paid" },
-  { id: "INV-2083", date: "2026-07-10", customer: "Mombasa Beverages", items: "Black Tea (Premium)", quantity: 450, amount: 5625, status: "Paid" },
-  { id: "INV-2082", date: "2026-07-09", customer: "Nairobi Traders Ltd", items: "Green Tea (Grade B)", quantity: 700, amount: 5600, status: "Overdue" },
+  { id: "INV-2087", date: "2026-07-14", customer: "Nairobi Traders Ltd", items: "Green Coffee (Premium)", quantity: 500, amount: 6250, status: "Paid" },
+  { id: "INV-2086", date: "2026-07-13", customer: "Kampala Exports Co", items: "Black Coffee (Grade A)", quantity: 800, amount: 8000, status: "Paid" },
+  { id: "INV-2085", date: "2026-07-12", customer: "Dar es Salaam Coffee House", items: "Robusta", quantity: 350, amount: 5250, status: "Pending" },
+  { id: "INV-2084", date: "2026-07-11", customer: "Addis Fine Foods", items: "Green Coffee (Grade A)", quantity: 600, amount: 6000, status: "Paid" },
+  { id: "INV-2083", date: "2026-07-10", customer: "Mombasa Beverages", items: "Black Coffee (Premium)", quantity: 450, amount: 5625, status: "Paid" },
+  { id: "INV-2082", date: "2026-07-09", customer: "Nairobi Traders Ltd", items: "Green Coffee (Grade B)", quantity: 700, amount: 5600, status: "Overdue" },
 ];
 
 const expenseByCategory = [
@@ -137,12 +137,12 @@ const expenseByCategory = [
 ];
 
 const expenseRecords = [
-  { id: "EXP-421", date: "2026-07-14", category: "Raw Materials", description: "Premium tea leaves procurement", amount: 4500, vendor: "Kigali Suppliers" },
+  { id: "EXP-421", date: "2026-07-14", category: "Raw Materials", description: "Premium coffee cherry procurement", amount: 4500, vendor: "Kigali Suppliers" },
   { id: "EXP-420", date: "2026-07-13", category: "Labor", description: "Overtime pay - weekend shift", amount: 3200, vendor: "Internal" },
   { id: "EXP-419", date: "2026-07-12", category: "Utilities", description: "Electricity bill - July", amount: 2800, vendor: "REWAG" },
   { id: "EXP-418", date: "2026-07-11", category: "Transport", description: "Collection route fuel costs", amount: 1850, vendor: "Shell Station" },
   { id: "EXP-417", date: "2026-07-10", category: "Maintenance", description: "Processing machine servicing", amount: 3500, vendor: "TechFix Rwanda" },
-  { id: "EXP-416", date: "2026-07-09", category: "Packaging", description: "Tea packaging materials", amount: 2100, vendor: "PackPro Ltd" },
+  { id: "EXP-416", date: "2026-07-09", category: "Packaging", description: "Coffee packaging materials", amount: 2100, vendor: "PackPro Ltd" },
 ];
 
 const financialMonthly = [
@@ -156,13 +156,13 @@ const financialMonthly = [
 ];
 
 const inventoryItems = [
-  { name: "Green Tea (Premium)", stock: 2800, capacity: 5000, unit: "kg", value: 35000, status: "Healthy" },
-  { name: "Green Tea (Grade A)", stock: 1950, capacity: 4000, unit: "kg", value: 19500, status: "Healthy" },
-  { name: "Black Tea (Premium)", stock: 420, capacity: 3500, unit: "kg", value: 5250, status: "Low" },
-  { name: "Black Tea (Grade A)", stock: 1200, capacity: 3500, unit: "kg", value: 12000, status: "Healthy" },
-  { name: "Oolong Tea", stock: 280, capacity: 2000, unit: "kg", value: 4200, status: "Low" },
-  { name: "Tea Bags (Green)", stock: 15000, capacity: 30000, unit: "pcs", value: 7500, status: "Healthy" },
-  { name: "Tea Bags (Black)", stock: 3200, capacity: 25000, unit: "pcs", value: 1600, status: "Low" },
+  { name: "Green Coffee (Premium)", stock: 2800, capacity: 5000, unit: "kg", value: 35000, status: "Healthy" },
+  { name: "Green Coffee (Grade A)", stock: 1950, capacity: 4000, unit: "kg", value: 19500, status: "Healthy" },
+  { name: "Black Coffee (Premium)", stock: 420, capacity: 3500, unit: "kg", value: 5250, status: "Low" },
+  { name: "Black Coffee (Grade A)", stock: 1200, capacity: 3500, unit: "kg", value: 12000, status: "Healthy" },
+  { name: "Robusta", stock: 280, capacity: 2000, unit: "kg", value: 4200, status: "Low" },
+  { name: "Coffee Pods (Green)", stock: 15000, capacity: 30000, unit: "pcs", value: 7500, status: "Healthy" },
+  { name: "Coffee Pods (Black)", stock: 3200, capacity: 25000, unit: "pcs", value: 1600, status: "Low" },
   { name: "Packaging Boxes", stock: 8500, capacity: 12000, unit: "pcs", value: 4250, status: "Healthy" },
 ];
 
@@ -648,7 +648,7 @@ function InventoryReport() {
 }
 
 const allReportTypes = [
-  { id: "collection", label: "Collection", icon: Coffee, description: "Tea collection records and farmer participation" },
+  { id: "collection", label: "Collection", icon: Coffee, description: "Coffee collection records and farmer participation" },
   { id: "production", label: "Production", icon: Factory, description: "Production batches and output metrics" },
   { id: "sales", label: "Sales", icon: ShoppingCart, description: "Sales invoices, revenue, and trends" },
   { id: "expense", label: "Expenses", icon: Receipt, description: "Expense records and category breakdown" },
@@ -715,7 +715,7 @@ export default function ReportsPage() {
               <BarChart3 size={28} className="text-primary" />
               Reports & Analytics
             </h1>
-            <p className="text-sm text-text-secondary mt-1">Comprehensive reporting dashboard for Tea Factory Management</p>
+            <p className="text-sm text-text-secondary mt-1">Comprehensive reporting dashboard for Coffee Factory Management</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" icon={Printer} onClick={() => handleExport("print")}>Print</Button>

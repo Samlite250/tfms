@@ -1,16 +1,40 @@
-# React + Vite
+# COMS - Coffee Factory Operation Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A modern web-based platform for managing Mahembe Coffee Factory operations. Built with React + Vite, Firebase, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Farmer Management & Registration
+- Coffee Cherry Collection Tracking
+- Production Batch Management
+- Inventory & Stock Control
+- Sales & Customer Management
+- Expense Tracking & Financial Reports
+- Employee Management
+- Role-based Access Control
+- Real-time Updates
+- Automated Messaging & Notifications
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React 19, Vite 8, Tailwind CSS 4
+- **Backend**: Firebase (Firestore, Auth, Storage)
+- **Deployment**: Vercel / Firebase Hosting
 
-## Expanding the Oxlint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+npm install
+npm run dev
+```
+
+## Demo Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@mahembe-coffee.rw | admin123 |
+| Manager | manager@mahembe-coffee.rw | manager123 |
+| Collection Officer | collection@mahembe-coffee.rw | collection123 |
+| Production Officer | production@mahembe-coffee.rw | production123 |
+| Store Keeper | store@mahembe-coffee.rw | store123 |
+| Accountant | accountant@mahembe-coffee.rw | accountant123 |

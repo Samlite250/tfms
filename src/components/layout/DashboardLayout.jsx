@@ -6,7 +6,7 @@ import { ROLE_PERMISSIONS } from '../../utils/constants';
 const allMenuItems = [
   { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard', permission: 'dashboard' },
   { label: 'Farmers', path: '/farmers', icon: 'Users', permission: 'farmers' },
-  { label: 'Tea Collection', path: '/collections', icon: 'Coffee', permission: 'collections' },
+  { label: 'Coffee Collection', path: '/collections', icon: 'Coffee', permission: 'collections' },
   { label: 'Production', path: '/production', icon: 'Factory', permission: 'production' },
   { label: 'Inventory', path: '/inventory', icon: 'Package', permission: 'inventory' },
   { label: 'Sales', path: '/sales', icon: 'ShoppingCart', permission: 'sales' },

@@ -34,22 +34,22 @@ const MOCK_SALES = {
     paymentMethod: "Bank Transfer",
     notes: "Bulk order for Q3 supply chain. Free shipping included.",
     customer: {
-      name: "Emerald Tea Traders",
-      company: "Emerald Tea Traders Ltd.",
-      email: "orders@emeraldtea.com",
+      name: "Emerald Coffee Traders",
+      company: "Emerald Coffee Traders Ltd.",
+      email: "orders@emeraldcoffee.com",
       phone: "+1 (555) 234-5678",
       address: "125 Commerce Ave, Portland, OR 97201",
     },
     company: {
-      name: "TFMS - Tea Factory Management",
-      address: "45 Highland Plantation Rd, Tea District",
-      email: "sales@tfms-tea.com",
+      name: "MCFS - Mahembe Coffee Factory System",
+      address: "45 Highland Plantation Rd, Coffee District",
+      email: "sales@mcfms-coffee.com",
       phone: "+1 (555) 100-2000",
     },
     items: [
-      { grade: "BOP1", description: "Broken Orange Pekoe Grade 1", quantity: 150, unitPrice: 12.5 },
-      { grade: "OP1", description: "Orange Pekoe Grade 1", quantity: 80, unitPrice: 15.0 },
-      { grade: "Green Tea Premium", description: "Premium Green Tea Leaves", quantity: 50, unitPrice: 22.0 },
+      { grade: "AA", description: "Premium AA Coffee Grade", quantity: 150, unitPrice: 12.5 },
+      { grade: "AB", description: "Medium AB Coffee Grade", quantity: 80, unitPrice: 15.0 },
+      { grade: "Specialty Grade 1", description: "Specialty Grade 1 Arabica", quantity: 50, unitPrice: 22.0 },
     ],
   },
   2: {
@@ -68,20 +68,20 @@ const MOCK_SALES = {
       address: "789 Import Lane, Seattle, WA 98101",
     },
     company: {
-      name: "TFMS - Tea Factory Management",
-      address: "45 Highland Plantation Rd, Tea District",
-      email: "sales@tfms-tea.com",
+      name: "MCFS - Mahembe Coffee Factory System",
+      address: "45 Highland Plantation Rd, Coffee District",
+      email: "sales@mcfms-coffee.com",
       phone: "+1 (555) 100-2000",
     },
     items: [
-      { grade: "BOPF", description: "Broken Orange Pekoe Fannings", quantity: 200, unitPrice: 9.75 },
-      { grade: "Dust1", description: "Tea Dust Grade 1", quantity: 100, unitPrice: 6.5 },
+      { grade: "AB", description: "Medium AB Coffee Grade", quantity: 200, unitPrice: 9.75 },
+      { grade: "C", description: "Commercial Grade C Coffee", quantity: 100, unitPrice: 6.5 },
     ],
   },
 };
 
 for (let i = 3; i <= 24; i++) {
-  const grades = ["OP1", "BOP1", "BOPF", "Green Tea Premium", "Dust1", "Oolong"];
+  const grades = ["AA", "AB", "PB", "C", "E", "Premium Arabica", "Standard Robusta"];
   const grade = grades[Math.floor(Math.random() * grades.length)];
   const qty = Math.floor(Math.random() * 200) + 20;
   const price = +(Math.random() * 25 + 5).toFixed(2);
@@ -100,16 +100,16 @@ for (let i = 3; i <= 24; i++) {
     paymentMethod: ["Cash", "Bank Transfer", "Mobile Money"][Math.floor(Math.random() * 3)],
     notes: "",
     customer: {
-      name: ["Pacific Rim Beverages", "Highland Exports Ltd.", "Oriental Tea House", "Zenith Beverages Co.", "Royal Tea Merchants"][Math.floor(Math.random() * 5)],
+      name: ["Pacific Rim Beverages", "Highland Exports Ltd.", "Oriental Coffee House", "Zenith Beverages Co.", "Royal Coffee Merchants"][Math.floor(Math.random() * 5)],
       company: "Co. Ltd.",
       email: "info@example.com",
       phone: "+1 (555) 000-0000",
       address: "123 Business St, City, ST 00000",
     },
     company: {
-      name: "TFMS - Tea Factory Management",
-      address: "45 Highland Plantation Rd, Tea District",
-      email: "sales@tfms-tea.com",
+      name: "MCFS - Mahembe Coffee Factory System",
+      address: "45 Highland Plantation Rd, Coffee District",
+      email: "sales@mcfms-coffee.com",
       phone: "+1 (555) 100-2000",
     },
     items: [
@@ -301,7 +301,7 @@ function SalesDetailPage() {
                   <thead>
                     <tr className="border-b border-border bg-gray-50/80">
                       <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">#</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Tea Grade</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Coffee Grade</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Description</th>
                       <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Qty (kg)</th>
                       <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Unit Price</th>

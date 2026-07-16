@@ -10,7 +10,7 @@ export default function PublicLayout({ children }) {
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary shadow-md shadow-primary/20">
             <Leaf className="w-5 h-5 text-white" />
           </div>
-          <span className="text-lg font-bold text-text-primary">TFMS</span>
+          <span className="text-lg font-bold text-text-primary">COMS</span>
         </Link>
       </header>
 
@@ -26,7 +26,7 @@ export default function PublicLayout({ children }) {
       </main>
 
       <footer className="text-center py-4 text-xs text-text-secondary">
-        Tea Factory Management System
+        Coffee Factory Operation Management System
       </footer>
     </div>
   );

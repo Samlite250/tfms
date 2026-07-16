@@ -71,7 +71,7 @@ function generateCollections() {
       pricePerKg: GRADE_PRICES[grade],
       amount: Math.round(weight * GRADE_PRICES[grade] * 100) / 100,
       collectedBy: collectors[Math.floor(Math.random() * collectors.length)],
-      qualityNotes: ["Excellent leaf quality", "Good moisture content", "Standard grade", "Premium flush", "Well processed"][Math.floor(Math.random() * 5)],
+      qualityNotes: ["Excellent cherry quality", "Good moisture content", "Standard grade", "Premium harvest", "Well processed"][Math.floor(Math.random() * 5)],
     });
   }
   return records.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -215,8 +215,8 @@ function CollectionPage() {
             <Leaf size={22} className="text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Tea Collection</h1>
-            <p className="text-sm text-gray-500">Manage and track all tea collection records</p>
+            <h1 className="text-2xl font-bold text-gray-900">Coffee Collection</h1>
+            <p className="text-sm text-gray-500">Manage and track all coffee collection records</p>
           </div>
         </div>
         <Link to="/collection/new">

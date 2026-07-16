@@ -177,7 +177,7 @@ function CollectionFormPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Record New Collection</h1>
-            <p className="text-sm text-gray-500">Fill in the details for a new tea collection</p>
+            <p className="text-sm text-gray-500">Fill in the details for a new coffee collection</p>
           </div>
         </div>
       </motion.div>
@@ -265,7 +265,7 @@ function CollectionFormPage() {
           <Card>
             <div className="flex items-center gap-2 mb-5">
               <Coffee size={18} className="text-primary" />
-              <h2 className="text-base font-semibold text-gray-900">Tea Details</h2>
+              <h2 className="text-base font-semibold text-gray-900">Coffee Details</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <Input
@@ -281,7 +281,7 @@ function CollectionFormPage() {
                 error={errors.weight?.message}
               />
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">Tea Grade</label>
+                <label className="text-sm font-medium text-gray-700">Coffee Grade</label>
                 <select
                   value={watch("grade")}
                   onChange={onGradeChange}
@@ -293,14 +293,14 @@ function CollectionFormPage() {
                   ))}
                 </select>
                 {errors.grade && <p className="text-xs text-red-500">{errors.grade.message}</p>}
-                <input type="hidden" {...register("grade", { required: "Tea grade is required" })} />
+                <input type="hidden" {...register("grade", { required: "Coffee grade is required" })} />
               </div>
               <div className="sm:col-span-2">
                 <label className="text-sm font-medium text-gray-700 block mb-1.5">Quality Notes</label>
                 <textarea
                   {...register("qualityNotes")}
                   rows={3}
-                  placeholder="Optional notes about tea quality, moisture content, leaf appearance..."
+                  placeholder="Optional notes about coffee quality, moisture content, cherry appearance..."
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"
                 />
               </div>

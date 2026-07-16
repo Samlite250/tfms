@@ -89,7 +89,7 @@ export default function Sidebar({
                 transition={{ duration: 0.2 }}
                 className="text-xl font-bold text-white whitespace-nowrap overflow-hidden"
               >
-                TFMS
+                COMS
               </motion.span>
             )}
           </AnimatePresence>

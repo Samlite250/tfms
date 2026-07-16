@@ -79,11 +79,11 @@ function generateExpenses() {
   const descriptions = {
     Electricity: ["Monthly power bill - Factory", "Generator fuel top-up", "Transformer maintenance charge", "Night shift electricity surcharge", "Sub-station repair invoice"],
     Fuel: ["Diesel for delivery trucks", "Petrol for field vehicles", "Forklift refueling", "Backup generator diesel", "Transport fleet fuel"],
-    Maintenance: ["Tea processing machine service", "Conveyor belt replacement", "Boiler inspection fee", "Packaging machine repair", "Cooling system maintenance"],
-    Transport: ["Outbound tea shipment to Colombo", "Raw material pickup - Nuwara Eliya", "Equipment delivery from Kandy", "Farmer collection route fuel", "Monthly vehicle servicing"],
+    Maintenance: ["Coffee processing machine service", "Conveyor belt replacement", "Boiler inspection fee", "Packaging machine repair", "Cooling system maintenance"],
+    Transport: ["Outbound coffee shipment to Colombo", "Raw material pickup - Nuwara Eliya", "Equipment delivery from Kandy", "Farmer collection route fuel", "Monthly vehicle servicing"],
     Water: ["Monthly water utility bill", "Water treatment chemicals", "Cooling tower water supply", "Borehole pump maintenance", "Wastewater disposal fee"],
     Salaries: ["Monthly staff payroll", "Overtime payment - July", "Seasonal worker wages", "Night shift allowance", "Performance bonus disbursement"],
-    Other: ["Office stationery order", "Tea tasting event catering", "Legal consultation fee", "Insurance premium payment", "Certification renewal fee"],
+    Other: ["Office stationery order", "Coffee tasting event catering", "Legal consultation fee", "Insurance premium payment", "Certification renewal fee"],
   };
 
   for (let i = 1; i <= 28; i++) {

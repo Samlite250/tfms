@@ -23,17 +23,17 @@ import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 
-const teaGradeOptions = [
-  { value: "OP1", label: "OP1 - Orange Pekoe 1" },
-  { value: "OPA", label: "OPA - Orange Pekoe A" },
-  { value: "OPB", label: "OPB - Orange Pekoe B" },
-  { value: "OPC", label: "OPC - Orange Pekoe C" },
-  { value: "BOP1", label: "BOP1 - Broken Orange Pekoe 1" },
-  { value: "BOPA", label: "BOPA - Broken Orange Pekoe A" },
-  { value: "BOPB", label: "BOPB - Broken Orange Pekoe B" },
-  { value: "BOPC", label: "BOPC - Broken Orange Pekoe C" },
-  { value: "CTC", label: "CTC - Crush, Tear, Curl" },
-  { value: "DUST1", label: "DUST1 - Dust 1" },
+const coffeeGradeOptions = [
+  { value: "AA", label: "AA - AA Grade" },
+  { value: "AB", label: "AB - AB Grade" },
+  { value: "PB", label: "PB - Peaberry" },
+  { value: "C", label: "C - C Grade" },
+  { value: "TT", label: "TT - T Grade Light" },
+  { value: "T", label: "T - T Grade" },
+  { value: "E", label: "E - Elephant" },
+  { value: "MH", label: "MH - Mbuni Heavy" },
+  { value: "SM", label: "SM - Soft Module" },
+  { value: "P", label: "P - Parchment" },
 ];
 
 const supervisorOptions = [
@@ -48,8 +48,8 @@ const supervisorOptions = [
 ];
 
 const methodOptions = [
-  { value: "Orthodox", label: "Orthodox" },
-  { value: "CTC", label: "CTC (Crush, Tear, Curl)" },
+  { value: "Washed", label: "Washed Process" },
+  { value: "Natural", label: "Natural Process" },
 ];
 
 const qualityGradeOptions = [
@@ -68,11 +68,11 @@ const steps = [
 const mockEditData = {
   batchNumber: "BATCH-2026-025",
   productionDate: "2026-07-10",
-  teaGrade: "BOP1",
+  teaGrade: "TT",
   supervisor: "R. Perera",
   greenLeafInput: 450,
-  otherMaterials: "12 kg stems, 5 kg dust",
-  processingMethod: "Orthodox",
+  otherMaterials: "12 kg husks, 5 kg parchment",
+  processingMethod: "Washed",
   fermentationTime: 90,
   dryingTime: 25,
   firingTemperature: 85,
@@ -237,9 +237,9 @@ function ProductionFormPage() {
                 })}
               />
               <Select
-                label="Tea Grade"
-                options={teaGradeOptions}
-                placeholder="Select tea grade"
+                label="Coffee Grade"
+                options={coffeeGradeOptions}
+                placeholder="Select coffee grade"
                 value={watch("teaGrade")}
                 onChange={(val) => setValue("teaGrade", val)}
                 error={errors.teaGrade?.message}
@@ -282,20 +282,20 @@ function ProductionFormPage() {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Input
-                label="Green Leaf Input (kg)"
+                label="Cherry Input (kg)"
                 type="number"
                 icon={Weight}
                 placeholder="Enter weight in kg"
                 error={errors.greenLeafInput?.message}
                 {...register("greenLeafInput", {
-                  required: "Green leaf input is required",
+                  required: "Cherry input is required",
                   min: { value: 1, message: "Must be at least 1 kg" },
                   valueAsNumber: true,
                 })}
               />
               <Input
                 label="Other Materials"
-                placeholder="e.g. 12 kg stems, 5 kg dust"
+                placeholder="e.g. 12 kg husks, 5 kg parchment"
                 icon={FileText}
                 {...register("otherMaterials")}
               />
@@ -382,13 +382,13 @@ function ProductionFormPage() {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Input
-                label="Finished Product Weight (kg)"
+                label="Parchment Coffee Weight (kg)"
                 type="number"
                 icon={Weight}
                 placeholder="Enter weight in kg"
                 error={errors.finishedProductWeight?.message}
                 {...register("finishedProductWeight", {
-                  required: "Finished product weight is required",
+                  required: "Parchment coffee weight is required",
                   min: { value: 0, message: "Cannot be negative" },
                   valueAsNumber: true,
                 })}
@@ -435,7 +435,7 @@ function ProductionFormPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-text-secondary">Finished Product</p>
+                  <p className="text-text-secondary">Parchment Coffee</p>
                   <p className="font-bold text-lg text-text-primary">
                     {finishedProductWeight ? `${finishedProductWeight} kg` : "-"}
                   </p>

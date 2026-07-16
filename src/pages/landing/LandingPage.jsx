@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import teaBg from "../../assets/tea-bg.jpg";
+import coffeeFarmBg from "../../assets/coffee-farm.jpg";
 import {
   motion,
   useInView,
@@ -299,9 +299,9 @@ const features = [
   },
   {
     icon: Coffee,
-    title: "Tea Collection",
+    title: "Coffee Collection",
     description:
-      "Record green leaf deliveries with weight, grade, and receipt tracking.",
+      "Record cherry deliveries with weight, grade, and receipt tracking.",
     color: "bg-green-50",
     iconColor: "text-green-600",
   },
@@ -317,7 +317,7 @@ const features = [
     icon: Package,
     title: "Inventory",
     description:
-      "Track stock levels for materials, chemicals, fuel, and finished tea.",
+      "Track stock levels for materials, chemicals, fuel, and roasted coffee.",
     color: "bg-amber-50",
     iconColor: "text-amber-600",
   },
@@ -359,19 +359,19 @@ const workflowSteps = [
   {
     icon: Sprout,
     title: "Farmer",
-    description: "Farmers register and deliver green leaves to the factory.",
+    description: "Farmers register and deliver coffee cherries to the factory.",
     color: "#43A047",
   },
   {
     icon: Coffee,
-    title: "Tea Collection",
-    description: "Record deliveries, weigh leaves, assign grades.",
+    title: "Coffee Collection",
+    description: "Record deliveries, weigh cherries, assign grades.",
     color: "#2E7D32",
   },
   {
     icon: Factory,
     title: "Production",
-    description: "Process leaves through production batches.",
+    description: "Process cherries through production batches.",
     color: "#F9A825",
   },
   {
@@ -397,7 +397,7 @@ const workflowSteps = [
 const stats = [
   { value: 500, suffix: "+", label: "Farmers Registered", icon: Users },
   { value: 120, suffix: "+", label: "Employees", icon: Users },
-  { value: 50000, suffix: "+", label: "KG Tea Collected", icon: Coffee },
+  { value: 50000, suffix: "+", label: "KG Coffee Collected", icon: Coffee },
   { value: 10000, suffix: "+", label: "Production Records", icon: Factory },
 ];
 
@@ -472,7 +472,7 @@ export default function LandingPage() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Leaf className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">TFMS</span>
+              <span className="text-xl font-bold text-gray-900">COMS</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-8">
@@ -559,7 +559,7 @@ export default function LandingPage() {
       >
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${teaBg})` }}
+          style={{ backgroundImage: `url(${coffeeFarmBg})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 via-gray-900/50 to-gray-900/30" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -577,7 +577,7 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-sm font-medium mb-6"
               >
                 <Sprout className="w-4 h-4" />
-                Tea Factory Management System
+                Coffee Factory Operation Management System
               </motion.div>
 
               <motion.h1
@@ -586,7 +586,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
               >
-                Modern Tea{" "}
+                Modern Coffee{" "}
                 <span className="text-primary">Factory</span>{" "}
                 Management
               </motion.h1>
@@ -597,7 +597,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="text-lg text-gray-200 leading-relaxed mb-8 max-w-lg"
               >
-                Streamline your tea factory operations with our comprehensive
+                Streamline your coffee factory operations with our comprehensive
                 digital management system. From farmer registration to sales
                 reporting.
               </motion.p>
@@ -683,7 +683,7 @@ export default function LandingPage() {
                           <Leaf className="w-4 h-4 text-accent" />
                         </div>
                         <div>
-                          <p className="text-white font-semibold text-sm leading-none">TFMS Overview</p>
+                          <p className="text-white font-semibold text-sm leading-none">COMS Overview</p>
                           <p className="text-white/50 text-[10px] mt-0.5">Live factory data</p>
                         </div>
                       </div>
@@ -827,8 +827,8 @@ export default function LandingPage() {
               Everything You Need to{" "}
               <span className="text-primary">Manage</span> Your Factory
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-              A complete suite of tools designed for modern tea factory
+              <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+              A complete suite of tools designed for modern coffee factory
               operations
             </p>
           </motion.div>
@@ -1042,21 +1042,21 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                quote: "TFMS has completely transformed how we manage our daily tea collections. The real-time tracking saves us hours of manual work every day.",
-                name: "James Mwangi",
-                role: "Factory Manager, Kericho Tea Co.",
+                quote: "COMS has completely transformed how we manage our daily coffee collections. The real-time tracking saves us hours of manual work every day.",
+                name: "Jean-Paul Habimana",
+                role: "Factory Manager, Mahembe Coffee Factory",
                 rating: 5,
               },
               {
-                quote: "The inventory management alone is worth it. We reduced waste by 30% in the first quarter of using TFMS. Highly recommended.",
-                name: "Priya Sharma",
-                role: "Operations Director, Highland Estates",
+                quote: "The inventory management alone is worth it. We reduced waste by 30% in the first quarter of using COMS. Highly recommended.",
+                name: "Marie Claire Uwimana",
+                role: "Operations Director, Mahembe Coffee Factory",
                 rating: 5,
               },
               {
                 quote: "Being able to generate sales reports instantly has given us better insights into our business. The team loves how easy it is to use.",
-                name: "David Nkomo",
-                role: "CEO, Southern Tea Industries",
+                name: "Emmanuel Ndayisaba",
+                role: "CEO, Muhanga Coffee Co-op",
                 rating: 5,
               },
             ].map((testimonial, i) => (
@@ -1114,14 +1114,14 @@ export default function LandingPage() {
               variants={fadeUp}
             >
               <span className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-3">
-                Why TFMS
+                Why COMS
               </span>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
                 Why Digitize Your{" "}
-                <span className="text-primary">Tea Factory</span>?
+                <span className="text-primary">Coffee Factory</span>?
               </h2>
               <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-                Transform your traditional tea factory operations with modern
+                Transform your traditional coffee factory operations with modern
                 digital tools. Our platform is designed to bring efficiency,
                 transparency, and data-driven insights to every aspect of your
                 business.
@@ -1359,7 +1359,7 @@ export default function LandingPage() {
                 {
                   icon: Mail,
                   title: "Email",
-                  value: "info@tfms.com",
+                  value: "info@mahembe-coffee.rw",
                   desc: "We'll respond within 24 hours",
                   color: "bg-emerald-50",
                   iconColor: "text-emerald-600",
@@ -1367,7 +1367,7 @@ export default function LandingPage() {
                 {
                   icon: Phone,
                   title: "Phone",
-                  value: "+94 11 234 5678",
+                  value: "+250 788 500 000",
                   desc: "Mon - Fri, 8am - 5pm",
                   color: "bg-blue-50",
                   iconColor: "text-blue-600",
@@ -1375,8 +1375,8 @@ export default function LandingPage() {
                 {
                   icon: MapPin,
                   title: "Address",
-                  value: "123 Tea Garden Road",
-                  desc: "Nuwara Eliya, Sri Lanka",
+                  value: "Muhanga-Nyanza Road",
+                  desc: "Muhanga, Southern Province, Rwanda",
                   color: "bg-amber-50",
                   iconColor: "text-amber-600",
                 },
@@ -1420,10 +1420,10 @@ export default function LandingPage() {
                 <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center">
                   <Leaf className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">TFMS</span>
+                <span className="text-xl font-bold">COMS</span>
               </Link>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Modern tea factory management system designed to streamline
+                Modern coffee factory management system designed to streamline
                 operations from farmer registration to sales reporting.
               </p>
               <div className="flex items-center gap-3">
@@ -1485,7 +1485,7 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold text-white mb-4">Stay Updated</h4>
               <p className="text-sm text-gray-400 leading-relaxed mb-4">
-                Get the latest news and updates about TFMS.
+                Get the latest news and updates about COMS.
               </p>
               <form
                 onSubmit={(e) => e.preventDefault()}
@@ -1517,11 +1517,11 @@ export default function LandingPage() {
         <div className="border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} TFMS. All rights reserved.
+              &copy; {new Date().getFullYear()} COMS - Mahembe Coffee Factory. All rights reserved.
             </p>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Leaf className="w-4 h-4 text-secondary" />
-              Built for the tea industry
+              Built for the coffee industry
             </div>
           </div>
         </div>

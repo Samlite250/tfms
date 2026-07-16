@@ -26,11 +26,11 @@ import DataTable from "../../components/ui/DataTable";
 import { useToast } from "../../components/ui/Toast";
 
 const farmers = [
-  { id: "FRM-001", name: "Mugisha Patrick", phone: "+256 772 123456", email: "mugisha.p@gmail.com", village: "Kyanja", district: "Kampala", province: "Central", country: "Uganda", farmSize: 2.5, teaVariety: "TRFK 306/1", collectionCenter: "Kyanja CC", totalDeliveries: 48, totalWeight: 1240, status: "Active", joinedDate: "2024-03-15", gender: "Male", dateOfBirth: "1985-06-15" },
-  { id: "FRM-002", name: "Nambogo Sarah", phone: "+256 783 234567", email: "nambogo.s@yahoo.com", village: "Mushubi", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 1.8, teaVariety: "TRFK 306/1", collectionCenter: "Mushubi CC", totalDeliveries: 36, totalWeight: 890, status: "Active", joinedDate: "2024-01-20", gender: "Female", dateOfBirth: "1990-03-22" },
-  { id: "FRM-003", name: "Kizza Moses", phone: "+256 701 345678", email: "kizza.m@gmail.com", village: "Rulangala", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 3.2, teaVariety: "RB 16/9", collectionCenter: "Rulangala CC", totalDeliveries: 62, totalWeight: 1780, status: "Active", joinedDate: "2023-11-08", gender: "Male", dateOfBirth: "1978-11-05" },
-  { id: "FRM-004", name: "Namukasa Grace", phone: "+256 775 456789", email: "namukasa.g@outlook.com", village: "Ntinda", district: "Kampala", province: "Central", country: "Uganda", farmSize: 1.2, teaVariety: "TRFK 306/1", collectionCenter: "Ntinda CC", totalDeliveries: 22, totalWeight: 520, status: "Active", joinedDate: "2024-06-10", gender: "Female", dateOfBirth: "1992-08-18" },
-  { id: "FRM-005", name: "Ssempala John", phone: "+256 786 567890", email: "ssempala.j@gmail.com", village: "Kisementi", district: "Kampala", province: "Central", country: "Uganda", farmSize: 4.0, teaVariety: "SFS 150/10", collectionCenter: "Kisementi CC", totalDeliveries: 71, totalWeight: 2100, status: "Active", joinedDate: "2023-08-22", gender: "Male", dateOfBirth: "1982-04-12" },
+  { id: "FRM-001", name: "Mugisha Patrick", phone: "+256 772 123456", email: "mugisha.p@gmail.com", village: "Kyanja", district: "Kampala", province: "Central", country: "Uganda", farmSize: 2.5, coffeeVariety: "Red Bourbon", collectionCenter: "Kyanja CC", totalDeliveries: 48, totalWeight: 1240, status: "Active", joinedDate: "2024-03-15", gender: "Male", dateOfBirth: "1985-06-15" },
+  { id: "FRM-002", name: "Nambogo Sarah", phone: "+256 783 234567", email: "nambogo.s@yahoo.com", village: "Mushubi", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 1.8, coffeeVariety: "Red Bourbon", collectionCenter: "Mushubi CC", totalDeliveries: 36, totalWeight: 890, status: "Active", joinedDate: "2024-01-20", gender: "Female", dateOfBirth: "1990-03-22" },
+  { id: "FRM-003", name: "Kizza Moses", phone: "+256 701 345678", email: "kizza.m@gmail.com", village: "Rulangala", district: "Wakiso", province: "Central", country: "Uganda", farmSize: 3.2, coffeeVariety: "Jackson", collectionCenter: "Rulangala CC", totalDeliveries: 62, totalWeight: 1780, status: "Active", joinedDate: "2023-11-08", gender: "Male", dateOfBirth: "1978-11-05" },
+  { id: "FRM-004", name: "Namukasa Grace", phone: "+256 775 456789", email: "namukasa.g@outlook.com", village: "Ntinda", district: "Kampala", province: "Central", country: "Uganda", farmSize: 1.2, coffeeVariety: "Red Bourbon", collectionCenter: "Ntinda CC", totalDeliveries: 22, totalWeight: 520, status: "Active", joinedDate: "2024-06-10", gender: "Female", dateOfBirth: "1992-08-18" },
+  { id: "FRM-005", name: "Ssempala John", phone: "+256 786 567890", email: "ssempala.j@gmail.com", village: "Kisementi", district: "Kampala", province: "Central", country: "Uganda", farmSize: 4.0, coffeeVariety: "BM 139", collectionCenter: "Kisementi CC", totalDeliveries: 71, totalWeight: 2100, status: "Active", joinedDate: "2023-08-22", gender: "Male", dateOfBirth: "1982-04-12" },
 ];
 
 const deliveryHistory = [
@@ -261,8 +261,8 @@ function FarmerProfilePage() {
                 <div className="flex items-center gap-3">
                   <Leaf size={16} className="text-text-secondary shrink-0" />
                   <div>
-                    <p className="text-xs text-text-secondary">Tea Variety</p>
-                    <p className="text-sm font-medium text-text-primary">{farmer.teaVariety}</p>
+                    <p className="text-xs text-text-secondary">Coffee Variety</p>
+                    <p className="text-sm font-medium text-text-primary">{farmer.coffeeVariety}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

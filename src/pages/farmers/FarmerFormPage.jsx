@@ -14,11 +14,11 @@ const genderOptions = [
   { value: "Female", label: "Female" },
 ];
 
-const teaVarietyOptions = [
-  { value: "TRFK 306/1", label: "TRFK 306/1" },
-  { value: "RB 16/9", label: "RB 16/9" },
-  { value: "SFS 150/10", label: "SFS 150/10" },
-  { value: "TRFK 306/3", label: "TRFK 306/3" },
+const coffeeVarietyOptions = [
+  { value: "Red Bourbon", label: "Red Bourbon" },
+  { value: "Jackson", label: "Jackson" },
+  { value: "BM 139", label: "BM 139" },
+  { value: "SL28", label: "SL28" },
 ];
 
 const collectionCenterOptions = [
@@ -45,7 +45,7 @@ const mockFarmer = {
   province: "Central",
   country: "Uganda",
   farmSize: 2.5,
-  teaVariety: "TRFK 306/1",
+  coffeeVariety: "Red Bourbon",
   collectionCenter: "Kyanja CC",
   status: "Active",
 };
@@ -89,7 +89,7 @@ function FarmerFormPage() {
       province: "",
       country: "Uganda",
       farmSize: "",
-      teaVariety: null,
+      coffeeVariety: null,
       collectionCenter: null,
       status: "Active",
     },
@@ -130,7 +130,7 @@ function FarmerFormPage() {
             {isEdit ? "Edit Farmer" : "Register New Farmer"}
           </h1>
           <p className="text-sm text-text-secondary mt-1">
-            {isEdit ? "Update farmer details below" : "Fill in the details to register a new tea farmer"}
+            {isEdit ? "Update farmer details below" : "Fill in the details to register a new coffee farmer"}
           </p>
         </motion.div>
 
@@ -265,17 +265,17 @@ function FarmerFormPage() {
                   })}
                 />
                 <Controller
-                  name="teaVariety"
+                  name="coffeeVariety"
                   control={control}
-                  rules={{ required: "Tea variety is required" }}
+                  rules={{ required: "Coffee variety is required" }}
                   render={({ field }) => (
                     <Select
-                      label="Tea Variety"
-                      options={teaVarietyOptions}
+                      label="Coffee Variety"
+                      options={coffeeVarietyOptions}
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder="Select tea variety"
-                      error={errors.teaVariety?.message}
+                      placeholder="Select coffee variety"
+                      error={errors.coffeeVariety?.message}
                     />
                   )}
                 />

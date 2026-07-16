@@ -43,7 +43,7 @@ function ForgotPasswordPage() {
           <div className="inline-flex items-center justify-center w-10 h-10 bg-primary rounded-xl">
             <Leaf className="w-5 h-5 text-white" />
           </div>
-          <span className="text-lg font-bold text-primary">TFMS</span>
+          <span className="text-lg font-bold text-primary">COMS</span>
         </div>
 
         {/* Card */}

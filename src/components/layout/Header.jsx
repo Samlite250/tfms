@@ -22,7 +22,7 @@ const dropdownVariants = {
 const breadcrumbMap = {
   dashboard: 'Dashboard',
   farmers: 'Farmers',
-  collections: 'Tea Collection',
+  collections: 'Coffee Collection',
   production: 'Production',
   inventory: 'Inventory',
   sales: 'Sales',

@@ -119,10 +119,10 @@ function AppRoutes() {
   };
 
   const mockNotifications = [
-    { id: 1, message: 'Low stock alert: Packaging Materials', time: '5 min ago', read: false },
-    { id: 2, message: 'New collection recorded by John', time: '1 hour ago', read: false },
+    { id: 1, message: 'Low stock alert: Jute Bags', time: '5 min ago', read: false },
+    { id: 2, message: 'New collection recorded by Epiphanie', time: '1 hour ago', read: false },
     { id: 3, message: 'Monthly report is ready', time: '3 hours ago', read: true },
-    { id: 4, message: 'Payment received from TeaCorp Ltd', time: '1 day ago', read: true },
+    { id: 4, message: 'Payment received from Nairobi Coffee Merchants', time: '1 day ago', read: true },
   ];
 
   function AuthenticatedLayout({ children }) {

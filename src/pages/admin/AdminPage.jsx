@@ -94,37 +94,37 @@ const TIMEZONE_OPTIONS = [
 ];
 
 const mockUsers = [
-  { id: "USR001", name: "Dissanayake Bandara", email: "d.bandara@tfms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000001", status: "active", lastLogin: "2026-07-14 09:15", avatar: "DB" },
-  { id: "USR002", name: "Kamal Perera", email: "k.perera@tfms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000002", status: "active", lastLogin: "2026-07-14 08:30", avatar: "KP" },
-  { id: "USR003", name: "Nimal Silva", email: "n.silva@tfms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000003", status: "active", lastLogin: "2026-07-14 07:45", avatar: "NS" },
-  { id: "USR004", name: "Anita Jayawardena", email: "a.jayawardena@tfms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000004", status: "active", lastLogin: "2026-07-13 17:20", avatar: "AJ" },
-  { id: "USR005", name: "Ravi Wickrama", email: "r.wickrama@tfms.com", role: ROLES.ACCOUNTANT, department: "Finance & Accounts", phone: "0771000005", status: "active", lastLogin: "2026-07-14 08:00", avatar: "RW" },
-  { id: "USR006", name: "Dilani Herath", email: "d.herath@tfms.com", role: ROLES.PRODUCTION_OFFICER, department: "Processing", phone: "0771000006", status: "active", lastLogin: "2026-07-14 06:30", avatar: "DH" },
-  { id: "USR007", name: "Chaminda Rajapaksa", email: "c.rajapaksa@tfms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000007", status: "active", lastLogin: "2026-07-13 14:10", avatar: "CR" },
-  { id: "USR008", name: "Priya Bandara", email: "p.bandara@tfms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000008", status: "inactive", lastLogin: "2026-06-20 11:00", avatar: "PB" },
-  { id: "USR009", name: "Sunil Fernando", email: "s.fernando@tfms.com", role: ROLES.PRODUCTION_OFFICER, department: "Processing", phone: "0771000009", status: "active", lastLogin: "2026-07-14 07:15", avatar: "SF" },
-  { id: "USR010", name: "Madhavi Liyanage", email: "m.liyanage@tfms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000010", status: "active", lastLogin: "2026-07-14 09:00", avatar: "ML" },
-  { id: "USR011", name: "Thilina Weerasinghe", email: "t.weerasinghe@tfms.com", role: ROLES.ACCOUNTANT, department: "Finance & Accounts", phone: "0771000011", status: "active", lastLogin: "2026-07-13 16:45", avatar: "TW" },
-  { id: "USR012", name: "Sanduni Ranasinghe", email: "s.ranasinghe@tfms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000012", status: "active", lastLogin: "2026-07-14 06:00", avatar: "SR" },
-  { id: "USR013", name: "Wasantha Jayasuriya", email: "w.jayasuriya@tfms.com", role: ROLES.PRODUCTION_OFFICER, department: "Processing", phone: "0771000013", status: "active", lastLogin: "2026-07-14 08:45", avatar: "WJ" },
-  { id: "USR014", name: "Kavisha Dissanayake", email: "k.dissanayake@tfms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000014", status: "inactive", lastLogin: "2026-05-10 09:30", avatar: "KD" },
-  { id: "USR015", name: "Mahinda Gamage", email: "m.gamage@tfms.com", role: ROLES.ADMIN, department: "Processing", phone: "0771000015", status: "active", lastLogin: "2026-07-14 07:00", avatar: "MG" },
-  { id: "USR016", name: "Lakshman Peris", email: "l.peris@tfms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000016", status: "active", lastLogin: "2026-07-13 12:00", avatar: "LP" },
+  { id: "USR001", name: "Dissanayake Bandara", email: "d.bandara@coms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000001", status: "active", lastLogin: "2026-07-14 09:15", avatar: "DB" },
+  { id: "USR002", name: "Kamal Perera", email: "k.perera@coms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000002", status: "active", lastLogin: "2026-07-14 08:30", avatar: "KP" },
+  { id: "USR003", name: "Nimal Silva", email: "n.silva@coms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000003", status: "active", lastLogin: "2026-07-14 07:45", avatar: "NS" },
+  { id: "USR004", name: "Anita Jayawardena", email: "a.jayawardena@coms.com", role: ROLES.ADMIN, department: "Management", phone: "0771000004", status: "active", lastLogin: "2026-07-13 17:20", avatar: "AJ" },
+  { id: "USR005", name: "Ravi Wickrama", email: "r.wickrama@coms.com", role: ROLES.ACCOUNTANT, department: "Finance & Accounts", phone: "0771000005", status: "active", lastLogin: "2026-07-14 08:00", avatar: "RW" },
+  { id: "USR006", name: "Dilani Herath", email: "d.herath@coms.com", role: ROLES.PRODUCTION_OFFICER, department: "Processing", phone: "0771000006", status: "active", lastLogin: "2026-07-14 06:30", avatar: "DH" },
+  { id: "USR007", name: "Chaminda Rajapaksa", email: "c.rajapaksa@coms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000007", status: "active", lastLogin: "2026-07-13 14:10", avatar: "CR" },
+  { id: "USR008", name: "Priya Bandara", email: "p.bandara@coms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000008", status: "inactive", lastLogin: "2026-06-20 11:00", avatar: "PB" },
+  { id: "USR009", name: "Sunil Fernando", email: "s.fernando@coms.com", role: ROLES.PRODUCTION_OFFICER, department: "Processing", phone: "0771000009", status: "active", lastLogin: "2026-07-14 07:15", avatar: "SF" },
+  { id: "USR010", name: "Madhavi Liyanage", email: "m.liyanage@coms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000010", status: "active", lastLogin: "2026-07-14 09:00", avatar: "ML" },
+  { id: "USR011", name: "Thilina Weerasinghe", email: "t.weerasinghe@coms.com", role: ROLES.ACCOUNTANT, department: "Finance & Accounts", phone: "0771000011", status: "active", lastLogin: "2026-07-13 16:45", avatar: "TW" },
+  { id: "USR012", name: "Sanduni Ranasinghe", email: "s.ranasinghe@coms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000012", status: "active", lastLogin: "2026-07-14 06:00", avatar: "SR" },
+  { id: "USR013", name: "Wasantha Jayasuriya", email: "w.jayasuriya@coms.com", role: ROLES.PRODUCTION_OFFICER, department: "Processing", phone: "0771000013", status: "active", lastLogin: "2026-07-14 08:45", avatar: "WJ" },
+  { id: "USR014", name: "Kavisha Dissanayake", email: "k.dissanayake@coms.com", role: ROLES.COLLECTION_OFFICER, department: "Collection", phone: "0771000014", status: "inactive", lastLogin: "2026-05-10 09:30", avatar: "KD" },
+  { id: "USR015", name: "Mahinda Gamage", email: "m.gamage@coms.com", role: ROLES.ADMIN, department: "Processing", phone: "0771000015", status: "active", lastLogin: "2026-07-14 07:00", avatar: "MG" },
+  { id: "USR016", name: "Lakshman Peris", email: "l.peris@coms.com", role: ROLES.STORE_KEEPER, department: "Warehouse", phone: "0771000016", status: "active", lastLogin: "2026-07-13 12:00", avatar: "LP" },
 ];
 
 const mockActivities = [
-  { id: 1, user: "Kamal Perera", action: "Created", module: "Collection", details: "Recorded tea collection: 450 kg from Kigali cooperative", timestamp: "2026-07-14 09:15:00" },
+  { id: 1, user: "Kamal Perera", action: "Created", module: "Collection", details: "Recorded coffee collection: 450 kg from Kigali cooperative", timestamp: "2026-07-14 09:15:00" },
   { id: 2, user: "Nimal Silva", action: "Updated", module: "Farmers", details: "Updated farmer profile: Jean Mugabo - contact info changed", timestamp: "2026-07-14 09:05:00" },
   { id: 3, user: "Dissanayake Bandara", action: "Deleted", module: "Users", details: "Deactivated user account: Lakshman Peris", timestamp: "2026-07-14 08:50:00" },
   { id: 4, user: "Ravi Wickrama", action: "Created", module: "Expenses", details: "Logged expense: RWF 1,850 for machinery maintenance", timestamp: "2026-07-14 08:40:00" },
   { id: 5, user: "Dilani Herath", action: "Updated", module: "Production", details: "Updated batch #1042 status to 'In Progress'", timestamp: "2026-07-14 08:30:00" },
-  { id: 6, user: "Chaminda Rajapaksa", action: "Created", module: "Inventory", details: "Added new stock entry: 500 kg Black Tea BOP1", timestamp: "2026-07-14 08:15:00" },
+  { id: 6, user: "Chaminda Rajapaksa", action: "Created", module: "Inventory", details: "Added new stock entry: 500 kg Black Coffee AA", timestamp: "2026-07-14 08:15:00" },
   { id: 7, user: "Kamal Perera", action: "Updated", module: "Employees", details: "Shift assignment updated for evening crew", timestamp: "2026-07-14 08:00:00" },
   { id: 8, user: "Anita Jayawardena", action: "Created", module: "Employees", details: "Registered new employee: Nipuni Wijesinghe - Payroll Officer", timestamp: "2026-07-14 07:45:00" },
-  { id: 9, user: "Madhavi Liyanage", action: "Created", module: "Collection", details: "Recorded tea collection: 320 kg from Nyungwe cooperative", timestamp: "2026-07-14 07:30:00" },
+  { id: 9, user: "Madhavi Liyanage", action: "Created", module: "Collection", details: "Recorded coffee collection: 320 kg from Nyungwe cooperative", timestamp: "2026-07-14 07:30:00" },
   { id: 10, user: "Thilina Weerasinghe", action: "Updated", module: "Sales", details: "Updated invoice #2087 payment status to 'Paid'", timestamp: "2026-07-14 07:15:00" },
-  { id: 11, user: "Wasantha Jayasuriya", action: "Updated", module: "Production", details: "Completed batch #1041: 320 kg green tea processed", timestamp: "2026-07-14 07:00:00" },
-  { id: 12, user: "Sunil Fernando", action: "Created", module: "Production", details: "Started new production batch #1043: Green Tea", timestamp: "2026-07-14 06:45:00" },
+  { id: 11, user: "Wasantha Jayasuriya", action: "Updated", module: "Production", details: "Completed batch #1041: 320 kg green coffee processed", timestamp: "2026-07-14 07:00:00" },
+  { id: 12, user: "Sunil Fernando", action: "Created", module: "Production", details: "Started new production batch #1043: Green Coffee", timestamp: "2026-07-14 06:45:00" },
   { id: 13, user: "Dissanayake Bandara", action: "Updated", module: "Settings", details: "Updated factory contact information", timestamp: "2026-07-14 06:30:00" },
   { id: 14, user: "Priya Bandara", action: "Deleted", module: "Collection", details: "Removed duplicate collection record #C-4521", timestamp: "2026-07-13 17:00:00" },
   { id: 15, user: "Kamal Perera", action: "Created", module: "Inventory", details: "Stock transfer: 200 kg from Warehouse A to Processing", timestamp: "2026-07-13 16:45:00" },
@@ -133,20 +133,20 @@ const mockActivities = [
   { id: 18, user: "Anita Jayawardena", action: "Updated", module: "Employees", details: "Updated leave request for Dilani Herath - Approved", timestamp: "2026-07-13 16:00:00" },
   { id: 19, user: "Dilani Herath", action: "Updated", module: "Production", details: "Quality check passed for batch #1040", timestamp: "2026-07-13 15:45:00" },
   { id: 20, user: "Chaminda Rajapaksa", action: "Deleted", module: "Inventory", details: "Removed expired stock entry: Fertilizer batch #FB-203", timestamp: "2026-07-13 15:30:00" },
-  { id: 21, user: "Madhavi Liyanage", action: "Updated", module: "Farmers", details: "Updated cooperative details: Kigali Tea Growers", timestamp: "2026-07-13 15:15:00" },
+  { id: 21, user: "Madhavi Liyanage", action: "Updated", module: "Farmers", details: "Updated cooperative details: Kigali Coffee Growers", timestamp: "2026-07-13 15:15:00" },
   { id: 22, user: "Sanduni Ranasinghe", action: "Created", module: "Inventory", details: "Received shipment: 1,000 kg packaging materials", timestamp: "2026-07-13 15:00:00" },
   { id: 23, user: "Thilina Weerasinghe", action: "Updated", module: "Expenses", details: "Updated expense category for invoice #EX-458", timestamp: "2026-07-13 14:45:00" },
   { id: 24, user: "Kamal Perera", action: "Created", module: "Reports", details: "Generated monthly production report for June 2026", timestamp: "2026-07-13 14:30:00" },
   { id: 25, user: "Dissanayake Bandara", action: "Updated", module: "Settings", details: "System backup configuration updated", timestamp: "2026-07-13 14:15:00" },
   { id: 26, user: "Wasantha Jayasuriya", action: "Deleted", module: "Production", details: "Cancelled production batch #1039 - quality issue", timestamp: "2026-07-13 14:00:00" },
-  { id: 27, user: "Nimal Silva", action: "Created", module: "Collection", details: "Recorded tea collection: 280 kg from Huye cooperative", timestamp: "2026-07-13 13:45:00" },
+  { id: 27, user: "Nimal Silva", action: "Created", module: "Collection", details: "Recorded coffee collection: 280 kg from Huye cooperative", timestamp: "2026-07-13 13:45:00" },
   { id: 28, user: "Sunil Fernando", action: "Updated", module: "Production", details: "Adjusted processing parameters for batch #1042", timestamp: "2026-07-13 13:30:00" },
   { id: 29, user: "Lakshman Peris", action: "Created", module: "Inventory", details: "Conducted weekly inventory audit - Warehouse B", timestamp: "2026-07-13 13:15:00" },
   { id: 30, user: "Kavisha Dissanayake", action: "Updated", module: "Farmers", details: "Updated payment records for 15 farmers", timestamp: "2026-07-13 13:00:00" },
   { id: 31, user: "Ravi Wickrama", action: "Deleted", module: "Expenses", details: "Removed duplicate expense entry #EX-462", timestamp: "2026-07-13 12:45:00" },
   { id: 32, user: "Anita Jayawardena", action: "Created", module: "Employees", details: "Scheduled training session for new collection officers", timestamp: "2026-07-13 12:30:00" },
   { id: 33, user: "Mahinda Gamage", action: "Updated", module: "Production", details: "Machine maintenance log updated - CTC Line 2", timestamp: "2026-07-13 12:15:00" },
-  { id: 34, user: "Kamal Perera", action: "Created", module: "Sales", details: "Processed bulk order: 2,500 kg to Mombasa Tea Co.", timestamp: "2026-07-13 12:00:00" },
+  { id: 34, user: "Kamal Perera", action: "Created", module: "Sales", details: "Processed bulk order: 2,500 kg to Mombasa Coffee Co.", timestamp: "2026-07-13 12:00:00" },
   { id: 35, user: "Dissanayake Bandara", action: "Created", module: "Users", details: "Created new admin account for system auditor", timestamp: "2026-07-13 11:45:00" },
 ];
 
@@ -239,10 +239,10 @@ export default function AdminPage() {
   const [activityDateTo, setActivityDateTo] = useState("");
   const activityPageSize = 8;
 
-  const [factoryName, setFactoryName] = useState("Highland Tea Estates PLC");
+  const [factoryName, setFactoryName] = useState("Mahembe Coffee Factory");
   const [factoryAddress, setFactoryAddress] = useState("No. 42, Plantation Road, Nuwara Eliya, Sri Lanka");
   const [factoryPhone, setFactoryPhone] = useState("+94 52 222 3456");
-  const [factoryEmail, setFactoryEmail] = useState("admin@highlandtea.com");
+  const [factoryEmail, setFactoryEmail] = useState("admin@mahembecoffee.com");
   const [defaultCurrency, setDefaultCurrency] = useState("RWF");
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
   const [timeZone, setTimeZone] = useState("Asia/Colombo");
@@ -546,7 +546,7 @@ export default function AdminPage() {
             <Input
               label="Email"
               type="email"
-              placeholder="user@tfms.com"
+              placeholder="user@coms.com"
               icon={Mail}
               error={errors.email?.message}
               {...register("email", {

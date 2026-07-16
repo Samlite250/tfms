@@ -29,12 +29,12 @@ const mockBatch = {
   id: 25,
   batchNumber: "BATCH-2026-025",
   date: "2026-07-10",
-  teaGrade: "BOP1",
+  teaGrade: "TT",
   supervisor: "R. Perera",
   status: "Completed",
   greenLeafInput: 450,
-  otherMaterials: "12 kg stems, 5 kg dust",
-  processingMethod: "Orthodox",
+  otherMaterials: "12 kg husks, 5 kg parchment",
+  processingMethod: "Washed",
   fermentationTime: 90,
   dryingTime: 25,
   firingTemperature: 85,
@@ -45,25 +45,25 @@ const mockBatch = {
   yieldPercent: 81.1,
   timeline: [
     {
-      step: "Leaf Collection",
+      step: "Cherry Collection",
       time: "06:00 AM",
       date: "2026-07-10",
       status: "completed",
-      details: "450 kg green leaf collected from fields A3, B1",
+      details: "450 kg coffee cherries collected from fields A3, B1",
     },
     {
-      step: "Withering",
+      step: "Pulping",
       time: "07:30 AM",
       date: "2026-07-10",
       status: "completed",
-      details: "14 hours indoor withering, humidity 68%",
+      details: "Pulping and fermentation preparation, humidity 68%",
     },
     {
-      step: "Rolling",
+      step: "Washing",
       time: "09:30 AM",
       date: "2026-07-10",
       status: "completed",
-      details: "Orthodox rolling for 45 minutes",
+      details: "Washed process, water fermentation for 45 minutes",
     },
     {
       step: "Fermentation",
@@ -84,14 +84,14 @@ const mockBatch = {
       time: "01:00 PM",
       date: "2026-07-10",
       status: "completed",
-      details: "Sorted to BOP1 grade, 365 kg finished product",
+      details: "Sorted to TT grade, 365 kg parchment coffee",
     },
     {
       step: "Quality Check",
       time: "02:30 PM",
       date: "2026-07-10",
       status: "completed",
-      details: "Grade A assessment, aroma: excellent, color: bright copper",
+      details: "Grade A assessment, aroma: excellent, color: rich brown",
     },
     {
       step: "Packaging",
@@ -225,7 +225,7 @@ function ProductionDetailPage() {
             bg: "bg-primary/10",
           },
           {
-            label: "Finished Product",
+            label: "Parchment Coffee",
             value: `${batch.finishedProductWeight} kg`,
             icon: PackageCheck,
             color: "text-secondary",
@@ -301,7 +301,7 @@ function ProductionDetailPage() {
                       <div className="flex items-center justify-between py-2 border-b border-border/60">
                         <span className="text-sm text-text-secondary flex items-center gap-2">
                           <Leaf size={14} className="text-primary" />
-                          Green Leaf Input
+                          Cherry Input
                         </span>
                         <span className="text-sm font-semibold text-text-primary">
                           {batch.greenLeafInput} kg
@@ -378,7 +378,7 @@ function ProductionDetailPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-primary/5 rounded-xl p-4 text-center">
                       <Weight size={20} className="text-primary mx-auto mb-2" />
-                      <p className="text-xs text-text-secondary">Finished Product</p>
+                      <p className="text-xs text-text-secondary">Parchment Coffee</p>
                       <p className="text-xl font-bold text-text-primary">
                         {batch.finishedProductWeight} kg
                       </p>
@@ -489,12 +489,12 @@ function ProductionDetailPage() {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
-                      { label: "Leaf Appearance", value: "Uniform, well-curled", score: "92/100" },
-                      { label: "Aroma Profile", value: "Excellent, floral notes", score: "95/100" },
-                      { label: "Liquor Color", value: "Bright copper", score: "90/100" },
-                      { label: "Cup Taste", value: "Rich, full-bodied", score: "88/100" },
-                      { label: "Infusion", value: "Bright, uniform", score: "91/100" },
-                      { label: "Moisture Content", value: "3.0% (target: <4%)", score: "96/100" },
+                      { label: "Bean Appearance", value: "Uniform, well-sorted", score: "92/100" },
+                      { label: "Aroma Profile", value: "Excellent, citrus notes", score: "95/100" },
+                      { label: "Liquor Color", value: "Rich brown", score: "90/100" },
+                      { label: "Cup Taste", value: "Rich, full-bodied, acidic", score: "88/100" },
+                      { label: "Body", value: "Medium, balanced", score: "91/100" },
+                      { label: "Moisture Content", value: "11.0% (target: 10-12%)", score: "96/100" },
                     ].map((metric) => (
                       <div
                         key={metric.label}

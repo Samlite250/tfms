@@ -45,7 +45,7 @@ const mockEditData = {
   firstName: "Kamal",
   lastName: "Perera",
   phone: "0771234567",
-  email: "kamal.p@tfms.com",
+  email: "kamal.p@coms.com",
   dateOfBirth: "1985-06-15",
   gender: "Male",
   nationalId: "851234567V",
@@ -169,7 +169,7 @@ export default function EmployeeFormPage() {
               />
               <Input
                 label="Email"
-                placeholder="name@tfms.com"
+                placeholder="name@coms.com"
                 type="email"
                 icon={Mail}
                 error={errors.email?.message}

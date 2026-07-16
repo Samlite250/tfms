@@ -19,40 +19,40 @@ import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 
 const CUSTOMER_OPTIONS = [
-  { value: "Emerald Tea Traders", label: "Emerald Tea Traders" },
+  { value: "Emerald Coffee Traders", label: "Emerald Coffee Traders" },
   { value: "Green Valley Imports", label: "Green Valley Imports" },
   { value: "Pacific Rim Beverages", label: "Pacific Rim Beverages" },
   { value: "Highland Exports Ltd.", label: "Highland Exports Ltd." },
-  { value: "Oriental Tea House", label: "Oriental Tea House" },
+  { value: "Oriental Coffee House", label: "Oriental Coffee House" },
   { value: "Zenith Beverages Co.", label: "Zenith Beverages Co." },
   { value: "Sunrise Trading", label: "Sunrise Trading" },
   { value: "Mountain Dew Distributors", label: "Mountain Dew Distributors" },
-  { value: "Royal Tea Merchants", label: "Royal Tea Merchants" },
-  { value: "Global Leaf Co.", label: "Global Leaf Co." },
-  { value: "Aroma Tea International", label: "Aroma Tea International" },
+  { value: "Royal Coffee Merchants", label: "Royal Coffee Merchants" },
+  { value: "Global Bean Co.", label: "Global Bean Co." },
+  { value: "Aroma Coffee International", label: "Aroma Coffee International" },
   { value: "Herbal Harmony Ltd.", label: "Herbal Harmony Ltd." },
-  { value: "Leaf & Cup Co.", label: "Leaf & Cup Co." },
+  { value: "Bean & Cup Co.", label: "Bean & Cup Co." },
   { value: "Misty Morning Imports", label: "Misty Morning Imports" },
-  { value: "Silk Road Tea Co.", label: "Silk Road Tea Co." },
+  { value: "Silk Road Coffee Co.", label: "Silk Road Coffee Co." },
 ];
 
-const TEA_GRADE_OPTIONS = [
-  { value: "OP1", label: "OP1 - Orange Pekoe 1" },
-  { value: "OPA", label: "OPA - Orange Pekoe A" },
-  { value: "OPB", label: "OPB - Orange Pekoe B" },
-  { value: "OPC", label: "OPC - Orange Pekoe C" },
-  { value: "BOP1", label: "BOP1 - Broken Orange Pekoe 1" },
-  { value: "BOP", label: "BOP - Broken Orange Pekoe" },
-  { value: "BOPF", label: "BOPF - Broken Orange Pekoe Fannings" },
-  { value: "BPS1", label: "BPS1 - Broken Pekoe Souchong 1" },
-  { value: "PF1", label: "PF1 - Pekoe Fannings 1" },
-  { value: "PD1", label: "PD1 - Pekoe Dust 1" },
-  { value: "D1", label: "D1 - Dust 1" },
-  { value: "D2", label: "D2 - Dust 2" },
-  { value: "Green Tea Premium", label: "Green Tea Premium" },
-  { value: "Green Tea Standard", label: "Green Tea Standard" },
-  { value: "Oolong", label: "Oolong" },
-  { value: "White Tea", label: "White Tea" },
+const COFFEE_GRADE_OPTIONS = [
+  { value: "AA", label: "AA - Premium AA Screen" },
+  { value: "AB", label: "AB - Medium AB Screen" },
+  { value: "PB", label: "PB - Peaberry" },
+  { value: "C", label: "C - Commercial Grade C" },
+  { value: "E", label: "E - Elephant Bean" },
+  { value: "MH", label: "MH - Mibri Heavy" },
+  { value: "ML", label: "ML - Mibri Light" },
+  { value: "SC", label: "SC - SC Screen" },
+  { value: "T", label: "T - Triage" },
+  { value: "UG", label: "UG - Ungraded" },
+  { value: "Y1", label: "Y1 - Screen 18" },
+  { value: "Y2", label: "Y2 - Screen 15" },
+  { value: "Specialty Grade 1", label: "Specialty Grade 1" },
+  { value: "Specialty Grade 2", label: "Specialty Grade 2" },
+  { value: "Premium Arabica", label: "Premium Arabica" },
+  { value: "Standard Robusta", label: "Standard Robusta" },
 ];
 
 const PAYMENT_METHOD_OPTIONS = [
@@ -251,7 +251,7 @@ function SalesFormPage() {
                 <div className="space-y-3">
                   <div className="hidden md:grid md:grid-cols-12 gap-3 px-1">
                     <div className="col-span-4">
-                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Tea Grade</span>
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Coffee Grade</span>
                     </div>
                     <div className="col-span-2">
                       <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Quantity (kg)</span>
@@ -283,7 +283,7 @@ function SalesFormPage() {
                         >
                           <div className="md:col-span-4">
                             <Select
-                              options={TEA_GRADE_OPTIONS}
+                              options={COFFEE_GRADE_OPTIONS}
                               placeholder="Select grade"
                               value={watch(`items.${index}.grade`)}
                               onChange={(val) => setValue(`items.${index}.grade`, val)}

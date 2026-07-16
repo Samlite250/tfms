@@ -23,18 +23,18 @@ import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import StatCard from "../../components/ui/StatCard";
 
-const teaGrades = [
+const coffeeGrades = [
   { value: "all", label: "All Grades" },
-  { value: "OP1", label: "OP1" },
-  { value: "OPA", label: "OPA" },
-  { value: "OPB", label: "OPB" },
-  { value: "OPC", label: "OPC" },
-  { value: "BOP1", label: "BOP1" },
-  { value: "BOPA", label: "BOPA" },
-  { value: "BOPB", label: "BOPB" },
-  { value: "BOPC", label: "BOPC" },
-  { value: "CTC", label: "CTC" },
-  { value: "DUST1", label: "DUST1" },
+  { value: "AA", label: "AA" },
+  { value: "AB", label: "AB" },
+  { value: "PB", label: "PB" },
+  { value: "C", label: "C" },
+  { value: "TT", label: "TT" },
+  { value: "T", label: "T" },
+  { value: "E", label: "E" },
+  { value: "MH", label: "MH" },
+  { value: "SM", label: "SM" },
+  { value: "P", label: "P" },
 ];
 
 const statusOptions = [
@@ -55,7 +55,7 @@ const supervisors = [
   "T. Gunasekara",
 ];
 
-const teaGradesList = ["OP1", "OPA", "OPB", "OPC", "BOP1", "BOPA", "BOPB", "BOPC", "CTC", "DUST1"];
+const coffeeGradesList = ["AA", "AB", "PB", "C", "TT", "T", "E", "MH", "SM", "P"];
 
 function generateMockData() {
   const records = [];
@@ -72,7 +72,7 @@ function generateMockData() {
       id: i,
       batchNumber: `BATCH-2026-${String(i).padStart(3, "0")}`,
       date: `2026-${month}-${day}`,
-      teaGrade: teaGradesList[Math.floor(Math.random() * teaGradesList.length)],
+      teaGrade: coffeeGradesList[Math.floor(Math.random() * coffeeGradesList.length)],
       rawMaterial,
       finishedProduct: Math.round(finishedProduct * 10) / 10,
       yieldPercent: Math.round(yieldPct * 10) / 10,
@@ -190,7 +190,7 @@ function ProductionPage() {
       accessor: "date",
     },
     {
-      header: "Tea Grade",
+      header: "Coffee Grade",
       accessor: "teaGrade",
       render: (row) => (
         <Badge variant="info">{row.teaGrade}</Badge>
@@ -245,7 +245,7 @@ function ProductionPage() {
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Production Management</h1>
           <p className="text-sm text-text-secondary mt-1">
-            Track and manage tea production batches
+            Track and manage coffee production batches
           </p>
         </div>
         <Button
@@ -296,10 +296,10 @@ function ProductionPage() {
               </div>
               <div className="w-full md:w-40">
                 <Select
-                  options={teaGrades}
+                  options={coffeeGrades}
                   value={gradeFilter}
                   onChange={setGradeFilter}
-                  placeholder="Tea Grade"
+                  placeholder="Coffee Grade"
                 />
               </div>
               <div className="w-full md:w-40">

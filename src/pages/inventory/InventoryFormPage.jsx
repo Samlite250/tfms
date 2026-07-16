@@ -10,7 +10,7 @@ import Select from "../../components/ui/Select";
 import { useToast } from "../../components/ui/Toast";
 
 const CATEGORY_OPTIONS = [
-  { value: "Tea Stock", label: "Tea Stock" },
+  { value: "Coffee Stock", label: "Coffee Stock" },
   { value: "Raw Materials", label: "Raw Materials" },
   { value: "Packaging", label: "Packaging Materials" },
   { value: "Chemicals", label: "Chemicals" },
@@ -27,11 +27,11 @@ const UNIT_OPTIONS = [
 ];
 
 const MOCK_ITEMS = {
-  1: { name: "Green Tea Leaves (Premium)", category: "Tea Stock", description: "Premium grade green tea leaves from highland farms", quantity: 2450, unit: "kg", minStock: 500, costPerUnit: 12.5, supplier: "Highland Tea Estates", location: "Warehouse A", reorderPoint: 600 },
-  2: { name: "Black Tea Leaves (Standard)", category: "Tea Stock", description: "Standard grade black tea leaves", quantity: 1800, unit: "kg", minStock: 400, costPerUnit: 8.75, supplier: "Valley Plantations", location: "Warehouse A", reorderPoint: 500 },
-  3: { name: "Oolong Tea Leaves", category: "Tea Stock", description: "Premium oolong tea leaves", quantity: 320, unit: "kg", minStock: 200, costPerUnit: 15.0, supplier: "Mountain View Estate", location: "Warehouse A", reorderPoint: 250 },
-  4: { name: "White Tea Buds", category: "Tea Stock", description: "Delicate white tea buds", quantity: 85, unit: "kg", minStock: 100, costPerUnit: 22.0, supplier: "Silver Tip Farms", location: "Warehouse A", reorderPoint: 120 },
-  5: { name: "Matcha Powder", category: "Tea Stock", description: "Ceremonial grade matcha powder", quantity: 45, unit: "kg", minStock: 50, costPerUnit: 35.0, supplier: "ShadeGrown Co.", location: "Warehouse B", reorderPoint: 60 },
+  1: { name: "Green Coffee Beans (Premium)", category: "Coffee Stock", description: "Premium grade green coffee beans from highland farms", quantity: 2450, unit: "kg", minStock: 500, costPerUnit: 12.5, supplier: "Highland Coffee Estates", location: "Warehouse A", reorderPoint: 600 },
+  2: { name: "Green Coffee Beans (Standard)", category: "Coffee Stock", description: "Standard grade green coffee beans", quantity: 1800, unit: "kg", minStock: 400, costPerUnit: 8.75, supplier: "Valley Plantations", location: "Warehouse A", reorderPoint: 500 },
+  3: { name: "Arabica Coffee Beans", category: "Coffee Stock", description: "Premium arabica coffee beans", quantity: 320, unit: "kg", minStock: 200, costPerUnit: 15.0, supplier: "Mountain View Estate", location: "Warehouse A", reorderPoint: 250 },
+  4: { name: "Robusta Coffee Beans", category: "Coffee Stock", description: "Robusta coffee beans for blend", quantity: 85, unit: "kg", minStock: 100, costPerUnit: 22.0, supplier: "Silver Tip Farms", location: "Warehouse A", reorderPoint: 120 },
+  5: { name: "Coffee Grade C", category: "Coffee Stock", description: "Coffee Grade C powder for processing", quantity: 45, unit: "kg", minStock: 50, costPerUnit: 35.0, supplier: "ShadeGrown Co.", location: "Warehouse B", reorderPoint: 60 },
 };
 
 const fadeIn = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
@@ -137,7 +137,7 @@ function InventoryFormPage() {
                 <div className="md:col-span-2">
                   <Input
                     label="Item Name"
-                    placeholder="e.g. Green Tea Leaves (Premium)"
+                    placeholder="e.g. Green Coffee Beans (Premium)"
                     error={errors.name?.message}
                     {...register("name", { required: "Item name is required" })}
                   />

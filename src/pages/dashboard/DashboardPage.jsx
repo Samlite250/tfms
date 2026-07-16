@@ -40,7 +40,7 @@ function getRoleConfig(role) {
       return {
         subtitle: "Here's your management overview",
         stats: [
-          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Coffee Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
           { label: "Production Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
           { label: "Active Employees", value: "48", change: "On shift", up: true, icon: Users, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
           { label: "Monthly Revenue", value: "RWF 128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
@@ -52,10 +52,10 @@ function getRoleConfig(role) {
           { label: "View Reports", icon: ClipboardList, to: "/reports", color: "bg-purple-600" },
         ],
         activities: [
-          { id: 1, icon: Coffee, description: "Collection recorded: 450 kg from Kigali cooperative", time: "12 min ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
-          { id: 2, icon: Factory, description: "Batch #1042 completed: 320 kg green tea", time: "2 hrs ago", module: "Production", color: "text-secondary", bg: "bg-secondary/10" },
+          { id: 1, icon: Coffee, description: "Collection recorded: 450 kg from Mahembe cooperative", time: "12 min ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
+          { id: 2, icon: Factory, description: "Batch #1042 completed: 320 kg green coffee", time: "2 hrs ago", module: "Production", color: "text-secondary", bg: "bg-secondary/10" },
           { id: 3, icon: Users, description: "Shift assignment updated for evening crew", time: "3 hrs ago", module: "Employees", color: "text-info", bg: "bg-info/10" },
-          { id: 4, icon: ShoppingCart, description: "Invoice #2087 issued: RWF 4,200 to Nairobi Traders", time: "4 hrs ago", module: "Sales", color: "text-accent-dark", bg: "bg-accent/10" },
+          { id: 4, icon: ShoppingCart, description: "Invoice #2087 issued: RWF 4,200 to Nairobi Coffee Merchants", time: "4 hrs ago", module: "Sales", color: "text-accent-dark", bg: "bg-accent/10" },
         ],
       };
 
@@ -73,9 +73,9 @@ function getRoleConfig(role) {
           { label: "Add Farmer", icon: UserPlus, to: "/farmers/new", color: "bg-info" },
         ],
         activities: [
-          { id: 1, icon: Coffee, description: "Collection: 450 kg from Kigali cooperative", time: "12 min ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
+          { id: 1, icon: Coffee, description: "Collection: 450 kg from Mahembe cooperative", time: "12 min ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
           { id: 2, icon: UserPlus, description: "New farmer: Jean Mugabo registered", time: "1 hr ago", module: "Farmers", color: "text-info", bg: "bg-info/10" },
-          { id: 3, icon: Coffee, description: "Collection: 320 kg from Nyungwe cooperative", time: "3 hrs ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
+          { id: 3, icon: Coffee, description: "Collection: 320 kg from Ruyanza cooperative", time: "3 hrs ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
           { id: 4, icon: Tractor, description: "Farmer profile updated: Emmanuel Ndayisaba", time: "5 hrs ago", module: "Farmers", color: "text-secondary", bg: "bg-secondary/10" },
         ],
       };
@@ -94,9 +94,9 @@ function getRoleConfig(role) {
           { label: "View Inventory", icon: Package, to: "/inventory", color: "bg-purple-600" },
         ],
         activities: [
-          { id: 1, icon: Factory, description: "Batch #1042 completed: 320 kg green tea", time: "2 hrs ago", module: "Production", color: "text-secondary", bg: "bg-secondary/10" },
-          { id: 2, icon: Package, description: "Inventory alert: Black tea below threshold", time: "3 hrs ago", module: "Inventory", color: "text-warning", bg: "bg-warning/10" },
-          { id: 3, icon: Factory, description: "Batch #1043 started: Oolong processing", time: "4 hrs ago", module: "Production", color: "text-info", bg: "bg-info/10" },
+          { id: 1, icon: Factory, description: "Batch #1042 completed: 320 kg green coffee", time: "2 hrs ago", module: "Production", color: "text-secondary", bg: "bg-secondary/10" },
+          { id: 2, icon: Package, description: "Inventory alert: Green coffee below threshold", time: "3 hrs ago", module: "Inventory", color: "text-warning", bg: "bg-warning/10" },
+          { id: 3, icon: Factory, description: "Batch #1043 started: Washed process", time: "4 hrs ago", module: "Production", color: "text-info", bg: "bg-info/10" },
           { id: 4, icon: ClipboardList, description: "Quality check passed for batch #1040", time: "5 hrs ago", module: "Production", color: "text-primary", bg: "bg-primary/10" },
         ],
       };
@@ -115,7 +115,7 @@ function getRoleConfig(role) {
           { label: "Stock Movement", icon: ArrowRight, to: "/inventory/movements", color: "bg-primary" },
         ],
         activities: [
-          { id: 1, icon: Package, description: "Stock entry: 500 kg Black Tea BOP1 received", time: "1 hr ago", module: "Inventory", color: "text-primary", bg: "bg-primary/10" },
+          { id: 1, icon: Package, description: "Stock entry: 500 kg Green Coffee AB received", time: "1 hr ago", module: "Inventory", color: "text-primary", bg: "bg-primary/10" },
           { id: 2, icon: AlertTriangle, description: "Low stock alert: Packaging materials", time: "3 hrs ago", module: "Inventory", color: "text-warning", bg: "bg-warning/10" },
           { id: 3, icon: ArrowRight, description: "Stock transfer: 200 kg Warehouse A to Processing", time: "4 hrs ago", module: "Inventory", color: "text-info", bg: "bg-info/10" },
           { id: 4, icon: Package, description: "Weekly inventory audit completed - Warehouse B", time: "Yesterday", module: "Inventory", color: "text-secondary", bg: "bg-secondary/10" },
@@ -137,9 +137,9 @@ function getRoleConfig(role) {
           { label: "View Reports", icon: ClipboardList, to: "/reports", color: "bg-purple-600" },
         ],
         activities: [
-          { id: 1, icon: ShoppingCart, description: "Invoice #2087 issued: RWF 4,200 to Nairobi Traders", time: "3 hrs ago", module: "Sales", color: "text-secondary", bg: "bg-secondary/10" },
+          { id: 1, icon: ShoppingCart, description: "Invoice #2087 issued: RWF 4,200 to Nairobi Coffee Merchants", time: "3 hrs ago", module: "Sales", color: "text-secondary", bg: "bg-secondary/10" },
           { id: 2, icon: Receipt, description: "Expense: RWF 1,850 for machinery maintenance", time: "4 hrs ago", module: "Expenses", color: "text-danger", bg: "bg-danger/10" },
-          { id: 3, icon: DollarSign, description: "Payment received: RWF 5,200 from Mombasa Tea Co.", time: "5 hrs ago", module: "Sales", color: "text-primary", bg: "bg-primary/10" },
+          { id: 3, icon: DollarSign, description: "Payment received: RWF 5,200 from European Coffee Imports", time: "5 hrs ago", module: "Sales", color: "text-primary", bg: "bg-primary/10" },
           { id: 4, icon: FileText, description: "Monthly financial report generated", time: "Yesterday", module: "Reports", color: "text-accent-dark", bg: "bg-accent/10" },
         ],
       };
@@ -148,7 +148,7 @@ function getRoleConfig(role) {
       return {
         subtitle: "Here's your overview",
         stats: [
-          { label: "Tea Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Coffee Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
         ],
         quickActions: [],
         activities: [],

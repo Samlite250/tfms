@@ -41,14 +41,14 @@ const allTabs = [
   { id: "profile", label: "Profile", icon: User },
   { id: "factory", label: "Factory", icon: Factory },
   { id: "departments", label: "Departments", icon: Building2 },
-  { id: "grades", label: "Tea Grades", icon: Leaf },
+  { id: "grades", label: "Coffee Grades", icon: Leaf },
   { id: "centers", label: "Collection Centers", icon: MapPin },
   { id: "notifications", label: "Notifications", icon: Bell },
 ];
 
 const initialProfile = {
   fullName: "Amara Nkemdirim",
-  email: "amara.nkemdirim@teafactory.com",
+  email: "amara.nkemdirim@coms.com",
   phone: "+234 801 234 5678",
   department: "Administration",
   role: "System Administrator",
@@ -57,21 +57,21 @@ const initialProfile = {
 };
 
 const initialFactory = {
-  factoryName: "GreenLeaf Tea Factory",
+  factoryName: "Mahembe Coffee Factory",
   registrationNumber: "RC-2019/FGN/128456",
   street: "42 Plantation Avenue",
   city: "Lagos",
   province: "Lagos State",
   country: "Nigeria",
   phone: "+234 1 234 5678",
-  email: "info@greenleafttea.com",
-  website: "https://www.greenleafttea.com",
+  email: "info@mahembecoffee.com",
+  website: "https://www.mahembecoffee.com",
   startTime: "06:00",
   endTime: "18:00",
 };
 
 const initialDepartments = [
-  { id: 1, name: "Production", description: "Oversees tea processing and manufacturing", memberCount: 45 },
+  { id: 1, name: "Production", description: "Oversees coffee processing and manufacturing", memberCount: 45 },
   { id: 2, name: "Collection", description: "Manages leaf collection from farmers", memberCount: 22 },
   { id: 3, name: "Packaging", description: "Handles product packaging and labeling", memberCount: 18 },
   { id: 4, name: "Administration", description: "General administrative operations", memberCount: 12 },
@@ -81,14 +81,14 @@ const initialDepartments = [
 ];
 
 const initialGrades = [
-  { id: 1, name: "PF1", description: "Premium Grade 1 - Finest whole leaf" },
-  { id: 2, name: "PF2", description: "Premium Grade 2 - Fine whole leaf" },
-  { id: 3, name: "PF3", description: "Premium Grade 3 - Medium leaf" },
-  { id: 4, name: "PD", description: "Pekoe Dust - Fine granular tea" },
-  { id: 5, name: "Dust", description: "Dust grade - Finest particles" },
-  { id: 6, name: "Fannings", description: "Small leaf particles below Pekoe" },
-  { id: 7, name: "BOP", description: "Broken Orange Pekoe - Popular grade" },
-  { id: 8, name: "BOPSM", description: "Broken Orange Pekoe Superior Medium" },
+  { id: 1, name: "AA", description: "Premium Grade - Largest bean size" },
+  { id: 2, name: "AB", description: "Premium Grade - Medium bean size" },
+  { id: 3, name: "PB", description: "Peaberry - Single round bean" },
+  { id: 4, name: "C", description: "Common Grade - Smaller bean" },
+  { id: 5, name: "TT", description: "Light beans from AA and AB" },
+  { id: 6, name: "T", description: "Smallest and lightest beans" },
+  { id: 7, name: "E", description: "Elephant Grade - Oversized beans" },
+  { id: 8, name: "MH/ML", description: "Mill Hand / Machine Grade" },
 ];
 
 const initialCenters = [
@@ -621,7 +621,7 @@ function GradesSection() {
 
   return (
     <motion.div variants={tabContentVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-      <Card header={<h3 className="text-base font-semibold text-text-primary">Tea Grades ({grades.length})</h3>}>
+      <Card header={<h3 className="text-base font-semibold text-text-primary">Coffee Grades ({grades.length})</h3>}>
         <div className="space-y-3 mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="w-40">
@@ -705,7 +705,7 @@ function GradesSection() {
       <Modal
         isOpen={deleteModal.open}
         onClose={() => setDeleteModal({ open: false, grade: null })}
-        title="Delete Tea Grade"
+        title="Delete Coffee Grade"
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleteModal({ open: false, grade: null })}>Cancel</Button>
@@ -915,7 +915,7 @@ function NotificationsSection() {
     { key: "lowStockAlerts", label: "Low Stock Alerts", description: "Get notified when inventory items fall below minimum thresholds" },
     { key: "dailyReports", label: "Daily Reports", description: "Receive automated daily production and collection summary reports" },
     { key: "paymentReminders", label: "Payment Reminders", description: "Alerts for upcoming and overdue farmer and supplier payments" },
-    { key: "collectionUpdates", label: "Collection Updates", description: "Real-time notifications when new tea leaf collections are recorded" },
+    { key: "collectionUpdates", label: "Collection Updates", description: "Real-time notifications when new coffee cherry collections are recorded" },
     { key: "qualityAlerts", label: "Quality Alerts", description: "Immediate alerts when quality control tests fail or require attention" },
   ];
 

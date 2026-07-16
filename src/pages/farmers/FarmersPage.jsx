@@ -175,7 +175,7 @@ function FarmersPage() {
         <motion.div variants={staggerItem} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-bold text-text-primary">Farmer Management</h1>
-            <p className="text-sm text-text-secondary mt-1">Manage tea farmers and their collection details</p>
+            <p className="text-sm text-text-secondary mt-1">Manage coffee farmers and their collection details</p>
           </div>
           <Button icon={Plus} onClick={() => navigate("/farmers/new")}>
             Add Farmer

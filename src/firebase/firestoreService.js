@@ -154,13 +154,13 @@ const employeesService = {
   count: (filters) => getCollectionCount('employees', filters),
 };
 
-const teaCollectionsService = {
-  add: (data) => addDocToCollection('teaCollections', data),
-  getAll: (options) => getCollection('teaCollections', options),
-  getById: (id) => getDocFromCollection('teaCollections', id),
-  update: (id, data) => updateDocInCollection('teaCollections', id, data),
-  delete: (id) => deleteDocFromCollection('teaCollections', id),
-  count: (filters) => getCollectionCount('teaCollections', filters),
+const coffeeCollectionsService = {
+  add: (data) => addDocToCollection('coffeeCollections', data),
+  getAll: (options) => getCollection('coffeeCollections', options),
+  getById: (id) => getDocFromCollection('coffeeCollections', id),
+  update: (id, data) => updateDocInCollection('coffeeCollections', id, data),
+  delete: (id) => deleteDocFromCollection('coffeeCollections', id),
+  count: (filters) => getCollectionCount('coffeeCollections', filters),
 };
 
 const productionService = {
@@ -239,7 +239,7 @@ export {
   usersService,
   farmersService,
   employeesService,
-  teaCollectionsService,
+  coffeeCollectionsService,
   productionService,
   inventoryService,
   customersService,

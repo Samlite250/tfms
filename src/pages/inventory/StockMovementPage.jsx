@@ -22,14 +22,14 @@ import DataTable from "../../components/ui/DataTable";
 import { useToast } from "../../components/ui/Toast";
 
 const ITEM_OPTIONS = [
-  { value: "green-tea", label: "Green Tea Leaves (Premium)" },
-  { value: "black-tea", label: "Black Tea Leaves (Standard)" },
-  { value: "oolong-tea", label: "Oolong Tea Leaves" },
+  { value: "green-coffee", label: "Green Coffee Beans (Premium)" },
+  { value: "standard-coffee", label: "Green Coffee Beans (Standard)" },
+  { value: "arabica-coffee", label: "Arabica Coffee Beans" },
   { value: "sugar", label: "Sugar (Granulated)" },
   { value: "cinnamon", label: "Cinnamon (Ceylon)" },
   { value: "cardamom", label: "Cardamom Pods" },
-  { value: "filter-bags", label: "Tea Filter Bags" },
-  { value: "cardboard-boxes", label: "Cardboard Boxes (Medium)" },
+  { value: "filter-bags", label: "Sample Bags" },
+  { value: "cardboard-boxes", label: "Packaging Boxes (Medium)" },
   { value: "detergent", label: "Food-Grade Detergent" },
   { value: "diesel", label: "Diesel Fuel" },
   { value: "propane", label: "Propane Gas" },
@@ -45,22 +45,22 @@ const MOVEMENT_TYPES = [
 ];
 
 const MOCK_MOVEMENTS = [
-  { id: 1, date: "2026-07-13", item: "Green Tea Leaves (Premium)", type: "in", quantity: 500, unit: "kg", reference: "PO-2026-0412", reason: "Supplier delivery from Highland Tea Estates", handledBy: "James Mwangi" },
+  { id: 1, date: "2026-07-13", item: "Green Coffee Beans (Premium)", type: "in", quantity: 500, unit: "kg", reference: "PO-2026-0412", reason: "Supplier delivery from Highland Coffee Estates", handledBy: "James Mwangi" },
   { id: 2, date: "2026-07-13", item: "Sugar (Granulated)", type: "in", quantity: 300, unit: "kg", reference: "PO-2026-0413", reason: "Monthly restock order", handledBy: "James Mwangi" },
-  { id: 3, date: "2026-07-13", item: "Tea Filter Bags", type: "out", quantity: 2000, unit: "pieces", reference: "PROD-2026-0891", reason: "Production run #891 - Jasmine Green Tea", handledBy: "Sarah Odhiambo" },
-  { id: 4, date: "2026-07-13", item: "Cardboard Boxes (Medium)", type: "out", quantity: 150, unit: "pieces", reference: "PROD-2026-0891", reason: "Packaging for Jasmine Green Tea batch", handledBy: "Sarah Odhiambo" },
-  { id: 5, date: "2026-07-12", item: "Black Tea Leaves (Standard)", type: "out", quantity: 250, unit: "kg", reference: "PROD-2026-0890", reason: "Production run #890 - Classic Black Tea", handledBy: "Peter Kamau" },
+  { id: 3, date: "2026-07-13", item: "Sample Bags", type: "out", quantity: 2000, unit: "pieces", reference: "PROD-2026-0891", reason: "Production run #891 - Green Coffee Blend", handledBy: "Sarah Odhiambo" },
+  { id: 4, date: "2026-07-13", item: "Packaging Boxes (Medium)", type: "out", quantity: 150, unit: "pieces", reference: "PROD-2026-0891", reason: "Packaging for Green Coffee Blend batch", handledBy: "Sarah Odhiambo" },
+  { id: 5, date: "2026-07-12", item: "Green Coffee Beans (Standard)", type: "out", quantity: 250, unit: "kg", reference: "PROD-2026-0890", reason: "Production run #890 - Classic Green Coffee", handledBy: "Peter Kamau" },
   { id: 6, date: "2026-07-12", item: "Diesel Fuel", type: "in", quantity: 200, unit: "liters", reference: "FUEL-2026-0089", reason: "Monthly fuel delivery", handledBy: "John Kiprop" },
   { id: 7, date: "2026-07-12", item: "Diesel Fuel", type: "out", quantity: 75, unit: "liters", reference: "FUEL-2026-0090", reason: "Generator operations - Week 28", handledBy: "John Kiprop" },
-  { id: 8, date: "2026-07-12", item: "Cinnamon (Ceylon)", type: "out", quantity: 25, unit: "kg", reference: "PROD-2026-0889", reason: "Spiced Chai blend production", handledBy: "Peter Kamau" },
-  { id: 9, date: "2026-07-11", item: "Oolong Tea Leaves", type: "in", quantity: 100, unit: "kg", reference: "PO-2026-0410", reason: "Specialty order from Mountain View Estate", handledBy: "James Mwangi" },
+  { id: 8, date: "2026-07-12", item: "Cinnamon (Ceylon)", type: "out", quantity: 25, unit: "kg", reference: "PROD-2026-0889", reason: "Spiced Coffee blend production", handledBy: "Peter Kamau" },
+  { id: 9, date: "2026-07-11", item: "Arabica Coffee Beans", type: "in", quantity: 100, unit: "kg", reference: "PO-2026-0410", reason: "Specialty order from Mountain View Estate", handledBy: "James Mwangi" },
   { id: 10, date: "2026-07-11", item: "Honey (Natural)", type: "in", quantity: 50, unit: "liters", reference: "PO-2026-0411", reason: "Restocking natural honey supply", handledBy: "James Mwangi" },
   { id: 11, date: "2026-07-11", item: "Sticker Labels", type: "out", quantity: 800, unit: "pieces", reference: "PROD-2026-0888", reason: "Product labeling - Premium line", handledBy: "Sarah Odhiambo" },
   { id: 12, date: "2026-07-11", item: "Food-Grade Detergent", type: "out", quantity: 5, unit: "liters", reference: "MAINT-2026-0234", reason: "Equipment cleaning - Processing line B", handledBy: "John Kiprop" },
   { id: 13, date: "2026-07-10", item: "Propane Gas", type: "in", quantity: 80, unit: "liters", reference: "FUEL-2026-0088", reason: "Gas cylinder refill", handledBy: "John Kiprop" },
   { id: 14, date: "2026-07-10", item: "Cardamom Pods", type: "in", quantity: 30, unit: "kg", reference: "PO-2026-0408", reason: "Spice order from Spice Islands", handledBy: "James Mwangi" },
-  { id: 15, date: "2026-07-10", item: "Milk Powder", type: "out", quantity: 40, unit: "kg", reference: "PROD-2026-0887", reason: "Milk Tea production run", handledBy: "Peter Kamau" },
-  { id: 16, date: "2026-07-09", item: "Green Tea Leaves (Premium)", type: "out", quantity: 350, unit: "kg", reference: "PROD-2026-0886", reason: "Premium Green Tea production batch", handledBy: "Sarah Odhiambo" },
+  { id: 15, date: "2026-07-10", item: "Milk Powder", type: "out", quantity: 40, unit: "kg", reference: "PROD-2026-0887", reason: "Coffee with milk production run", handledBy: "Peter Kamau" },
+  { id: 16, date: "2026-07-09", item: "Green Coffee Beans (Premium)", type: "out", quantity: 350, unit: "kg", reference: "PROD-2026-0886", reason: "Premium Green Coffee production batch", handledBy: "Sarah Odhiambo" },
   { id: 17, date: "2026-07-09", item: "pH Testing Strips", type: "in", quantity: 100, unit: "pieces", reference: "LAB-2026-0045", reason: "Lab supplies restocking", handledBy: "James Mwangi" },
 ];
 
