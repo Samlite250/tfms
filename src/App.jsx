@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { MessagesProvider } from './contexts/MessagesContext';
 import { ToastProvider } from './components/ui/Toast';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import { ROLE_PERMISSIONS } from './utils/constants';
@@ -52,6 +53,7 @@ import ReportsPage from './pages/reports/ReportsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AdminPage from './pages/admin/AdminPage';
 import MyCollectionsPage from './pages/farmer/MyCollectionsPage';
+import MessagingPage from './pages/messages/MessagingPage';
 
 const routePermissionMap = {
   '/farmers': 'farmers',
@@ -180,6 +182,7 @@ function AppRoutes() {
       <Route path="/reports" element={<AuthenticatedLayout><ReportsPage /></AuthenticatedLayout>} />
       <Route path="/settings" element={<AuthenticatedLayout><SettingsPage /></AuthenticatedLayout>} />
       <Route path="/my-collections" element={<AuthenticatedLayout><MyCollectionsPage /></AuthenticatedLayout>} />
+      <Route path="/messages" element={<AuthenticatedLayout><MessagingPage /></AuthenticatedLayout>} />
       <Route path="/admin" element={<AuthenticatedLayout><AdminPage /></AuthenticatedLayout>} />
 
       {/* Catch all - redirect to landing */}
@@ -192,9 +195,11 @@ export default function App() {
   return (
     <Router>
       <AuthProvider>
-        <ToastProvider>
-          <AppRoutes />
-        </ToastProvider>
+        <MessagesProvider>
+          <ToastProvider>
+            <AppRoutes />
+          </ToastProvider>
+        </MessagesProvider>
       </AuthProvider>
     </Router>
   );

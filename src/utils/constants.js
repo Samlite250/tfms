@@ -21,26 +21,26 @@ export const ROLE_LABELS = {
 export const ROLE_PERMISSIONS = {
   [ROLES.ADMIN]: [
     'dashboard', 'farmers', 'employees', 'collections', 'production',
-    'inventory', 'customers', 'sales', 'expenses', 'reports', 'settings', 'admin',
+    'inventory', 'customers', 'sales', 'expenses', 'reports', 'settings', 'admin', 'messages',
   ],
   [ROLES.FACTORY_MANAGER]: [
     'dashboard', 'farmers', 'employees', 'collections', 'production',
-    'inventory', 'customers', 'sales', 'expenses', 'reports', 'settings',
+    'inventory', 'customers', 'sales', 'expenses', 'reports', 'settings', 'messages',
   ],
   [ROLES.COLLECTION_OFFICER]: [
-    'dashboard', 'farmers', 'collections',
+    'dashboard', 'farmers', 'collections', 'messages',
   ],
   [ROLES.PRODUCTION_OFFICER]: [
-    'dashboard', 'production', 'inventory',
+    'dashboard', 'production', 'inventory', 'messages',
   ],
   [ROLES.STORE_KEEPER]: [
-    'dashboard', 'inventory',
+    'dashboard', 'inventory', 'messages',
   ],
   [ROLES.ACCOUNTANT]: [
-    'dashboard', 'sales', 'expenses', 'reports',
+    'dashboard', 'sales', 'expenses', 'reports', 'messages',
   ],
   [ROLES.FARMER]: [
-    'dashboard', 'my_collections', 'settings',
+    'dashboard', 'my_collections', 'settings', 'messages',
   ],
 };
 

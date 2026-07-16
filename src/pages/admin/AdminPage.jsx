@@ -42,6 +42,11 @@ import {
   Factory,
   Package,
   DollarSign,
+  MessageSquare,
+  Send,
+  Inbox,
+  Reply,
+  Circle,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
@@ -55,6 +60,7 @@ import EmptyState from "../../components/ui/EmptyState";
 import StatCard from "../../components/ui/StatCard";
 import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
+import { useMessages } from "../../contexts/MessagesContext";
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from "../../utils/constants";
 
 const ROLE_BADGE_VARIANT = {
@@ -303,9 +309,9 @@ export default function AdminPage() {
   const activityPageSize = 8;
 
   const [factoryName, setFactoryName] = useState("Mahembe Coffee Factory");
-  const [factoryAddress, setFactoryAddress] = useState("No. 42, Plantation Road, Nuwara Eliya, Sri Lanka");
-  const [factoryPhone, setFactoryPhone] = useState("+94 52 222 3456");
-  const [factoryEmail, setFactoryEmail] = useState("admin@mahembecoffee.com");
+  const [factoryAddress, setFactoryAddress] = useState("Muhanga, Southern Province, Rwanda");
+  const [factoryPhone, setFactoryPhone] = useState("+250 788 300 000");
+  const [factoryEmail, setFactoryEmail] = useState("admin@mahembe-coffee.rw");
   const [defaultCurrency, setDefaultCurrency] = useState("RWF");
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
   const [timeZone, setTimeZone] = useState("Asia/Colombo");
@@ -322,6 +328,16 @@ export default function AdminPage() {
 
   const { success, error: toastError, info } = useToast();
   const { approveUser, rejectUser: rejectUserAuth } = useAuth();
+  const { messages, sendMessage, replyToMessage, markAsRead, deleteMessage } = useMessages();
+
+  const [msgActiveTab, setMsgActiveTab] = useState("inbox");
+  const [msgSelected, setMsgSelected] = useState(null);
+  const [msgSearch, setMsgSearch] = useState("");
+  const [msgReplyText, setMsgReplyText] = useState("");
+  const [msgComposeSubject, setMsgComposeSubject] = useState("");
+  const [msgComposeBody, setMsgComposeBody] = useState("");
+  const [msgShowCompose, setMsgShowCompose] = useState(false);
+  const [msgReplyTarget, setMsgReplyTarget] = useState(null);
 
   const {
     register,
@@ -635,6 +651,7 @@ export default function AdminPage() {
     { key: "store", label: "Store Management", icon: Package },
     { key: "accounting", label: "Accounting", icon: DollarSign },
     { key: "farmers", label: "Farmers", icon: Tractor },
+    { key: "messages", label: "Messages", icon: MessageSquare, badge: unreadMessages },
     { key: "approvals", label: "Pending Approvals", icon: Clock, badge: pendingUsers.length },
     { key: "activity", label: "Activity Log", icon: Activity },
     { key: "settings", label: "System Settings", icon: Settings },
@@ -816,6 +833,91 @@ export default function AdminPage() {
       default: return "default";
     }
   };
+
+  const unreadMessages = useMemo(
+    () => messages.filter((m) => m.to === "admin" && !m.read).length,
+    [messages]
+  );
+
+  const msgInbox = useMemo(() => {
+    return messages
+      .filter((m) => m.to === "admin")
+      .filter((m) => !msgSearch || m.subject.toLowerCase().includes(msgSearch.toLowerCase()) || m.from.toLowerCase().includes(msgSearch.toLowerCase()));
+  }, [messages, msgSearch]);
+
+  const msgSent = useMemo(() => {
+    return messages
+      .filter((m) => m.fromEmail === "admin@mahembe-coffee.rw")
+      .filter((m) => !msgSearch || m.subject.toLowerCase().includes(msgSearch.toLowerCase()));
+  }, [messages, msgSearch]);
+
+  const msgCurrentList = msgActiveTab === "inbox" ? msgInbox : msgSent;
+
+  function msgFormatDateTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function msgTimeAgo(iso) {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  }
+
+  function msgOpenMessage(msg) {
+    setMsgSelected(msg);
+    setMsgReplyTarget(null);
+    setMsgShowCompose(false);
+    if (!msg.read) markAsRead(msg.id);
+  }
+
+  function msgSendReply() {
+    if (!msgReplyText.trim() || !msgSelected) return;
+    replyToMessage(msgSelected.id, {
+      from: "Jean-Paul Habimana",
+      fromEmail: "admin@mahembe-coffee.rw",
+      body: msgReplyText.trim(),
+    });
+    setMsgSelected((prev) => ({
+      ...prev,
+      read: true,
+      replies: [
+        ...(prev.replies || []),
+        { id: `reply-${Date.now()}`, from: "Jean-Paul Habimana", fromEmail: "admin@mahembe-coffee.rw", body: msgReplyText.trim(), timestamp: new Date().toISOString() },
+      ],
+    }));
+    setMsgReplyText("");
+  }
+
+  function msgSendCompose() {
+    if (!msgComposeSubject.trim() || !msgComposeBody.trim() || !msgReplyTarget) return;
+    sendMessage({
+      from: "Jean-Paul Habimana",
+      fromEmail: "admin@mahembe-coffee.rw",
+      fromRole: "admin",
+      to: msgReplyTarget.from,
+      toEmail: msgReplyTarget.fromEmail,
+      subject: msgComposeSubject.trim(),
+      body: msgComposeBody.trim(),
+    });
+    setMsgComposeSubject("");
+    setMsgComposeBody("");
+    setMsgShowCompose(false);
+    setMsgReplyTarget(null);
+    success("Message sent successfully");
+  }
+
+  function msgStartReplyTo(msg) {
+    setMsgReplyTarget(msg);
+    setMsgShowCompose(true);
+    setMsgSelected(null);
+    setMsgComposeSubject(`Re: ${msg.subject}`);
+    setMsgComposeBody("");
+  }
 
   const farmerStatusVariant = (status) => {
     switch (status) {
@@ -1446,6 +1548,240 @@ export default function AdminPage() {
                   </div>
                 )}
               </Card>
+            </motion.div>
+          )}
+
+          {/* Messages Tab */}
+          {activeTab === "messages" && (
+            <motion.div
+              key="messages"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Left: Tabs + List */}
+                <Card padding="none" className="lg:col-span-1">
+                  <div className="flex border-b border-border">
+                    {[
+                      { key: "inbox", label: "Inbox", icon: Inbox, count: unreadMessages },
+                      { key: "sent", label: "Sent", icon: Send },
+                    ].map((tab) => (
+                      <button
+                        key={tab.key}
+                        onClick={() => { setMsgActiveTab(tab.key); setMsgSelected(null); setMsgSearch(""); }}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all cursor-pointer -mb-px ${
+                          msgActiveTab === tab.key ? "border-primary text-primary" : "border-transparent text-text-secondary hover:text-text-primary"
+                        }`}
+                      >
+                        <tab.icon size={16} />
+                        {tab.label}
+                        {tab.count > 0 && (
+                          <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full bg-primary text-white px-1">
+                            {tab.count}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="p-3 border-b border-border">
+                    <div className="relative">
+                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                      <input
+                        type="text"
+                        value={msgSearch}
+                        onChange={(e) => setMsgSearch(e.target.value)}
+                        placeholder="Search messages..."
+                        className="w-full pl-9 pr-4 py-2 rounded-xl border border-border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-[500px] overflow-y-auto divide-y divide-border">
+                    {msgCurrentList.length === 0 ? (
+                      <div className="p-8">
+                        <EmptyState icon={Mail} title="No messages" description={msgActiveTab === "inbox" ? "Inbox is empty." : "No sent messages."} />
+                      </div>
+                    ) : (
+                      msgCurrentList.map((msg) => (
+                        <button
+                          key={msg.id}
+                          onClick={() => msgOpenMessage(msg)}
+                          className={`w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors cursor-pointer ${
+                            msgSelected?.id === msg.id ? "bg-primary/10" : ""
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
+                              msg.read ? "bg-gray-100 text-text-secondary" : "bg-primary/15 text-primary"
+                            }`}>
+                              {getInitials(msgActiveTab === "inbox" ? msg.from : msg.to)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className={`text-sm truncate ${msg.read ? "font-normal" : "font-semibold"}`}>
+                                  {msgActiveTab === "inbox" ? msg.from : msg.to}
+                                </p>
+                                {!msg.read && <Circle size={8} className="fill-primary text-primary shrink-0" />}
+                              </div>
+                              <p className={`text-xs truncate mt-0.5 ${msg.read ? "text-text-secondary" : "font-medium text-text-primary"}`}>
+                                {msg.subject}
+                              </p>
+                              <p className="text-xs text-text-secondary/60 mt-0.5">{msgTimeAgo(msg.timestamp)}</p>
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </Card>
+
+                {/* Right: Detail / Compose */}
+                <div className="lg:col-span-2">
+                  {msgShowCompose ? (
+                    <Card
+                      header={
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Send size={20} className="text-primary" />
+                            <h3 className="text-base font-semibold text-text-primary">
+                              {msgReplyTarget ? `Reply to ${msgReplyTarget.from}` : "New Message"}
+                            </h3>
+                          </div>
+                          <button onClick={() => { setMsgShowCompose(false); setMsgReplyTarget(null); }} className="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Cancel</button>
+                        </div>
+                      }
+                    >
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-text-primary mb-1.5 block">To</label>
+                          <input
+                            type="text"
+                            value={msgReplyTarget ? `${msgReplyTarget.from} (${msgReplyTarget.fromEmail})` : ""}
+                            disabled
+                            className="w-full rounded-xl border border-border bg-gray-50 px-4 py-2.5 text-sm text-text-secondary"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-text-primary mb-1.5 block">Subject</label>
+                          <input
+                            type="text"
+                            value={msgComposeSubject}
+                            onChange={(e) => setMsgComposeSubject(e.target.value)}
+                            placeholder="Message subject"
+                            className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-text-primary mb-1.5 block">Message</label>
+                          <textarea
+                            value={msgComposeBody}
+                            onChange={(e) => setMsgComposeBody(e.target.value)}
+                            placeholder="Type your message..."
+                            rows={5}
+                            className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-3">
+                          <Button variant="ghost" onClick={() => { setMsgShowCompose(false); setMsgReplyTarget(null); }}>Cancel</Button>
+                          <Button icon={Send} onClick={msgSendCompose} disabled={!msgComposeSubject.trim() || !msgComposeBody.trim()}>
+                            Send Message
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ) : msgSelected ? (
+                    <Card padding="none">
+                      <div className="p-5 border-b border-border">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                              <span className="text-sm font-bold text-primary">{getInitials(msgSelected.from)}</span>
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-text-primary">{msgSelected.from}</h3>
+                                <Badge variant="default" className="text-[10px]">{msgSelected.fromRole}</Badge>
+                              </div>
+                              <p className="text-xs text-text-secondary mt-0.5">{msgSelected.fromEmail}</p>
+                              <p className="text-xs text-text-secondary/60 mt-0.5">{msgFormatDateTime(msgSelected.timestamp)}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => msgStartReplyTo(msgSelected)}
+                              className="p-2 rounded-lg text-text-secondary hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+                              title="Reply"
+                            >
+                              <Reply size={16} />
+                            </button>
+                            <button
+                              onClick={() => { deleteMessage(msgSelected.id); setMsgSelected(null); }}
+                              className="p-2 rounded-lg text-text-secondary hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+                              title="Delete"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                        <h2 className="text-lg font-semibold text-text-primary mt-4">{msgSelected.subject}</h2>
+                      </div>
+                      <div className="p-5">
+                        <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap">{msgSelected.body}</p>
+                      </div>
+                      {msgSelected.replies?.length > 0 && (
+                        <div className="border-t border-border">
+                          <div className="px-5 py-3 bg-gray-50/80 border-b border-border">
+                            <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+                              {msgSelected.replies.length} {msgSelected.replies.length === 1 ? "Reply" : "Replies"}
+                            </p>
+                          </div>
+                          <div className="divide-y divide-border">
+                            {msgSelected.replies.map((reply) => (
+                              <div key={reply.id} className="p-5">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <span className="text-[10px] font-bold text-primary">{getInitials(reply.from)}</span>
+                                  </div>
+                                  <span className="text-sm font-medium text-text-primary">{reply.from}</span>
+                                  <span className="text-xs text-text-secondary/60">{msgFormatDateTime(reply.timestamp)}</span>
+                                </div>
+                                <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap ml-9">{reply.body}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="p-5 border-t border-border bg-gray-50/50">
+                        <p className="text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wide">Quick Reply</p>
+                        <div className="flex gap-3">
+                          <textarea
+                            value={msgReplyText}
+                            onChange={(e) => setMsgReplyText(e.target.value)}
+                            placeholder="Type your reply..."
+                            rows={3}
+                            className="flex-1 rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"
+                          />
+                        </div>
+                        <div className="flex justify-end mt-3">
+                          <Button icon={Reply} onClick={msgSendReply} disabled={!msgReplyText.trim()} size="sm">
+                            Send Reply
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ) : (
+                    <Card>
+                      <EmptyState
+                        icon={MessageSquare}
+                        title="Select a message"
+                        description="Choose a message from the list to read and reply, or compose a new message."
+                      />
+                    </Card>
+                  )}
+                </div>
+              </div>
             </motion.div>
           )}
 
