@@ -315,6 +315,7 @@ export default function AdminPage() {
   const [pendingLoading, setPendingLoading] = useState(false);
   const [pendingSearch, setPendingSearch] = useState("");
   const [pendingViewUser, setPendingViewUser] = useState(null);
+  const [pendingFarmersList, setPendingFarmersList] = useState([]);
 
   const [collectionsSearch, setCollectionsSearch] = useState("");
   const [productionSearch, setProductionSearch] = useState("");
@@ -467,10 +468,18 @@ export default function AdminPage() {
     );
   }, [accountingSearch]);
 
+  // Merge active farmers with pending farmers from registration
+  const allFarmersList = useMemo(() => {
+    // Deduplicate: if a pending farmer already appears in the active list, skip
+    const activeIds = new Set(farmersList.map((f) => f.id));
+    const pendingOnly = pendingFarmersList.filter((f) => !activeIds.has(f.id));
+    return [...pendingOnly, ...farmersList];
+  }, [farmersList, pendingFarmersList]);
+
   const filteredFarmers = useMemo(() => {
-    if (!farmersSearch) return farmersList;
+    if (!farmersSearch) return allFarmersList;
     const s = farmersSearch.toLowerCase();
-    return farmersList.filter(
+    return allFarmersList.filter(
       (f) =>
         (f.id || "").toLowerCase().includes(s) ||
         (f.name || "").toLowerCase().includes(s) ||
@@ -480,7 +489,7 @@ export default function AdminPage() {
         (f.collectionCenter || "").toLowerCase().includes(s) ||
         (f.status || "").toLowerCase().includes(s)
     );
-  }, [farmersList, farmersSearch]);
+  }, [allFarmersList, farmersSearch]);
 
   function handleAddUser(data) {
     const newUser = {
@@ -572,7 +581,7 @@ export default function AdminPage() {
       const snapshot = await getDocs(q);
       const rawList = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
       const usersList = rawList.filter((u) => u.status === "pending");
-      
+
       const mergedList = await Promise.all(
         usersList.map(async (u) => {
           if (u.role === "farmer") {
@@ -623,7 +632,8 @@ export default function AdminPage() {
     try {
       await approveUser(pendingUser.id);
       setPendingUsers((prev) => prev.filter((u) => u.id !== pendingUser.id));
-      success(`"${pendingUser.displayName || pendingUser.email}" has been approved and can now log in.`);
+      setPendingFarmersList((prev) => prev.filter((f) => f.id !== pendingUser.id && f.userId !== pendingUser.id));
+      success(`"${pendingUser.displayName || pendingUser.name || pendingUser.email}" has been approved and can now log in.`);
     } catch {
       toastError("Failed to approve user. Please try again.");
     }
@@ -633,7 +643,8 @@ export default function AdminPage() {
     try {
       await rejectUserAuth(pendingUser.id);
       setPendingUsers((prev) => prev.filter((u) => u.id !== pendingUser.id));
-      success(`"${pendingUser.displayName || pendingUser.email}" registration has been rejected.`);
+      setPendingFarmersList((prev) => prev.filter((f) => f.id !== pendingUser.id && f.userId !== pendingUser.id));
+      success(`"${pendingUser.displayName || pendingUser.name || pendingUser.email}" registration has been rejected.`);
     } catch {
       toastError("Failed to reject user. Please try again.");
     }
@@ -769,16 +780,15 @@ export default function AdminPage() {
               <label className="text-sm font-medium text-text-primary">Password</label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder={isEdit ? "Leave blank to keep current" : "Enter password"}
-                  className={`w-full rounded-xl border bg-white pl-10 pr-10 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 ${
-                    errors.password
-                      ? "border-danger focus:ring-danger/30 focus:border-danger"
-                      : "border-border focus:ring-primary/30 focus:border-primary"
-                  }`}
+                  className={`w-full rounded-xl border bg-white pl-10 pr-10 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 ${errors.password
+                    ? "border-danger focus:ring-danger/30 focus:border-danger"
+                    : "border-border focus:ring-primary/30 focus:border-primary"
+                    }`}
                   {...register("password", isEdit ? {} : { required: "Password is required", minLength: { value: 6, message: "Min 6 characters" } })}
                 />
                 <button
@@ -794,11 +804,10 @@ export default function AdminPage() {
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-text-primary">Role</label>
               <select
-                className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 cursor-pointer ${
-                  errors.role
-                    ? "border-danger focus:ring-danger/30 focus:border-danger"
-                    : "border-border focus:ring-primary/30 focus:border-primary"
-                }`}
+                className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 cursor-pointer ${errors.role
+                  ? "border-danger focus:ring-danger/30 focus:border-danger"
+                  : "border-border focus:ring-primary/30 focus:border-primary"
+                  }`}
                 {...register("role", { required: "Role is required" })}
               >
                 <option value="">Select a role</option>
@@ -815,11 +824,10 @@ export default function AdminPage() {
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-text-primary">Department</label>
               <select
-                className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 cursor-pointer ${
-                  errors.department
-                    ? "border-danger focus:ring-danger/30 focus:border-danger"
-                    : "border-border focus:ring-primary/30 focus:border-primary"
-                }`}
+                className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 cursor-pointer ${errors.department
+                  ? "border-danger focus:ring-danger/30 focus:border-danger"
+                  : "border-border focus:ring-primary/30 focus:border-primary"
+                  }`}
                 {...register("department", { required: "Department is required" })}
               >
                 <option value="">Select a department</option>
@@ -979,10 +987,33 @@ export default function AdminPage() {
     setMsgComposeBody("");
   }
 
+  // Load pending farmers from localStorage (offline) or Firestore on mount
+  useEffect(() => {
+    async function loadPendingFarmers() {
+      try {
+        const { collection: col, getDocs: gd } = await import("firebase/firestore");
+        const { db: firestoreDb } = await import("../../firebase/config");
+        const snapshot = await gd(col(firestoreDb, "pending_farmers"));
+        const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }));
+        setPendingFarmersList(list);
+      } catch {
+        // Offline fallback
+        try {
+          const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+          setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
+        } catch {
+          setPendingFarmersList([]);
+        }
+      }
+    }
+    loadPendingFarmers();
+  }, []);
+
   const farmerStatusVariant = (status) => {
     switch (status) {
       case "Active": return "success";
       case "Inactive": return "default";
+      case "Pending": return "warning";
       default: return "default";
     }
   };
@@ -1010,11 +1041,10 @@ export default function AdminPage() {
         </div>
         <button
           onClick={() => setActiveTab("messages")}
-          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all cursor-pointer ${
-            unreadMessages > 0
-              ? "bg-primary text-white border-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
-              : "bg-white text-text-primary border-border hover:border-primary/30 hover:bg-primary/5"
-          }`}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all cursor-pointer ${unreadMessages > 0
+            ? "bg-primary text-white border-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+            : "bg-white text-text-primary border-border hover:border-primary/30 hover:bg-primary/5"
+            }`}
         >
           <MessageSquare size={18} />
           <span className="text-sm font-medium">Messages</span>
@@ -1054,25 +1084,24 @@ export default function AdminPage() {
       {/* Tabs */}
       <motion.div variants={itemVariants}>
         <div className="flex items-center gap-1 border-b border-border mb-6 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 cursor-pointer -mb-px whitespace-nowrap ${
-                  activeTab === tab.key
-                    ? "border-primary text-primary"
-                    : "border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300"
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 cursor-pointer -mb-px whitespace-nowrap ${activeTab === tab.key
+                ? "border-primary text-primary"
+                : "border-transparent text-text-secondary hover:text-text-primary hover:border-gray-300"
                 }`}
-              >
-                <tab.icon size={18} />
-                {tab.label}
-                {tab.badge > 0 && (
-                  <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded-full bg-danger text-white">
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            ))}
+            >
+              <tab.icon size={18} />
+              {tab.label}
+              {tab.badge > 0 && (
+                <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded-full bg-danger text-white">
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
         <AnimatePresence mode="wait">
@@ -1166,11 +1195,10 @@ export default function AdminPage() {
                                 </button>
                                 <button
                                   onClick={() => handleToggleStatus(user)}
-                                  className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                                    user.status === "active"
-                                      ? "text-text-secondary hover:bg-amber-50 hover:text-amber-600"
-                                      : "text-text-secondary hover:bg-green-50 hover:text-green-600"
-                                  }`}
+                                  className={`p-2 rounded-lg transition-colors cursor-pointer ${user.status === "active"
+                                    ? "text-text-secondary hover:bg-amber-50 hover:text-amber-600"
+                                    : "text-text-secondary hover:bg-green-50 hover:text-green-600"
+                                    }`}
                                   title={user.status === "active" ? "Deactivate" : "Activate"}
                                 >
                                   {user.status === "active" ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
@@ -1613,13 +1641,41 @@ export default function AdminPage() {
                               <Badge variant={farmerStatusVariant(farmer.status)} dot>{farmer.status}</Badge>
                             </td>
                             <td className="px-4 py-3 text-sm">
-                              <button
-                                onClick={() => setDeleteFarmer(farmer)}
-                                className="p-1.5 text-danger/70 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
-                                title="Delete farmer"
-                              >
-                                <Trash2 size={15} />
-                              </button>
+                              <div className="flex items-center gap-1">
+                                {farmer.status === "Pending" ? (
+                                  <>
+                                    <button
+                                      onClick={() => setPendingViewUser(farmer)}
+                                      className="p-1.5 text-text-secondary hover:text-primary hover:bg-primary/10 rounded-lg transition-colors cursor-pointer"
+                                      title="View details"
+                                    >
+                                      <Eye size={15} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleApproveUser(farmer)}
+                                      className="p-1.5 text-success/70 hover:text-success hover:bg-success/10 rounded-lg transition-colors cursor-pointer"
+                                      title="Approve farmer"
+                                    >
+                                      <UserCheck size={15} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectUser(farmer)}
+                                      className="p-1.5 text-danger/70 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
+                                      title="Reject farmer"
+                                    >
+                                      <UserX size={15} />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={() => setDeleteFarmer(farmer)}
+                                    className="p-1.5 text-danger/70 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
+                                    title="Delete farmer"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </motion.tr>
                         ))
@@ -1630,7 +1686,7 @@ export default function AdminPage() {
 
                 {filteredFarmers.length > 0 && (
                   <div className="px-4 py-3 border-t border-border text-sm text-text-secondary">
-                    Showing {filteredFarmers.length} of {farmersList.length} farmers
+                    Showing {filteredFarmers.length} farmers ({pendingFarmersList.length} pending approval)
                   </div>
                 )}
               </Card>
@@ -1663,9 +1719,8 @@ export default function AdminPage() {
                       <button
                         key={tab.key}
                         onClick={() => { setMsgActiveTab(tab.key); setMsgSelected(null); setMsgSearch(""); }}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all cursor-pointer -mb-px ${
-                          msgActiveTab === tab.key ? "border-primary text-primary" : "border-transparent text-text-secondary hover:text-text-primary"
-                        }`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all cursor-pointer -mb-px ${msgActiveTab === tab.key ? "border-primary text-primary" : "border-transparent text-text-secondary hover:text-text-primary"
+                          }`}
                       >
                         <tab.icon size={16} />
                         {tab.label}
@@ -1699,14 +1754,12 @@ export default function AdminPage() {
                         <button
                           key={msg.id}
                           onClick={() => msgOpenMessage(msg)}
-                          className={`w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors cursor-pointer ${
-                            msgSelected?.id === msg.id ? "bg-primary/10" : ""
-                          }`}
+                          className={`w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors cursor-pointer ${msgSelected?.id === msg.id ? "bg-primary/10" : ""
+                            }`}
                         >
                           <div className="flex items-start gap-3">
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
-                              msg.read ? "bg-gray-100 text-text-secondary" : "bg-primary/15 text-primary"
-                            }`}>
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${msg.read ? "bg-gray-100 text-text-secondary" : "bg-primary/15 text-primary"
+                              }`}>
                               {getInitials(msgActiveTab === "inbox" ? msg.from : msg.to)}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -2323,14 +2376,12 @@ export default function AdminPage() {
                     className="flex items-center gap-2 cursor-pointer"
                   >
                     <span
-                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 ${
-                        maintenanceMode ? "bg-primary" : "bg-gray-300"
-                      }`}
+                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 ${maintenanceMode ? "bg-primary" : "bg-gray-300"
+                        }`}
                     >
                       <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                          maintenanceMode ? "translate-x-6" : "translate-x-1"
-                        }`}
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${maintenanceMode ? "translate-x-6" : "translate-x-1"
+                          }`}
                       />
                     </span>
                     <span className={`text-sm font-medium ${maintenanceMode ? "text-primary" : "text-text-secondary"}`}>
