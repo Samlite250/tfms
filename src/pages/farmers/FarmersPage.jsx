@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -10,8 +10,7 @@ import {
   Eye,
   Pencil,
   Trash2,
-  Filter,
-  MoreVertical,
+  Clock,
   Loader2,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
@@ -29,17 +28,18 @@ import { farmersSeed } from "../../firebase/seedData";
 
 const collectionCenterOptions = [
   { value: null, label: "All Centers" },
-  { value: "Mushubi CC", label: "Mushubi CC" },
-  { value: "Rulangala CC", label: "Rulangala CC" },
-  { value: "Kyanja CC", label: "Kyanja CC" },
-  { value: "Ntinda CC", label: "Ntinda CC" },
-  { value: "Kisementi CC", label: "Kisementi CC" },
+  { value: "Mahembe CC", label: "Mahembe CC" },
+  { value: "Muhanga CC", label: "Muhanga CC" },
+  { value: "Ruyanza CC", label: "Ruyanza CC" },
+  { value: "Kabuga CC", label: "Kabuga CC" },
+  { value: "Nyamagana CC", label: "Nyamagana CC" },
 ];
 
 const statusFilterOptions = [
   { value: null, label: "All Statuses" },
   { value: "Active", label: "Active" },
   { value: "Inactive", label: "Inactive" },
+  { value: "Pending", label: "Pending" },
 ];
 
 const staggerContainer = {
@@ -52,6 +52,15 @@ const staggerItem = {
   visible: { opacity: 1, y: 0 },
 };
 
+function statusBadge(status) {
+  switch (status) {
+    case "Active": return <Badge variant="success" dot>{status}</Badge>;
+    case "Inactive": return <Badge variant="danger" dot>{status}</Badge>;
+    case "Pending": return <Badge variant="warning" dot>{status}</Badge>;
+    default: return <Badge variant="default" dot>{status}</Badge>;
+  }
+}
+
 function FarmersPage() {
   const navigate = useNavigate();
   const { success } = useToast();
@@ -60,36 +69,62 @@ function FarmersPage() {
     orderDirection: "desc",
     seedData: farmersSeed,
   });
+  const [pendingFarmersList, setPendingFarmersList] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
   const [centerFilter, setCenterFilter] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, farmer: null });
 
+  // Load pending (registered but not yet approved) farmers
+  useEffect(() => {
+    async function loadPendingFarmers() {
+      try {
+        const { collection: col, getDocs: gd } = await import("firebase/firestore");
+        const { db } = await import("../../firebase/config");
+        const snapshot = await gd(col(db, "pending_farmers"));
+        const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }));
+        setPendingFarmersList(list);
+      } catch {
+        // Offline fallback
+        try {
+          const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+          setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
+        } catch {
+          setPendingFarmersList([]);
+        }
+      }
+    }
+    loadPendingFarmers();
+  }, []);
+
+  // Merge: pending farmers at top, deduplicated with active list
+  const allFarmersList = useMemo(() => {
+    const activeIds = new Set(farmersList.map((f) => f.id));
+    const pendingOnly = pendingFarmersList.filter((f) => !activeIds.has(f.id));
+    return [...pendingOnly, ...farmersList];
+  }, [farmersList, pendingFarmersList]);
+
   const filteredFarmers = useMemo(() => {
-    return farmersList.filter((f) => {
+    return allFarmersList.filter((f) => {
       const matchesSearch =
         !search ||
-        f.name.toLowerCase().includes(search.toLowerCase()) ||
-        f.id.toLowerCase().includes(search.toLowerCase()) ||
-        f.phone.includes(search) ||
-        f.village.toLowerCase().includes(search.toLowerCase());
+        (f.name || "").toLowerCase().includes(search.toLowerCase()) ||
+        (f.id || "").toLowerCase().includes(search.toLowerCase()) ||
+        (f.phone || "").includes(search) ||
+        (f.village || "").toLowerCase().includes(search.toLowerCase());
       const matchesStatus = !statusFilter || f.status === statusFilter;
       const matchesCenter = !centerFilter || f.collectionCenter === centerFilter;
       return matchesSearch && matchesStatus && matchesCenter;
     });
-  }, [farmersList, search, statusFilter, centerFilter]);
+  }, [allFarmersList, search, statusFilter, centerFilter]);
 
   const stats = useMemo(() => {
-    const total = farmersList.length;
-    const active = farmersList.filter((f) => f.status === "Active").length;
-    const inactive = total - active;
-    const now = new Date();
-    const newThisMonth = farmersList.filter((f) => {
-      const d = new Date(f.joinedDate);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    }).length;
-    return { total, active, inactive, newThisMonth };
-  }, [farmersList]);
+    const total = allFarmersList.length;
+    const active = allFarmersList.filter((f) => f.status === "Active").length;
+    const inactive = allFarmersList.filter((f) => f.status === "Inactive").length;
+    const pending = pendingFarmersList.length;
+    return { total, active, inactive, pending };
+  }, [allFarmersList, pendingFarmersList]);
 
   if (loading) {
     return (
@@ -111,7 +146,7 @@ function FarmersPage() {
     { label: "Total Farmers", value: stats.total, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
     { label: "Active", value: stats.active, icon: UserCheck, color: "text-success", bg: "bg-success/10", borderColor: "#43A047" },
     { label: "Inactive", value: stats.inactive, icon: UserX, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F" },
-    { label: "New This Month", value: stats.newThisMonth, icon: UserPlus, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
+    { label: "Pending Approval", value: stats.pending, icon: Clock, color: "text-warning", bg: "bg-warning/10", borderColor: "#F59E0B" },
   ];
 
   async function handleDelete() {
@@ -135,12 +170,12 @@ function FarmersPage() {
       accessor: "name",
       render: (row) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
-            {row.name.split(" ").map((n) => n[0]).join("")}
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${row.status === "Pending" ? "bg-warning/15 text-warning" : "bg-primary/10 text-primary"}`}>
+            {(row.name || "?").split(" ").map((n) => n[0]).join("").slice(0, 2)}
           </div>
           <div>
             <p className="font-medium text-text-primary">{row.name}</p>
-            <p className="text-xs text-text-secondary">{row.village}</p>
+            <p className="text-xs text-text-secondary">{row.village || row.district || "—"}</p>
           </div>
         </div>
       ),
@@ -151,16 +186,12 @@ function FarmersPage() {
     {
       header: "Deliveries",
       accessor: "totalDeliveries",
-      render: (row) => <span className="font-semibold">{row.totalDeliveries}</span>,
+      render: (row) => <span className="font-semibold">{row.totalDeliveries ?? "—"}</span>,
     },
     {
       header: "Status",
       accessor: "status",
-      render: (row) => (
-        <Badge variant={row.status === "Active" ? "success" : "danger"} dot>
-          {row.status}
-        </Badge>
-      ),
+      render: (row) => statusBadge(row.status),
     },
   ];
 
@@ -241,20 +272,24 @@ function FarmersPage() {
                   >
                     <Eye size={16} />
                   </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); navigate(`/farmers/${row.id}/edit`); }}
-                    className="p-2 rounded-lg text-text-secondary hover:bg-info/10 hover:text-info transition-colors cursor-pointer"
-                    title="Edit"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setDeleteModal({ open: true, farmer: row }); }}
-                    className="p-2 rounded-lg text-text-secondary hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer"
-                    title="Delete"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {row.status !== "Pending" && (
+                    <>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/farmers/${row.id}/edit`); }}
+                        className="p-2 rounded-lg text-text-secondary hover:bg-info/10 hover:text-info transition-colors cursor-pointer"
+                        title="Edit"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteModal({ open: true, farmer: row }); }}
+                        className="p-2 rounded-lg text-text-secondary hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer"
+                        title="Delete"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </>
+                  )}
                 </>
               )}
               emptyState={
