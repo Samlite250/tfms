@@ -582,44 +582,76 @@ export default function AdminPage() {
     setTimeout(() => success("System backup completed successfully"), 2000);
   }
 
-  const fetchPendingUsers = useCallback(async () => {
+  // Real-time listener for pending users — updates immediately when new registrations arrive
+  const fetchPendingUsers = useCallback(() => {
     setPendingLoading(true);
-    try {
-      const { collection, query, where, getDocs, doc, getDoc } = await import("firebase/firestore");
-      const { db } = await import("../../firebase/config");
-      const q = query(collection(db, "users"), where("status", "==", "pending"));
-      const snapshot = await getDocs(q);
-      const rawList = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const usersList = rawList.filter((u) => u.status === "pending");
+    let unsubscribe = null;
 
-      const mergedList = await Promise.all(
-        usersList.map(async (u) => {
-          if (u.role === "farmer") {
+    import("firebase/firestore").then(({ collection, query, where, onSnapshot, doc, getDoc }) =>
+      import("../../firebase/config").then(({ db }) => {
+        const q = query(collection(db, "users"), where("status", "==", "pending"));
+        unsubscribe = onSnapshot(
+          q,
+          async (snapshot) => {
+            const rawList = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+            // Merge in pending_farmer profile data for richer display
+            const mergedList = await Promise.all(
+              rawList.map(async (u) => {
+                if (u.role === "farmer") {
+                  try {
+                    const pendingFarmerDoc = await getDoc(doc(db, "pending_farmers", u.id));
+                    if (pendingFarmerDoc.exists()) {
+                      return { ...u, ...pendingFarmerDoc.data() };
+                    }
+                  } catch (e) {
+                    console.error("Error fetching pending farmer doc:", e);
+                  }
+                }
+                return u;
+              })
+            );
+            setPendingUsers(mergedList);
+            setPendingLoading(false);
+          },
+          () => {
+            // Firestore listener error — fall back to localStorage
             try {
-              const pendingFarmerDoc = await getDoc(doc(db, "pending_farmers", u.id));
-              if (pendingFarmerDoc.exists()) {
-                return { ...u, ...pendingFarmerDoc.data() };
-              }
-            } catch (e) {
-              console.error("Error fetching pending farmer doc:", e);
+              const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
+              const pendingFarmers = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+              const usersList = pending
+                .filter((u) => u.status === "pending")
+                .map((u) => ({ id: u.uid || u.id, ...u }));
+              const mergedList = usersList.map((u) => {
+                if (u.role === "farmer") {
+                  const farmerProfile = pendingFarmers.find(
+                    (f) => f.userId === u.id || f.id === u.id
+                  );
+                  if (farmerProfile) return { ...u, ...farmerProfile };
+                }
+                return u;
+              });
+              setPendingUsers(mergedList);
+            } catch {
+              setPendingUsers([]);
             }
+            setPendingLoading(false);
           }
-          return u;
-        })
-      );
-      setPendingUsers(mergedList);
-    } catch {
-      // Offline/dev mode: read from localStorage
+        );
+      })
+    ).catch(() => {
+      // Firebase not available — use localStorage
       try {
         const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
         const pendingFarmers = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
-        const usersList = pending.filter((u) => u.status === "pending").map((u) => ({ id: u.uid, ...u }));
+        const usersList = pending
+          .filter((u) => u.status === "pending")
+          .map((u) => ({ id: u.uid || u.id, ...u }));
         const mergedList = usersList.map((u) => {
           if (u.role === "farmer") {
-            const farmerProfile = pendingFarmers.find((f) => f.userId === u.id || f.id === u.id);
-            if (farmerProfile) {
-              return { ...u, ...farmerProfile };
-            }
+            const farmerProfile = pendingFarmers.find(
+              (f) => f.userId === u.id || f.id === u.id
+            );
+            if (farmerProfile) return { ...u, ...farmerProfile };
           }
           return u;
         });
@@ -627,15 +659,17 @@ export default function AdminPage() {
       } catch {
         setPendingUsers([]);
       }
-    } finally {
       setPendingLoading(false);
-    }
+    });
+
+    return unsubscribe;
   }, []);
 
+  // Subscribe to pending users when the approvals tab is active; auto-unsubscribe when switching away
   useEffect(() => {
-    if (activeTab === "approvals") {
-      fetchPendingUsers();
-    }
+    if (activeTab !== "approvals") return;
+    const unsub = fetchPendingUsers();
+    return () => { if (typeof unsub === "function") unsub(); };
   }, [activeTab, fetchPendingUsers]);
 
   async function handleApproveUser(pendingUser) {
@@ -665,10 +699,13 @@ export default function AdminPage() {
     const s = pendingSearch.toLowerCase();
     return pendingUsers.filter(
       (u) =>
-        (u.displayName || "").toLowerCase().includes(s) ||
+        (u.displayName || u.name || "").toLowerCase().includes(s) ||
         (u.email || "").toLowerCase().includes(s) ||
         (u.role || "").toLowerCase().includes(s) ||
-        (u.department || "").toLowerCase().includes(s)
+        (u.department || "").toLowerCase().includes(s) ||
+        (u.phone || "").toLowerCase().includes(s) ||
+        (u.collectionCenter || "").toLowerCase().includes(s) ||
+        (u.district || "").toLowerCase().includes(s)
     );
   }, [pendingUsers, pendingSearch]);
 
@@ -997,26 +1034,37 @@ export default function AdminPage() {
     setMsgComposeBody("");
   }
 
-  // Load pending farmers from localStorage (offline) or Firestore on mount
+  // Real-time listener for pending farmers (shown in Farmers tab with Pending badge)
   useEffect(() => {
-    async function loadPendingFarmers() {
+    let unsubscribe = null;
+    import("firebase/firestore").then(({ collection: col, onSnapshot: onSnap }) =>
+      import("../../firebase/config").then(({ db: firestoreDb }) => {
+        unsubscribe = onSnap(
+          col(firestoreDb, "pending_farmers"),
+          (snapshot) => {
+            const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }));
+            setPendingFarmersList(list);
+          },
+          () => {
+            // Offline fallback
+            try {
+              const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+              setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
+            } catch {
+              setPendingFarmersList([]);
+            }
+          }
+        );
+      })
+    ).catch(() => {
       try {
-        const { collection: col, getDocs: gd } = await import("firebase/firestore");
-        const { db: firestoreDb } = await import("../../firebase/config");
-        const snapshot = await gd(col(firestoreDb, "pending_farmers"));
-        const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }));
-        setPendingFarmersList(list);
+        const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+        setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
       } catch {
-        // Offline fallback
-        try {
-          const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
-          setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
-        } catch {
-          setPendingFarmersList([]);
-        }
+        setPendingFarmersList([]);
       }
-    }
-    loadPendingFarmers();
+    });
+    return () => { if (typeof unsubscribe === "function") unsubscribe(); };
   }, []);
 
   const farmerStatusVariant = (status) => {
@@ -2017,7 +2065,7 @@ export default function AdminPage() {
                       >
                         <div className="w-11 h-11 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
                           <span className="text-sm font-bold text-warning">
-                            {(pendingUser.displayName || pendingUser.email || "?")
+                            {(pendingUser.displayName || pendingUser.name || pendingUser.email || "?")
                               .split(" ")
                               .map((n) => n[0])
                               .join("")
@@ -2028,7 +2076,7 @@ export default function AdminPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
                             <p className="font-semibold text-text-primary truncate">
-                              {pendingUser.displayName || "No Name"}
+                              {pendingUser.displayName || pendingUser.name || "No Name"}
                             </p>
                             <Badge variant="warning">Pending</Badge>
                           </div>

@@ -2,6 +2,12 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
+import {
+  sendRegistrationConfirmation,
+  sendAdminAlert,
+  sendAccountApproved,
+  sendAccountRejected
+} from '../services/emailService';
 
 const AuthContext = createContext(null);
 
@@ -166,6 +172,24 @@ export function AuthProvider({ children }) {
         });
       }
 
+      // Trigger Email Notification
+      try {
+        await sendRegistrationConfirmation(firebaseUser.email, profileData.displayName);
+      } catch (err) {
+        console.warn("Failed to send signup confirmation email:", err);
+      }
+
+      try {
+        await sendAdminAlert({
+          displayName: profileData.displayName,
+          email: firebaseUser.email,
+          role: profileData.role,
+          phone: profileData.phone,
+        });
+      } catch (err) {
+        console.warn("Failed to send admin signup alert email:", err);
+      }
+
       await auth.signOut();
       return firebaseUser;
     }
@@ -214,11 +238,41 @@ export function AuthProvider({ children }) {
       localStorage.setItem('coms_pending_farmers', JSON.stringify(pendingFarmers));
     }
 
+    // Trigger Email Notification (works offline/local using the email server proxy too!)
+    try {
+      await sendRegistrationConfirmation(email, profileData.displayName);
+    } catch (err) {
+      console.warn("Failed to send signup confirmation email:", err);
+    }
+
+    try {
+      await sendAdminAlert({
+        displayName: profileData.displayName,
+        email,
+        role: profileData.role,
+        phone: profileData.phone,
+      });
+    } catch (err) {
+      console.warn("Failed to send admin signup alert email:", err);
+    }
+
     return localProfile;
   }
 
   async function approveUser(uid) {
     if (firebaseAvailable) {
+      // Fetch user profile info first to send the email
+      try {
+        const { getDoc } = await import('firebase/firestore');
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          await sendAccountApproved(userData.email, userData.displayName, userData.role);
+        }
+      } catch (err) {
+        console.warn("Failed to send account approval email:", err);
+      }
+
       const { updateDoc } = await import('firebase/firestore');
       await updateDoc(doc(db, 'users', uid), {
         status: 'active',
@@ -226,11 +280,11 @@ export function AuthProvider({ children }) {
       });
       // If farmer, move from pending_farmers to farmers collection
       try {
-        const { getDoc, setDoc } = await import('firebase/firestore');
-        const pendingDoc = await getDoc(doc(db, 'pending_farmers', uid));
+        const { getDoc: getFirestoreDoc, setDoc: setFirestoreDoc } = await import('firebase/firestore');
+        const pendingDoc = await getFirestoreDoc(doc(db, 'pending_farmers', uid));
         if (pendingDoc.exists()) {
           const farmerData = pendingDoc.data();
-          await setDoc(doc(db, 'farmers', uid), {
+          await setFirestoreDoc(doc(db, 'farmers', uid), {
             ...farmerData,
             status: 'Active',
             updatedAt: serverTimestamp(),
@@ -262,12 +316,29 @@ export function AuthProvider({ children }) {
             localStorage.setItem('coms_pending_farmers', JSON.stringify(pendingFarmers.filter((f) => f.userId !== uid && f.id !== uid)));
           }
         }
+
+        try {
+          await sendAccountApproved(approved.email, approved.displayName, approved.role);
+        } catch (err) {
+          console.warn("Failed to send account approval email:", err);
+        }
       }
     }
   }
 
   async function rejectUser(uid) {
     if (firebaseAvailable) {
+      try {
+        const { getDoc } = await import('firebase/firestore');
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          await sendAccountRejected(userData.email, userData.displayName);
+        }
+      } catch (err) {
+        console.warn("Failed to send account rejection email:", err);
+      }
+
       const { updateDoc } = await import('firebase/firestore');
       await updateDoc(doc(db, 'users', uid), {
         status: 'rejected',
@@ -275,6 +346,14 @@ export function AuthProvider({ children }) {
       });
     } else {
       const pending = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
+      const rejectedUser = pending.find((u) => u.uid === uid);
+      if (rejectedUser) {
+        try {
+          await sendAccountRejected(rejectedUser.email, rejectedUser.displayName);
+        } catch (err) {
+          console.warn("Failed to send account rejection email:", err);
+        }
+      }
       localStorage.setItem('coms_pending_users', JSON.stringify(pending.filter((u) => u.uid !== uid)));
     }
   }
