@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, Phone, Leaf, ArrowLeft, CheckCircle2, Tractor } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, Phone, Leaf, ArrowLeft, CheckCircle2, Tractor, MapPin, Home, Scale, Coffee } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from '../../utils/constants';
 
@@ -11,6 +11,21 @@ const STAFF_ROLE_OPTIONS = Object.entries(ROLE_LABELS)
   .map(([value, label]) => ({ value, label }));
 
 const DEPARTMENT_OPTIONS = DEPARTMENTS.map((d) => ({ value: d, label: d }));
+
+const COFFEE_VARIETY_OPTIONS = [
+  { value: 'Red Bourbon', label: 'Red Bourbon' },
+  { value: 'Jackson', label: 'Jackson' },
+  { value: 'BM 139', label: 'BM 139' },
+  { value: 'SL28', label: 'SL28' },
+];
+
+const COLLECTION_CENTER_OPTIONS = [
+  { value: 'Mahembe CC', label: 'Mahembe CC' },
+  { value: 'Muhanga CC', label: 'Muhanga CC' },
+  { value: 'Ruyanza CC', label: 'Ruyanza CC' },
+  { value: 'Kabuga CC', label: 'Kabuga CC' },
+  { value: 'Nyamagana CC', label: 'Nyamagana CC' },
+];
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,6 +50,11 @@ export default function RegisterPage() {
       role: '',
       department: '',
       phone: '',
+      village: '',
+      district: '',
+      farmSize: '',
+      coffeeVariety: '',
+      collectionCenter: '',
     },
   });
 
@@ -45,11 +65,19 @@ export default function RegisterPage() {
     try {
       const role = regType === 'farmer' ? ROLES.FARMER : data.role;
       const department = regType === 'farmer' ? '' : data.department;
+      const farmerData = regType === 'farmer' ? {
+        village: data.village,
+        district: data.district,
+        farmSize: parseFloat(data.farmSize) || 0,
+        coffeeVariety: data.coffeeVariety,
+        collectionCenter: data.collectionCenter,
+      } : {};
       await registerUser(data.email, data.password, {
         displayName: data.displayName,
         role,
         department,
         phone: data.phone,
+        ...farmerData,
       });
       setSubmitted(true);
     } catch (err) {
@@ -72,6 +100,11 @@ export default function RegisterPage() {
       role: '',
       department: '',
       phone: '',
+      village: '',
+      district: '',
+      farmSize: '',
+      coffeeVariety: '',
+      collectionCenter: '',
     });
   }
 
@@ -361,9 +394,105 @@ export default function RegisterPage() {
             )}
 
             {regType === 'farmer' && (
-              <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl">
-                <p className="text-xs text-primary font-medium">Farmer Account</p>
-                <p className="text-xs text-text-secondary mt-0.5">You will be able to view your collections and payments once approved.</p>
+              <div className="space-y-3">
+                <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl">
+                  <p className="text-xs text-primary font-medium">Farm Details</p>
+                  <p className="text-xs text-text-secondary mt-0.5">Provide your farm information so we can register you at the correct collection center.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Village</label>
+                    <div className="relative">
+                      <Home size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                      <input
+                        type="text"
+                        placeholder="e.g. Mahembe"
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
+                          errors.village
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                        {...register('village', { required: 'Village is required' })}
+                      />
+                    </div>
+                    {errors.village && <p className="text-xs text-danger mt-1">{errors.village.message}</p>}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">District</label>
+                    <div className="relative">
+                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                      <input
+                        type="text"
+                        placeholder="e.g. Muhanga"
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
+                          errors.district
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                        {...register('district', { required: 'District is required' })}
+                      />
+                    </div>
+                    {errors.district && <p className="text-xs text-danger mt-1">{errors.district.message}</p>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Farm Size (hectares)</label>
+                    <div className="relative">
+                      <Scale size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        placeholder="e.g. 2.5"
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
+                          errors.farmSize
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                        {...register('farmSize', { required: 'Farm size is required', min: { value: 0.1, message: 'Must be > 0' } })}
+                      />
+                    </div>
+                    {errors.farmSize && <p className="text-xs text-danger mt-1">{errors.farmSize.message}</p>}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Coffee Variety</label>
+                    <div className="relative">
+                      <Coffee size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                      <select
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
+                          errors.coffeeVariety
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                        {...register('coffeeVariety', { required: 'Variety is required' })}
+                      >
+                        <option value="">Select variety</option>
+                        {COFFEE_VARIETY_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {errors.coffeeVariety && <p className="text-xs text-danger mt-1">{errors.coffeeVariety.message}</p>}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-text-primary mb-1.5 block">Collection Center</label>
+                  <select
+                    className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
+                      errors.collectionCenter
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                    }`}
+                    {...register('collectionCenter', { required: 'Collection center is required' })}
+                  >
+                    <option value="">Select center</option>
+                    {COLLECTION_CENTER_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  {errors.collectionCenter && <p className="text-xs text-danger mt-1">{errors.collectionCenter.message}</p>}
+                </div>
               </div>
             )}
 

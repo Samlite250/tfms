@@ -143,13 +143,35 @@ export function AuthProvider({ children }) {
         updatedAt: serverTimestamp(),
       });
 
+      if (profileData.role === 'farmer') {
+        await setDoc(doc(db, 'pending_farmers', firebaseUser.uid), {
+          userId: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: profileData.displayName,
+          phone: profileData.phone,
+          village: profileData.village || '',
+          district: profileData.district || '',
+          province: 'Southern',
+          country: 'Rwanda',
+          farmSize: profileData.farmSize || 0,
+          coffeeVariety: profileData.coffeeVariety || '',
+          collectionCenter: profileData.collectionCenter || '',
+          totalDeliveries: 0,
+          totalWeight: 0,
+          status: 'Pending',
+          joinedDate: new Date().toISOString().split('T')[0],
+          createdAt: serverTimestamp(),
+        });
+      }
+
       await auth.signOut();
       return firebaseUser;
     }
 
     // Offline/dev mode: create a local pending user
+    const uid = `local-reg-${Date.now()}`;
     const localProfile = {
-      uid: `local-reg-${Date.now()}`,
+      uid,
       email,
       displayName: profileData.displayName,
       role: profileData.role,
@@ -163,6 +185,31 @@ export function AuthProvider({ children }) {
     pending.push(localProfile);
     localStorage.setItem('coms_pending_users', JSON.stringify(pending));
 
+    // If farmer, also save a pending farmer profile
+    if (profileData.role === 'farmer') {
+      const farmerProfile = {
+        id: uid,
+        userId: uid,
+        email,
+        name: profileData.displayName,
+        phone: profileData.phone,
+        village: profileData.village || '',
+        district: profileData.district || '',
+        province: 'Southern',
+        country: 'Rwanda',
+        farmSize: profileData.farmSize || 0,
+        coffeeVariety: profileData.coffeeVariety || '',
+        collectionCenter: profileData.collectionCenter || '',
+        totalDeliveries: 0,
+        totalWeight: 0,
+        status: 'Pending',
+        joinedDate: new Date().toISOString().split('T')[0],
+      };
+      const pendingFarmers = JSON.parse(localStorage.getItem('coms_pending_farmers') || '[]');
+      pendingFarmers.push(farmerProfile);
+      localStorage.setItem('coms_pending_farmers', JSON.stringify(pendingFarmers));
+    }
+
     return localProfile;
   }
 
@@ -173,6 +220,22 @@ export function AuthProvider({ children }) {
         status: 'active',
         updatedAt: serverTimestamp(),
       });
+      // If farmer, move from pending_farmers to farmers collection
+      try {
+        const { getDoc, setDoc } = await import('firebase/firestore');
+        const pendingDoc = await getDoc(doc(db, 'pending_farmers', uid));
+        if (pendingDoc.exists()) {
+          const farmerData = pendingDoc.data();
+          await setDoc(doc(db, 'farmers', uid), {
+            ...farmerData,
+            status: 'Active',
+            updatedAt: serverTimestamp(),
+          });
+          await import('firebase/firestore').then(({ deleteDoc }) =>
+            deleteDoc(doc(db, 'pending_farmers', uid))
+          );
+        }
+      } catch { /* ignore if not a farmer */ }
     } else {
       const pending = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
       const approved = pending.find((u) => u.uid === uid);
@@ -182,6 +245,19 @@ export function AuthProvider({ children }) {
         approvedUsers.push(approved);
         localStorage.setItem('coms_approved_users', JSON.stringify(approvedUsers));
         localStorage.setItem('coms_pending_users', JSON.stringify(pending.filter((u) => u.uid !== uid)));
+
+        // If farmer, move profile from pending to active farmers
+        if (approved.role === 'farmer') {
+          const pendingFarmers = JSON.parse(localStorage.getItem('coms_pending_farmers') || '[]');
+          const farmerProfile = pendingFarmers.find((f) => f.userId === uid || f.id === uid);
+          if (farmerProfile) {
+            farmerProfile.status = 'Active';
+            const activeFarmers = JSON.parse(localStorage.getItem('coms_collection_farmers') || '[]');
+            activeFarmers.unshift(farmerProfile);
+            localStorage.setItem('coms_collection_farmers', JSON.stringify(activeFarmers));
+            localStorage.setItem('coms_pending_farmers', JSON.stringify(pendingFarmers.filter((f) => f.userId !== uid && f.id !== uid)));
+          }
+        }
       }
     }
   }

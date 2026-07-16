@@ -62,6 +62,8 @@ import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
 import { useMessages } from "../../contexts/MessagesContext";
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from "../../utils/constants";
+import useRealtimeCollection from "../../hooks/useRealtimeCollection";
+import { farmersSeed } from "../../firebase/seedData";
 
 const ROLE_BADGE_VARIANT = {
   [ROLES.ADMIN]: "danger",
@@ -206,15 +208,6 @@ const mockAccounting = [
   { id: "FIN-1008", date: "2026-07-07", type: "Income", description: "Specialty coffee export to European Buyer - 600 kg AA", amount: 7800000, category: "Coffee Sales", status: "Pending", recordedBy: "Thilina Weerasinghe" },
 ];
 
-const mockFarmers = [
-  { id: "FAR-001", name: "Jean Mugabo", phone: "+250 788 301 201", village: "Muhanga", farmSize: 2.5, variety: "Red Bourbon", center: "Mahembe Central", totalDeliveries: 28, status: "Active" },
-  { id: "FAR-002", name: "Emmanuel Ndayisaba", phone: "+250 788 301 202", village: "Nyamabuye", farmSize: 1.8, variety: "Jackson", center: "Muhanga Hub", totalDeliveries: 15, status: "Active" },
-  { id: "FAR-003", name: "Marie Claire Uwimana", phone: "+250 788 301 203", village: "Kibangu", farmSize: 3.0, variety: "BM 139", center: "Ruyanza CC", totalDeliveries: 42, status: "Active" },
-  { id: "FAR-004", name: "Patrick Habimana", phone: "+250 788 301 204", village: "Muhanga", farmSize: 1.2, variety: "Red Bourbon", center: "Mahembe Central", totalDeliveries: 10, status: "Active" },
-  { id: "FAR-005", name: "Claudine Mukamana", phone: "+250 788 301 205", village: "Rugendabari", farmSize: 0.8, variety: "Jackson", center: "Muhanga Hub", totalDeliveries: 5, status: "Inactive" },
-  { id: "FAR-006", name: "Ignace Gahamanyi", phone: "+250 788 301 206", village: "Cyarubari", farmSize: 4.1, variety: "Red Bourbon", center: "Mahembe Central", totalDeliveries: 56, status: "Active" },
-];
-
 const ACTION_COLORS = {
   Created: { text: "text-green-700", bg: "bg-green-100", dot: "bg-green-500" },
   Updated: { text: "text-blue-700", bg: "bg-blue-100", dot: "bg-blue-500" },
@@ -330,6 +323,11 @@ export default function AdminPage() {
   const { success, error: toastError, info } = useToast();
   const { approveUser, rejectUser: rejectUserAuth, userProfile } = useAuth();
   const { messages, sendMessage, replyToMessage, markAsRead, deleteMessage } = useMessages();
+  const { data: farmersList, loading: farmersLoading } = useRealtimeCollection("farmers", {
+    orderByField: "joinedDate",
+    orderDirection: "desc",
+    seedData: farmersSeed,
+  });
 
   const adminEmail = userProfile?.email || "admin@mahembe-coffee.rw";
 
@@ -468,18 +466,19 @@ export default function AdminPage() {
   }, [accountingSearch]);
 
   const filteredFarmers = useMemo(() => {
-    if (!farmersSearch) return mockFarmers;
+    if (!farmersSearch) return farmersList;
     const s = farmersSearch.toLowerCase();
-    return mockFarmers.filter(
+    return farmersList.filter(
       (f) =>
-        f.id.toLowerCase().includes(s) ||
-        f.name.toLowerCase().includes(s) ||
-        f.village.toLowerCase().includes(s) ||
-        f.variety.toLowerCase().includes(s) ||
-        f.center.toLowerCase().includes(s) ||
-        f.status.toLowerCase().includes(s)
+        (f.id || "").toLowerCase().includes(s) ||
+        (f.name || "").toLowerCase().includes(s) ||
+        (f.village || "").toLowerCase().includes(s) ||
+        (f.district || "").toLowerCase().includes(s) ||
+        (f.coffeeVariety || "").toLowerCase().includes(s) ||
+        (f.collectionCenter || "").toLowerCase().includes(s) ||
+        (f.status || "").toLowerCase().includes(s)
     );
-  }, [farmersSearch]);
+  }, [farmersList, farmersSearch]);
 
   function handleAddUser(data) {
     const newUser = {
@@ -1569,9 +1568,9 @@ export default function AdminPage() {
                             <td className="px-4 py-3 text-sm text-text-primary">{farmer.village}</td>
                             <td className="px-4 py-3 text-sm text-text-primary">{farmer.farmSize}</td>
                             <td className="px-4 py-3 text-sm">
-                              <Badge variant="default">{farmer.variety}</Badge>
+                              <Badge variant="default">{farmer.coffeeVariety}</Badge>
                             </td>
-                            <td className="px-4 py-3 text-sm text-text-primary">{farmer.center}</td>
+                            <td className="px-4 py-3 text-sm text-text-primary">{farmer.collectionCenter}</td>
                             <td className="px-4 py-3 text-sm text-text-primary font-medium">{farmer.totalDeliveries}</td>
                             <td className="px-4 py-3 text-sm">
                               <Badge variant={farmerStatusVariant(farmer.status)} dot>{farmer.status}</Badge>
@@ -1585,7 +1584,7 @@ export default function AdminPage() {
 
                 {filteredFarmers.length > 0 && (
                   <div className="px-4 py-3 border-t border-border text-sm text-text-secondary">
-                    Showing {filteredFarmers.length} of {mockFarmers.length} farmers
+                    Showing {filteredFarmers.length} of {farmersList.length} farmers
                   </div>
                 )}
               </Card>
@@ -2437,6 +2436,52 @@ export default function AdminPage() {
                 </p>
               </div>
             </div>
+
+            {pendingViewUser.role === "farmer" && (
+              <div>
+                <h4 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+                  <Tractor size={16} className="text-primary" />
+                  Farm Details
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-2 mb-1">
+                      <MapPin size={14} className="text-text-secondary" />
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Village</span>
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.village || "—"}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-2 mb-1">
+                      <MapPin size={14} className="text-text-secondary" />
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">District</span>
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.district || "—"}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Tractor size={14} className="text-text-secondary" />
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Farm Size</span>
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.farmSize ? `${pendingViewUser.farmSize} ha` : "—"}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Coffee size={14} className="text-text-secondary" />
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Coffee Variety</span>
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.coffeeVariety || "—"}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Building2 size={14} className="text-text-secondary" />
+                      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Collection Center</span>
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">{pendingViewUser.collectionCenter || "—"}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Modal>
