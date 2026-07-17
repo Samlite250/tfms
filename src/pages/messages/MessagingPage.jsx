@@ -85,7 +85,7 @@ export default function MessagingPage() {
   const myConversations = useMemo(() => {
     const convMap = new Map();
     messages.forEach((m) => {
-      const isMine = m.fromEmail === userEmail || m.toEmail === userEmail;
+      const isMine = isAdmin || m.fromEmail === userEmail || m.toEmail === userEmail;
       if (!isMine) return;
       const otherEmail = m.fromEmail === userEmail ? m.toEmail : m.fromEmail;
       const otherName = m.fromEmail === userEmail ? m.to : m.from;
@@ -99,15 +99,18 @@ export default function MessagingPage() {
       const s = search.toLowerCase();
       return list.filter((m) =>
         (m.subject || "").toLowerCase().includes(s) ||
-        (m.otherName || "").toLowerCase().includes(s)
+        (m.otherName || "").toLowerCase().includes(s) ||
+        (m.from || "").toLowerCase().includes(s)
       );
     }
     return list;
-  }, [messages, userEmail, search]);
+  }, [messages, userEmail, search, isAdmin]);
 
   const unreadCount = useMemo(
-    () => myConversations.filter((m) => m.toEmail === userEmail && !m.read).length,
-    [myConversations, userEmail]
+    () => isAdmin
+      ? messages.filter((m) => !m.read).length
+      : myConversations.filter((m) => m.toEmail === userEmail && !m.read).length,
+    [myConversations, messages, userEmail, isAdmin]
   );
 
   const threadMessages = useMemo(() => {
@@ -115,19 +118,20 @@ export default function MessagingPage() {
     return messages
       .filter((m) => m.subject === selectedMsg.subject)
       .filter((m) =>
+        isAdmin ||
         (m.fromEmail === userEmail && m.toEmail === selectedMsg.otherEmail) ||
         (m.toEmail === userEmail && m.fromEmail === selectedMsg.otherEmail) ||
         (m.fromEmail === selectedMsg.fromEmail && m.toEmail === selectedMsg.toEmail) ||
         (m.toEmail === selectedMsg.fromEmail && m.fromEmail === selectedMsg.toEmail)
       )
       .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-  }, [selectedMsg, messages, userEmail]);
+  }, [selectedMsg, messages, userEmail, isAdmin]);
 
   function openConversation(msg) {
     setSelectedMsg(msg);
     setShowCompose(false);
     setSelectedContact(null);
-    if (msg.toEmail === userEmail && !msg.read) markAsRead(msg.id);
+    if (!msg.read) markAsRead(msg.id);
   }
 
   async function handleSendReply() {
@@ -146,12 +150,27 @@ export default function MessagingPage() {
 
   async function handleCompose() {
     if (!composeSubject.trim() || !composeBody.trim()) return;
+    let toEmail = composeTo;
+    let toName = composeTo ? composeTo.split("@")[0] : (isAdmin ? "Farmer" : "Admin");
+    if (!toEmail && !isAdmin) {
+      try {
+        const { collection, query, where, getDocs, limit } = await import("firebase/firestore");
+        const { db } = await import("../../firebase/config");
+        const adminQuery = query(collection(db, "users"), where("role", "==", "admin"), where("status", "==", "active"), limit(1));
+        const snap = await getDocs(adminQuery);
+        if (!snap.empty) {
+          toEmail = snap.docs[0].data().email;
+          toName = snap.docs[0].data().displayName || "Admin";
+        }
+      } catch { /* ignore */ }
+    }
+    if (!toEmail) toEmail = "admin@mahembe-coffee.rw";
     await sendMessage({
       from: userName,
       fromEmail: userEmail,
       fromRole: userRole,
-      to: composeTo || (isAdmin ? "Farmer" : "Admin"),
-      toEmail: composeTo || (isAdmin ? "" : "admin@mahembe-coffee.rw"),
+      to: toName,
+      toEmail,
       subject: composeSubject.trim(),
       body: composeBody.trim(),
     });
