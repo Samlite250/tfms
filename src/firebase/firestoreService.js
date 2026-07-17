@@ -253,6 +253,15 @@ const notificationsService = {
   count: (filters) => getCollectionCount('notifications', filters),
 };
 
+const contactMessagesService = {
+  add: (data) => addDocToCollection('contact_messages', data),
+  getAll: (options) => getCollection('contact_messages', options),
+  getById: (id) => getDocFromCollection('contact_messages', id),
+  update: (id, data) => updateDocInCollection('contact_messages', id, data),
+  delete: (id) => deleteDocFromCollection('contact_messages', id),
+  count: (filters) => getCollectionCount('contact_messages', filters),
+};
+
 export {
   usersService,
   farmersService,
@@ -268,4 +277,5 @@ export {
   departmentsService,
   settingsService,
   activityLogsService,
+  contactMessagesService,
 };

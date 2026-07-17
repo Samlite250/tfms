@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageSquare, Send, Inbox, Mail, Search, Clock, Reply,
   Trash2, ChevronLeft, CheckCircle2, Circle, Paperclip, ArrowRight,
+  ExternalLink,
 } from "lucide-react";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
@@ -10,6 +11,7 @@ import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
 import { useMessages } from "../../contexts/MessagesContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { contactMessagesService } from "../../firebase/firestoreService";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -49,7 +51,60 @@ export default function MessagingPage() {
   const [replyText, setReplyText] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeBody, setComposeBody] = useState("");
+  const [contactMessages, setContactMessages] = useState([]);
+  const [contactLoading, setContactLoading] = useState(false);
+  const [selectedContact, setSelectedContact] = useState(null);
   const userEmail = userProfile?.email || "";
+  const isAdmin = userProfile?.role === "admin";
+
+  useEffect(() => {
+    if (activeTab !== "contact") return;
+    let unsub = null;
+    async function fetchContactMessages() {
+      setContactLoading(true);
+      try {
+        const { collection, query, orderBy, onSnapshot } = await import("firebase/firestore");
+        const { db } = await import("../../firebase/config");
+        const q = query(collection(db, "contact_messages"), orderBy("createdAt", "desc"));
+        unsub = onSnapshot(q, (snapshot) => {
+          setContactMessages(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+          setContactLoading(false);
+        }, () => {
+          setContactMessages([]);
+          setContactLoading(false);
+        });
+      } catch {
+        try {
+          const data = await contactMessagesService.getAll({ limitCount: 100 });
+          setContactMessages(Array.isArray(data) ? data : []);
+        } catch {
+          setContactMessages([]);
+        }
+        setContactLoading(false);
+      }
+    }
+    fetchContactMessages();
+    return () => { if (unsub) unsub(); };
+  }, [activeTab]);
+
+  async function handleMarkContactRead(id) {
+    try {
+      await contactMessagesService.update(id, { status: "read" });
+      setContactMessages((prev) => prev.map((m) => m.id === id ? { ...m, status: "read" } : m));
+    } catch (err) {
+      console.error("Failed to mark as read:", err);
+    }
+  }
+
+  async function handleDeleteContact(id) {
+    try {
+      await contactMessagesService.delete(id);
+      setContactMessages((prev) => prev.filter((m) => m.id !== id));
+      if (selectedContact?.id === id) setSelectedContact(null);
+    } catch (err) {
+      console.error("Failed to delete contact message:", err);
+    }
+  }
 
   const inbox = useMemo(() => {
     return messages
@@ -131,6 +186,7 @@ export default function MessagingPage() {
               {[
                 { key: "inbox", label: "Inbox", icon: Inbox, count: unreadCount },
                 { key: "sent", label: "Sent", icon: Send },
+                ...(isAdmin ? [{ key: "contact", label: "Contact Us", icon: Mail, count: contactMessages.filter((m) => m.status === "new").length }] : []),
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -166,7 +222,53 @@ export default function MessagingPage() {
 
             {/* Message List */}
             <div className="max-h-[500px] overflow-y-auto divide-y divide-border">
-              {currentList.length === 0 ? (
+              {activeTab === "contact" ? (
+                contactLoading ? (
+                  <div className="p-8 text-center">
+                    <div className="inline-flex items-center gap-2 text-text-secondary">
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Loading...
+                    </div>
+                  </div>
+                ) : contactMessages.length === 0 ? (
+                  <div className="p-8">
+                    <EmptyState icon={Mail} title="No contact messages" description="No one has used the contact form yet." />
+                  </div>
+                ) : (
+                  contactMessages.map((msg) => (
+                    <button
+                      key={msg.id}
+                      onClick={() => { setSelectedContact(msg); if (msg.status === "new") handleMarkContactRead(msg.id); }}
+                      className={`w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors cursor-pointer ${
+                        selectedContact?.id === msg.id ? "bg-primary/10" : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${
+                          msg.status === "new" ? "bg-primary/15 text-primary" : "bg-gray-100 text-text-secondary"
+                        }`}>
+                          {getInitials(msg.name || "Anonymous")}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`text-sm truncate ${msg.status === "new" ? "font-semibold text-text-primary" : "font-normal text-text-primary"}`}>
+                              {msg.name || "Anonymous"}
+                            </p>
+                            {msg.status === "new" && <Circle size={8} className="fill-primary text-primary shrink-0" />}
+                          </div>
+                          <p className={`text-xs truncate mt-0.5 ${msg.status === "new" ? "font-medium text-text-primary" : "text-text-secondary"}`}>
+                            {msg.subject}
+                          </p>
+                          <p className="text-xs text-text-secondary/60 mt-0.5">{timeAgo(msg.createdAt)}</p>
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                )
+              ) : currentList.length === 0 ? (
                 <div className="p-8">
                   <EmptyState icon={Mail} title="No messages" description={activeTab === "inbox" ? "Your inbox is empty." : "No sent messages."} />
                 </div>
@@ -208,7 +310,46 @@ export default function MessagingPage() {
         {/* Right Panel: Message Detail / Compose */}
         <motion.div variants={itemVariants} className="lg:col-span-2">
           <AnimatePresence mode="wait">
-            {showCompose ? (
+            {selectedContact && activeTab === "contact" ? (
+              <motion.div key="contact-detail" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <Card padding="none">
+                  <div className="p-5 border-b border-border">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <button onClick={() => setSelectedContact(null)} className="mt-1 p-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer lg:hidden">
+                          <ChevronLeft size={18} />
+                        </button>
+                        <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                          <span className="text-sm font-bold text-primary">{getInitials(selectedContact.name || "A")}</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-text-primary">{selectedContact.name}</h3>
+                            <Badge variant={selectedContact.status === "new" ? "info" : "success"}>
+                              {selectedContact.status === "new" ? "New" : "Read"}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-text-secondary mt-0.5">{selectedContact.email}</p>
+                          <p className="text-xs text-text-secondary/60 mt-0.5">{formatDateTime(selectedContact.createdAt)}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => handleDeleteContact(selectedContact.id)} className="p-2 rounded-lg text-text-secondary hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer" title="Delete">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <h2 className="text-lg font-semibold text-text-primary mt-4">{selectedContact.subject}</h2>
+                  </div>
+                  <div className="p-5">
+                    <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap">{selectedContact.message}</p>
+                  </div>
+                  <div className="p-5 border-t border-border bg-gray-50/50">
+                    <p className="text-xs text-text-secondary">
+                      This message was submitted via the website contact form. To respond, reply to <span className="font-medium text-text-primary">{selectedContact.email}</span> directly.
+                    </p>
+                  </div>
+                </Card>
+              </motion.div>
+            ) : showCompose ? (
               <motion.div key="compose" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <Card
                   header={
@@ -335,8 +476,8 @@ export default function MessagingPage() {
                 <Card>
                   <EmptyState
                     icon={MessageSquare}
-                    title="Select a message"
-                    description="Choose a message from the list to view its contents, or compose a new message to admin."
+                    title={activeTab === "contact" ? "Select a contact message" : "Select a message"}
+                    description={activeTab === "contact" ? "Choose a contact form submission to view its contents." : "Choose a message from the list to view its contents, or compose a new message to admin."}
                   />
                 </Card>
               </motion.div>

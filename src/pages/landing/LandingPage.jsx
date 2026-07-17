@@ -31,6 +31,7 @@ import {
   Zap,
   Sprout,
 } from "lucide-react";
+import { contactMessagesService } from "../../firebase/firestoreService";
 
 function AnimatedCounter({ target, suffix = "", duration = 2 }) {
   const ref = useRef(null);
@@ -420,6 +421,7 @@ export default function LandingPage() {
     reset,
   } = useForm();
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
@@ -435,10 +437,26 @@ export default function LandingPage() {
   const aboutInView = useInView(aboutRef, { once: true, margin: "-100px" });
   const contactInView = useInView(contactRef, { once: true, margin: "-100px" });
 
-  const onSubmit = () => {
-    setFormSubmitted(true);
-    reset();
-    setTimeout(() => setFormSubmitted(false), 4000);
+  const onSubmit = async (data) => {
+    setSending(true);
+    try {
+      await contactMessagesService.add({
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+        status: "new",
+        createdAt: new Date().toISOString(),
+      });
+      setFormSubmitted(true);
+      reset();
+      setTimeout(() => setFormSubmitted(false), 5000);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      alert("Failed to send message. Please try again later.");
+    } finally {
+      setSending(false);
+    }
   };
 
   useEffect(() => {
@@ -1340,10 +1358,23 @@ export default function LandingPage() {
 
                 <button
                   type="submit"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary text-white px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+                  disabled={sending}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary text-white px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
-                  <Send className="w-4 h-4" />
-                  Send Message
+                  {sending ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Message
+                    </>
+                  )}
                 </button>
               </form>
             </motion.div>
