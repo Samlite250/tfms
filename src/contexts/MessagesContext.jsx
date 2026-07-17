@@ -12,31 +12,40 @@ export function MessagesProvider({ children }) {
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
     if (!url || !key) return;
 
-    supabase
-      .from('messages')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (!error && data) {
-          setMessages(data.map((row) => ({
-            id: row.id,
-            from: row.from_name,
-            fromEmail: row.from_email,
-            fromRole: row.from_role,
-            to: row.to_name,
-            toEmail: row.to_email,
-            subject: row.subject,
-            body: row.body,
-            read: row.read,
-            createdAt: row.created_at,
-            replies: row.replies || [],
-          })));
-        }
-      });
+    let cancelled = false;
+
+    async function fetchMessages() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || cancelled) return;
+
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && !cancelled) {
+        setMessages(data.map((row) => ({
+          id: row.id,
+          from: row.from_name,
+          fromEmail: row.from_email,
+          fromRole: row.from_role,
+          to: row.to_name,
+          toEmail: row.to_email,
+          subject: row.subject,
+          body: row.body,
+          read: row.read,
+          createdAt: row.created_at,
+          replies: row.replies || [],
+        })));
+      }
+    }
+
+    fetchMessages();
 
     channelRef.current = supabase
       .channel('messages-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
+        if (cancelled) return;
         if (payload.eventType === 'INSERT') {
           const row = payload.new;
           const msg = {
@@ -75,6 +84,7 @@ export function MessagesProvider({ children }) {
       .subscribe();
 
     return () => {
+      cancelled = true;
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;

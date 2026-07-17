@@ -46,8 +46,9 @@ export default function useRealtimeCollection(collectionName, options = {}) {
 
   useEffect(() => {
     let settled = false;
-    const url = import.meta.env.VITE_SUPABASE_URL || "";
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+    const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+    const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+    const key = rawKey.indexOf("eyJ") > 0 ? rawKey.slice(rawKey.indexOf("eyJ")) : rawKey;
 
     if (!url || !key) {
       const stored = loadSeedFromStorage(collectionName);
