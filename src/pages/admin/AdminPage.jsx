@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -210,7 +210,6 @@ export default function AdminPage() {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(false);
   const [pendingSearch, setPendingSearch] = useState("");
-  const [pendingFarmersList, setPendingFarmersList] = useState([]);
 
   const { success, error: toastError, info } = useToast();
   const { approveUser, rejectUser: rejectUserAuth, userProfile } = useAuth();
@@ -370,9 +369,14 @@ export default function AdminPage() {
     });
   }
 
-  const fetchPendingUsers = useCallback(() => {
+  const pendingUnsubRef = useRef(null);
+
+  const fetchPendingUsers = useCallback(async () => {
+    if (pendingUnsubRef.current) {
+      pendingUnsubRef.current();
+      pendingUnsubRef.current = null;
+    }
     setPendingLoading(true);
-    let unsubscribe = null;
 
     const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
     const isDemo = !apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20;
@@ -398,134 +402,65 @@ export default function AdminPage() {
       return;
     }
 
-    import("firebase/firestore").then(({ collection, query, where, onSnapshot, doc, getDoc }) =>
-      import("../../firebase/config").then(({ db }) => {
-        const q = query(collection(db, "users"), where("status", "==", "pending"));
-        unsubscribe = onSnapshot(
-          q,
-          async (snapshot) => {
-            const rawList = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-            const mergedList = await Promise.all(
-              rawList.map(async (u) => {
-                if (u.role === "farmer") {
-                  try {
-                    const pendingFarmerDoc = await getDoc(doc(db, "pending_farmers", u.id));
-                    if (pendingFarmerDoc.exists()) {
-                      return { ...u, ...pendingFarmerDoc.data() };
-                    }
-                  } catch (e) {
-                    console.error("Error fetching pending farmer doc:", e);
+    try {
+      const { collection, query, where, onSnapshot, doc, getDoc } = await import("firebase/firestore");
+      const { db } = await import("../../firebase/config");
+      const q = query(collection(db, "users"), where("status", "==", "pending"));
+      pendingUnsubRef.current = onSnapshot(
+        q,
+        async (snapshot) => {
+          const rawList = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+          const mergedList = await Promise.all(
+            rawList.map(async (u) => {
+              if (u.role === "farmer") {
+                try {
+                  const pendingFarmerDoc = await getDoc(doc(db, "pending_farmers", u.id));
+                  if (pendingFarmerDoc.exists()) {
+                    return { ...u, ...pendingFarmerDoc.data() };
                   }
+                } catch (e) {
+                  console.error("Error fetching pending farmer doc:", e);
                 }
-                return u;
-              })
-            );
-            setPendingUsers(mergedList);
-            setPendingLoading(false);
-          },
-          () => {
-            try {
-              const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
-              const pendingFarmers = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
-              const usersList = pending
-                .filter((u) => u.status === "pending")
-                .map((u) => ({ id: u.uid || u.id, ...u }));
-              const mergedList = usersList.map((u) => {
-                if (u.role === "farmer") {
-                  const farmerProfile = pendingFarmers.find(
-                    (f) => f.userId === u.id || f.id === u.id
-                  );
-                  if (farmerProfile) return { ...u, ...farmerProfile };
-                }
-                return u;
-              });
-              setPendingUsers(mergedList);
-            } catch {
-              setPendingUsers([]);
-            }
-            setPendingLoading(false);
-          }
-        );
-      })
-    ).catch(() => {
-      try {
-        const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
-        const pendingFarmers = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
-        const usersList = pending
-          .filter((u) => u.status === "pending")
-          .map((u) => ({ id: u.uid || u.id, ...u }));
-        const mergedList = usersList.map((u) => {
-          if (u.role === "farmer") {
-            const farmerProfile = pendingFarmers.find(
-              (f) => f.userId === u.id || f.id === u.id
-            );
-            if (farmerProfile) return { ...u, ...farmerProfile };
-          }
-          return u;
-        });
-        setPendingUsers(mergedList);
-      } catch {
-        setPendingUsers([]);
-      }
+              }
+              return u;
+            })
+          );
+          setPendingUsers(mergedList);
+          setPendingLoading(false);
+        },
+        (err) => {
+          console.error("Pending users snapshot error:", err);
+          toastError("Failed to load pending users from the server.");
+          setPendingUsers([]);
+          setPendingLoading(false);
+        }
+      );
+    } catch (err) {
+      console.error("Failed to subscribe to pending users:", err);
+      toastError("Could not connect to the database. Pending users unavailable.");
+      setPendingUsers([]);
       setPendingLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (activeTab !== "approvals") return;
-    const unsub = fetchPendingUsers();
-    return () => { if (typeof unsub === "function") unsub(); };
-  }, [activeTab, fetchPendingUsers]);
-
-  useEffect(() => {
-    if (activeTab !== "approvals") return;
-    let unsubscribe = null;
-
-    async function subscribeToPendingFarmers() {
-      const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
-      const isDemo = !apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20;
-      if (isDemo) {
-        try {
-          const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
-          setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
-        } catch {
-          setPendingFarmersList([]);
-        }
-        return;
-      }
-
-      try {
-        const { collection: col, onSnapshot } = await import("firebase/firestore");
-        const { db } = await import("../../firebase/config");
-        unsubscribe = onSnapshot(
-          col(db, "pending_farmers"),
-          (snapshot) => setPendingFarmersList(snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }))),
-          () => setPendingFarmersList([])
-        );
-      } catch {
-        try {
-          const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
-          setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
-        } catch {
-          setPendingFarmersList([]);
-        }
-      }
     }
+  }, [toastError]);
 
-    subscribeToPendingFarmers();
-    return () => { if (unsubscribe) unsubscribe(); };
-  }, [activeTab]);
+  useEffect(() => {
+    if (activeTab !== "approvals") return;
+    fetchPendingUsers();
+    return () => {
+      if (pendingUnsubRef.current) {
+        pendingUnsubRef.current();
+        pendingUnsubRef.current = null;
+      }
+    };
+  }, [activeTab, fetchPendingUsers]);
 
   async function handleApproveUser(pendingUser) {
     try {
       await approveUser(pendingUser.id);
       setPendingUsers((prev) => prev.filter((u) => u.id !== pendingUser.id));
-      setPendingFarmersList((prev) => prev.filter((f) => f.id !== pendingUser.id && f.userId !== pendingUser.id));
       success(`"${pendingUser.displayName || pendingUser.name || pendingUser.email}" has been approved and can now log in.`);
-    } catch {
-      toastError("Failed to approve user. Please try again.");
+    } catch (err) {
+      toastError(err?.message || "Failed to approve user. Please try again.");
     }
   }
 
@@ -533,10 +468,9 @@ export default function AdminPage() {
     try {
       await rejectUserAuth(pendingUser.id);
       setPendingUsers((prev) => prev.filter((u) => u.id !== pendingUser.id));
-      setPendingFarmersList((prev) => prev.filter((f) => f.id !== pendingUser.id && f.userId !== pendingUser.id));
       success(`"${pendingUser.displayName || pendingUser.name || pendingUser.email}" registration has been rejected.`);
-    } catch {
-      toastError("Failed to reject user. Please try again.");
+    } catch (err) {
+      toastError(err?.message || "Failed to reject user. Please try again.");
     }
   }
 

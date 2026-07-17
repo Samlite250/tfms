@@ -348,6 +348,11 @@ export function AuthProvider({ children }) {
         status: 'rejected',
         updatedAt: serverTimestamp(),
       });
+
+      try {
+        const { deleteDoc: delDoc } = await import('firebase/firestore');
+        await delDoc(doc(db, 'pending_farmers', uid));
+      } catch { /* not a farmer or already removed */ }
     } else {
       const pending = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
       const rejectedUser = pending.find((u) => u.uid === uid);
