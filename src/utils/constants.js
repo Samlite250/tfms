@@ -21,11 +21,11 @@ export const ROLE_LABELS = {
 export const ROLE_PERMISSIONS = {
   [ROLES.ADMIN]: [
     'dashboard', 'farmers', 'employees', 'collections', 'production',
-    'inventory', 'customers', 'sales', 'expenses', 'reports', 'settings', 'admin', 'messages',
+    'inventory', 'payments', 'reports', 'settings', 'admin', 'messages',
   ],
   [ROLES.FACTORY_MANAGER]: [
     'dashboard', 'farmers', 'employees', 'collections', 'production',
-    'inventory', 'customers', 'sales', 'expenses', 'reports', 'settings', 'messages',
+    'inventory', 'payments', 'reports', 'settings', 'messages',
   ],
   [ROLES.COLLECTION_OFFICER]: [
     'dashboard', 'farmers', 'collections', 'messages',
@@ -37,7 +37,7 @@ export const ROLE_PERMISSIONS = {
     'dashboard', 'inventory', 'messages',
   ],
   [ROLES.ACCOUNTANT]: [
-    'dashboard', 'sales', 'expenses', 'reports', 'messages',
+    'dashboard', 'payments', 'reports', 'messages',
   ],
   [ROLES.FARMER]: [
     'dashboard', 'my_collections', 'settings', 'messages',
@@ -45,13 +45,13 @@ export const ROLE_PERMISSIONS = {
 };
 
 export const ROLE_REPORTS = {
-  [ROLES.ADMIN]: ['collection', 'production', 'sales', 'expense', 'financial', 'inventory'],
-  [ROLES.FACTORY_MANAGER]: ['collection', 'production', 'sales', 'expense', 'financial', 'inventory'],
+  [ROLES.ADMIN]: ['collection', 'production', 'payment', 'inventory'],
+  [ROLES.FACTORY_MANAGER]: ['collection', 'production', 'payment', 'inventory'],
   [ROLES.COLLECTION_OFFICER]: ['collection'],
   [ROLES.PRODUCTION_OFFICER]: ['production', 'inventory'],
   [ROLES.STORE_KEEPER]: ['inventory'],
-  [ROLES.ACCOUNTANT]: ['sales', 'expense', 'financial'],
-  [ROLES.FARMER]: ['collection'],
+  [ROLES.ACCOUNTANT]: ['payment'],
+  [ROLES.FARMER]: ['collection', 'payment'],
 };
 
 export const ROLE_SETTINGS_TABS = {
@@ -71,12 +71,11 @@ export const COLLECTIONS = {
   COFFEE_COLLECTIONS: 'coffeeCollections',
   PRODUCTION: 'production',
   INVENTORY: 'inventory',
-  CUSTOMERS: 'customers',
-  SALES: 'sales',
-  EXPENSES: 'expenses',
+  PAYMENTS: 'payments',
   DEPARTMENTS: 'departments',
   SETTINGS: 'settings',
   ACTIVITY_LOGS: 'activityLogs',
+  NOTIFICATIONS: 'notifications',
 };
 
 export const COFFEE_GRADES = [
@@ -142,6 +141,43 @@ export const STATUS = {
   PAID: 'paid',
   UNPAID: 'unpaid',
   PARTIAL: 'partial',
+  PROCESSING: 'processing',
+  DELIVERED: 'delivered',
+  RECEIVED: 'received',
+};
+
+export const PROCESSING_STAGES = [
+  'Received',
+  'Washing',
+  'Sorting',
+  'Drying',
+  'Milling',
+  'Packaging',
+  'Completed',
+];
+
+export const PAYMENT_METHODS = [
+  'Cash',
+  'Bank Transfer',
+  'Mobile Money',
+  'Check',
+];
+
+export const COFFEE_PRICE_PER_KG = {
+  AA: 1200,
+  AB: 1000,
+  PB: 1100,
+  C: 800,
+  TT: 700,
+  T: 600,
+  E: 900,
+  FNGS: 550,
+  BF: 500,
+  BL: 450,
+  HB: 400,
+  HE: 350,
+  SGH: 300,
+  'MH/ML': 250,
 };
 
 export const STATUS_COLORS = {

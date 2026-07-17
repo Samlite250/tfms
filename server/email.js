@@ -137,3 +137,206 @@ export async function sendAdminAlert(adminEmail, user) {
   `;
   return sendEmail({ to: adminEmail, subject: 'COMS Alert: New Pending Registration', html });
 }
+
+export async function sendCoffeeReceived(to, name, { weight, grade, center, receiptNumber }) {
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      <h2 style="color: #15803d; margin-top: 0;">Coffee Received</h2>
+      <p style="font-size: 16px; color: #334155; line-height: 1.5;">
+        Hello ${name}, your coffee delivery has been received.
+      </p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Receipt #</td>
+          <td style="padding: 10px 0; color: #0f172a;">${receiptNumber}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Weight</td>
+          <td style="padding: 10px 0; color: #0f172a;">${weight} kg</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Grade</td>
+          <td style="padding: 10px 0; color: #0f172a;">${grade}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Collection Center</td>
+          <td style="padding: 10px 0; color: #0f172a;">${center}</td>
+        </tr>
+      </table>
+      <div style="margin: 24px 0; padding: 16px; background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 4px;">
+        <span style="font-weight: 600; color: #15803d;">Status: Received - Pending Quality Check</span>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
+        This email was sent automatically by COMS. Please do not reply to this email.
+      </p>
+    </div>
+  `;
+  return sendEmail({ to, subject: `COMS: Coffee Received - ${receiptNumber}`, html });
+}
+
+export async function sendCoffeeAccepted(to, name, { weight, grade, receiptNumber }) {
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      <h2 style="color: #15803d; margin-top: 0;">Coffee Accepted</h2>
+      <p style="font-size: 16px; color: #334155; line-height: 1.5;">
+        Hello ${name}, your coffee delivery has been accepted.
+      </p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Receipt #</td>
+          <td style="padding: 10px 0; color: #0f172a;">${receiptNumber}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Weight</td>
+          <td style="padding: 10px 0; color: #0f172a;">${weight} kg</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Grade</td>
+          <td style="padding: 10px 0; color: #0f172a;">${grade}</td>
+        </tr>
+      </table>
+      <div style="margin: 24px 0; padding: 16px; background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 4px;">
+        <span style="font-weight: 600; color: #15803d;">Status: Accepted - Payment Will Be Processed</span>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
+        This email was sent automatically by COMS. Please do not reply to this email.
+      </p>
+    </div>
+  `;
+  return sendEmail({ to, subject: `COMS: Coffee Accepted - ${receiptNumber}`, html });
+}
+
+export async function sendPaymentReady(to, name, { amount, receiptNumber, paymentMethod }) {
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      <h2 style="color: #15803d; margin-top: 0;">Payment Ready</h2>
+      <p style="font-size: 16px; color: #334155; line-height: 1.5;">
+        Hello ${name}, your payment is ready for collection.
+      </p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Amount</td>
+          <td style="padding: 10px 0; color: #0f172a; font-weight: 700; font-size: 18px;">RWF ${amount.toLocaleString()}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Receipt #</td>
+          <td style="padding: 10px 0; color: #0f172a;">${receiptNumber}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Payment Method</td>
+          <td style="padding: 10px 0; color: #0f172a;">${paymentMethod}</td>
+        </tr>
+      </table>
+      <div style="margin: 24px 0; padding: 16px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;">
+        <span style="font-weight: 600; color: #b45309;">Please collect your payment at the factory office.</span>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
+        This email was sent automatically by COMS. Please do not reply to this email.
+      </p>
+    </div>
+  `;
+  return sendEmail({ to, subject: `COMS: Payment Ready - RWF ${amount.toLocaleString()}`, html });
+}
+
+export async function sendPaymentCompleted(to, name, { amount, receiptNumber }) {
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      <h2 style="color: #15803d; margin-top: 0;">Payment Completed</h2>
+      <p style="font-size: 16px; color: #334155; line-height: 1.5;">
+        Hello ${name}, your payment has been completed.
+      </p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Amount</td>
+          <td style="padding: 10px 0; color: #0f172a; font-weight: 700; font-size: 18px;">RWF ${amount.toLocaleString()}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 0; font-weight: 600; color: #475569;">Receipt #</td>
+          <td style="padding: 10px 0; color: #0f172a;">${receiptNumber}</td>
+        </tr>
+      </table>
+      <div style="margin: 24px 0; padding: 16px; background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 4px;">
+        <span style="font-weight: 600; color: #15803d;">Payment has been successfully processed. Thank you!</span>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
+        This email was sent automatically by COMS. Please do not reply to this email.
+      </p>
+    </div>
+  `;
+  return sendEmail({ to, subject: `COMS: Payment Completed - RWF ${amount.toLocaleString()}`, html });
+}
+
+export async function sendPriceAnnouncement(to, name, { prices, effectiveDate }) {
+  const priceList = Object.entries(prices).map(([grade, price]) => 
+    `<tr style="border-bottom: 1px solid #f1f5f9;">
+      <td style="padding: 10px 0; font-weight: 600; color: #475569;">${grade}</td>
+      <td style="padding: 10px 0; color: #0f172a;">RWF ${price.toLocaleString()}/kg</td>
+    </tr>`
+  ).join('');
+
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      <h2 style="color: #2b6cb0; margin-top: 0;">Coffee Price Announcement</h2>
+      <p style="font-size: 16px; color: #334155; line-height: 1.5;">
+        Hello ${name}, the factory has announced new coffee prices.
+      </p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr style="border-bottom: 2px solid #e2e8f0; background-color: #f8fafc;">
+          <td style="padding: 10px 0; font-weight: 700; color: #1e293b;">Grade</td>
+          <td style="padding: 10px 0; font-weight: 700; color: #1e293b;">Price per kg (RWF)</td>
+        </tr>
+        ${priceList}
+      </table>
+      <div style="margin: 24px 0; padding: 16px; background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+        <span style="font-weight: 600; color: #1d4ed8;">Effective from: ${effectiveDate}</span>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
+        This email was sent automatically by COMS. Please do not reply to this email.
+      </p>
+    </div>
+  `;
+  return sendEmail({ to, subject: 'COMS: New Coffee Prices Announced', html });
+}
+
+export async function sendImportantNotice(to, name, { message }) {
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      <h2 style="color: #b91c1c; margin-top: 0;">Important Notice</h2>
+      <p style="font-size: 16px; color: #334155; line-height: 1.5;">
+        Hello ${name},
+      </p>
+      <div style="margin: 24px 0; padding: 16px; background-color: #fef2f2; border-left: 4px solid #dc2626; border-radius: 4px;">
+        <p style="font-size: 16px; color: #991b1b; line-height: 1.5; margin: 0;">${message}</p>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
+        This email was sent automatically by COMS. Please do not reply to this email.
+      </p>
+    </div>
+  `;
+  return sendEmail({ to, subject: 'COMS: Important Notice', html });
+}
+
+export async function sendReminder(to, name, { message }) {
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      <h2 style="color: #2b6cb0; margin-top: 0;">Reminder</h2>
+      <p style="font-size: 16px; color: #334155; line-height: 1.5;">
+        Hello ${name},
+      </p>
+      <div style="margin: 24px 0; padding: 16px; background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+        <p style="font-size: 16px; color: #1e40af; line-height: 1.5; margin: 0;">${message}</p>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">
+        This email was sent automatically by COMS. Please do not reply to this email.
+      </p>
+    </div>
+  `;
+  return sendEmail({ to, subject: 'COMS: Reminder', html });
+}

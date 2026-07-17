@@ -235,6 +235,24 @@ const activityLogsService = {
   count: (filters) => getCollectionCount('activityLogs', filters),
 };
 
+const paymentsService = {
+  add: (data) => addDocToCollection('payments', data),
+  getAll: (options) => getCollection('payments', options),
+  getById: (id) => getDocFromCollection('payments', id),
+  update: (id, data) => updateDocInCollection('payments', id, data),
+  delete: (id) => deleteDocFromCollection('payments', id),
+  count: (filters) => getCollectionCount('payments', filters),
+};
+
+const notificationsService = {
+  add: (data) => addDocToCollection('notifications', data),
+  getAll: (options) => getCollection('notifications', options),
+  getById: (id) => getDocFromCollection('notifications', id),
+  update: (id, data) => updateDocInCollection('notifications', id, data),
+  delete: (id) => deleteDocFromCollection('notifications', id),
+  count: (filters) => getCollectionCount('notifications', filters),
+};
+
 export {
   usersService,
   farmersService,
@@ -245,6 +263,8 @@ export {
   customersService,
   salesService,
   expensesService,
+  paymentsService,
+  notificationsService,
   departmentsService,
   settingsService,
   activityLogsService,

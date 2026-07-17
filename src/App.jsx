@@ -41,28 +41,23 @@ import InventoryFormPage from './pages/inventory/InventoryFormPage';
 import StockMovementPage from './pages/inventory/StockMovementPage';
 import LowStockAlerts from './pages/inventory/LowStockAlerts';
 
-import SalesPage from './pages/sales/SalesPage';
-import SalesFormPage from './pages/sales/SalesFormPage';
-import SalesDetailPage from './pages/sales/SalesDetailPage';
-import CustomersPage from './pages/sales/CustomersPage';
 
-import ExpensesPage from './pages/expenses/ExpensesPage';
-import ExpenseFormPage from './pages/expenses/ExpenseFormPage';
-import ExpenseDetailPage from './pages/expenses/ExpenseDetailPage';
 
 import ReportsPage from './pages/reports/ReportsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AdminPage from './pages/admin/AdminPage';
 import MyCollectionsPage from './pages/farmer/MyCollectionsPage';
 import MessagingPage from './pages/messages/MessagingPage';
+import PaymentsPage from './pages/payments/PaymentsPage';
+import PaymentFormPage from './pages/payments/PaymentFormPage';
+import PaymentDetailPage from './pages/payments/PaymentDetailPage';
 
 const routePermissionMap = {
   '/farmers': 'farmers',
   '/collections': 'collections',
   '/production': 'production',
   '/inventory': 'inventory',
-  '/sales': 'sales',
-  '/expenses': 'expenses',
+  '/payments': 'payments',
   '/reports': 'reports',
   '/employees': 'employees',
   '/settings': 'settings',
@@ -164,15 +159,9 @@ function AppRoutes() {
       <Route path="/inventory/:id/edit" element={<AuthenticatedLayout><InventoryFormPage /></AuthenticatedLayout>} />
       <Route path="/inventory/movements" element={<AuthenticatedLayout><StockMovementPage /></AuthenticatedLayout>} />
       <Route path="/inventory/alerts" element={<AuthenticatedLayout><LowStockAlerts /></AuthenticatedLayout>} />
-      <Route path="/sales" element={<AuthenticatedLayout><SalesPage /></AuthenticatedLayout>} />
-      <Route path="/sales/new" element={<AuthenticatedLayout><SalesFormPage /></AuthenticatedLayout>} />
-      <Route path="/sales/:id" element={<AuthenticatedLayout><SalesDetailPage /></AuthenticatedLayout>} />
-      <Route path="/sales/:id/edit" element={<AuthenticatedLayout><SalesFormPage /></AuthenticatedLayout>} />
-      <Route path="/customers" element={<AuthenticatedLayout><CustomersPage /></AuthenticatedLayout>} />
-      <Route path="/expenses" element={<AuthenticatedLayout><ExpensesPage /></AuthenticatedLayout>} />
-      <Route path="/expenses/new" element={<AuthenticatedLayout><ExpenseFormPage /></AuthenticatedLayout>} />
-      <Route path="/expenses/:id" element={<AuthenticatedLayout><ExpenseDetailPage /></AuthenticatedLayout>} />
-      <Route path="/expenses/:id/edit" element={<AuthenticatedLayout><ExpenseFormPage /></AuthenticatedLayout>} />
+      <Route path="/payments" element={<AuthenticatedLayout><PaymentsPage /></AuthenticatedLayout>} />
+      <Route path="/payments/new" element={<AuthenticatedLayout><PaymentFormPage /></AuthenticatedLayout>} />
+      <Route path="/payments/:id" element={<AuthenticatedLayout><PaymentDetailPage /></AuthenticatedLayout>} />
       <Route path="/reports" element={<AuthenticatedLayout><ReportsPage /></AuthenticatedLayout>} />
       <Route path="/settings" element={<AuthenticatedLayout><SettingsPage /></AuthenticatedLayout>} />
       <Route path="/my-collections" element={<AuthenticatedLayout><MyCollectionsPage /></AuthenticatedLayout>} />

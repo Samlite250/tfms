@@ -44,6 +44,17 @@ const statusOptions = [
   { value: "Quality Check", label: "Quality Check" },
 ];
 
+const processingStages = [
+  { value: "all", label: "All Stages" },
+  { value: "Received", label: "Received" },
+  { value: "Washing", label: "Washing" },
+  { value: "Sorting", label: "Sorting" },
+  { value: "Drying", label: "Drying" },
+  { value: "Milling", label: "Milling" },
+  { value: "Packaging", label: "Packaging" },
+  { value: "Completed", label: "Completed" },
+];
+
 const supervisors = [
   "R. Perera",
   "K. Fernando",
@@ -57,8 +68,19 @@ const supervisors = [
 
 const coffeeGradesList = ["AA", "AB", "PB", "C", "TT", "T", "E", "MH", "SM", "P"];
 
+const stageBadgeVariant = {
+  Received: "default",
+  Washing: "info",
+  Sorting: "warning",
+  Drying: "accent",
+  Milling: "primary",
+  Packaging: "secondary",
+  Completed: "success",
+};
+
 function generateMockData() {
   const records = [];
+  const stages = ["Received", "Washing", "Sorting", "Drying", "Milling", "Packaging", "Completed"];
   for (let i = 1; i <= 24; i++) {
     const rawMaterial = Math.floor(Math.random() * 200) + 200;
     const yieldPct = 70 + Math.random() * 20;
@@ -67,6 +89,7 @@ function generateMockData() {
     const status = statuses[Math.floor(Math.random() * statuses.length)];
     const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, "0");
     const month = String(Math.floor(Math.random() * 2) + 6).padStart(2, "0");
+    const processingStage = status === "Completed" ? "Completed" : stages[Math.floor(Math.random() * stages.length)];
 
     records.push({
       id: i,
@@ -77,6 +100,7 @@ function generateMockData() {
       finishedProduct: Math.round(finishedProduct * 10) / 10,
       yieldPercent: Math.round(yieldPct * 10) / 10,
       status,
+      processingStage,
       supervisor: supervisors[Math.floor(Math.random() * supervisors.length)],
     });
   }
@@ -153,6 +177,7 @@ function ProductionPage() {
   const [dateFilter, setDateFilter] = useState("");
   const [gradeFilter, setGradeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [stageFilter, setStageFilter] = useState("all");
   const [deleteModal, setDeleteModal] = useState(null);
 
   const filteredData = useMemo(() => {
@@ -164,9 +189,10 @@ function ProductionPage() {
       const matchesDate = !dateFilter || row.date === dateFilter;
       const matchesGrade = gradeFilter === "all" || row.teaGrade === gradeFilter;
       const matchesStatus = statusFilter === "all" || row.status === statusFilter;
-      return matchesSearch && matchesDate && matchesGrade && matchesStatus;
+      const matchesStage = stageFilter === "all" || row.processingStage === stageFilter;
+      return matchesSearch && matchesDate && matchesGrade && matchesStatus && matchesStage;
     });
-  }, [dataList, searchTerm, dateFilter, gradeFilter, statusFilter]);
+  }, [dataList, searchTerm, dateFilter, gradeFilter, statusFilter, stageFilter]);
 
   const statusBadge = (status) => {
     const map = {
@@ -227,6 +253,13 @@ function ProductionPage() {
       header: "Status",
       accessor: "status",
       render: (row) => statusBadge(row.status),
+    },
+    {
+      header: "Processing Stage",
+      accessor: "processingStage",
+      render: (row) => (
+        <Badge variant={stageBadgeVariant[row.processingStage] || "default"} dot>{row.processingStage}</Badge>
+      ),
     },
     {
       header: "Supervisor",
@@ -308,6 +341,14 @@ function ProductionPage() {
                   value={statusFilter}
                   onChange={setStatusFilter}
                   placeholder="Status"
+                />
+              </div>
+              <div className="w-full md:w-40">
+                <Select
+                  options={processingStages}
+                  value={stageFilter}
+                  onChange={setStageFilter}
+                  placeholder="Processing Stage"
                 />
               </div>
             </div>

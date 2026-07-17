@@ -39,3 +39,31 @@ export async function sendAdminAlert(user) {
 export async function sendMessageNotification({ to, recipientName, senderName, subject, body }) {
     return triggerEmail({ type: 'message_notification', to, recipientName, senderName, subject, body });
 }
+
+export async function sendCoffeeReceivedEmail(to, name, { weight, grade, center, receiptNumber }) {
+    return triggerEmail({ type: 'coffee_received', to, name, weight, grade, center, receiptNumber });
+}
+
+export async function sendCoffeeAcceptedEmail(to, name, { weight, grade, receiptNumber }) {
+    return triggerEmail({ type: 'coffee_accepted', to, name, weight, grade, receiptNumber });
+}
+
+export async function sendPaymentReadyEmail(to, name, { amount, receiptNumber, paymentMethod }) {
+    return triggerEmail({ type: 'payment_ready', to, name, amount, receiptNumber, paymentMethod });
+}
+
+export async function sendPaymentCompletedEmail(to, name, { amount, receiptNumber }) {
+    return triggerEmail({ type: 'payment_completed', to, name, amount, receiptNumber });
+}
+
+export async function sendPriceAnnouncementEmail(to, name, { prices, effectiveDate }) {
+    return triggerEmail({ type: 'price_announcement', to, name, prices, effectiveDate });
+}
+
+export async function sendImportantNoticeEmail(to, name, { message }) {
+    return triggerEmail({ type: 'important_notice', to, name, message });
+}
+
+export async function sendReminderEmail(to, name, { message }) {
+    return triggerEmail({ type: 'reminder', to, name, message });
+}

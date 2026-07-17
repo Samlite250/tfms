@@ -1,14 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Coffee, Factory, Package, ShoppingCart, DollarSign, Users, TrendingUp,
   Clock, FileText, ArrowRight, Weight,
-  UserPlus, Receipt, ClipboardList, Tractor, AlertTriangle,
+  UserPlus, Receipt, ClipboardList, Tractor, AlertTriangle, Banknote,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROLES, ROLE_LABELS } from "../../utils/constants";
 import StatCard from "../../components/ui/StatCard";
+import { farmersService, coffeeCollectionsService, productionService, paymentsService, inventoryService } from "../../firebase/firestoreService";
+import { formatCurrency } from "../../utils/helpers";
 
 
 function getGreeting() {
@@ -179,9 +181,63 @@ function getRoleConfig(role) {
 export default function DashboardPage() {
   const { userProfile } = useAuth();
   const role = userProfile?.role || ROLES.ADMIN;
-  const config = useMemo(() => getRoleConfig(role), [role]);
   const greeting = useMemo(() => getGreeting(), []);
   const date = useMemo(() => formatDate(), []);
+
+  const [stats, setStats] = useState({
+    farmers: 0,
+    collectionsToday: 0,
+    totalCollected: 0,
+    productionBatches: 0,
+    paymentsPending: 0,
+    paymentsTotal: 0,
+    inventoryItems: 0,
+    loading: true,
+  });
+
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        const [farmers, collections, production, payments, inventory] = await Promise.all([
+          farmersService.count([]).catch(() => 0),
+          coffeeCollectionsService.getAll({ filters: [], limitCount: 100 }).catch(() => []),
+          productionService.count([]).catch(() => 0),
+          paymentsService.getAll({ filters: [], limitCount: 100 }).catch(() => []),
+          inventoryService.count([]).catch(() => 0),
+        ]);
+
+        const today = new Date().toISOString().split('T')[0];
+        const collectionsToday = Array.isArray(collections) 
+          ? collections.filter(c => c.date === today).reduce((sum, c) => sum + (c.weight || 0), 0)
+          : 0;
+        const totalCollected = Array.isArray(collections) 
+          ? collections.reduce((sum, c) => sum + (c.weight || 0), 0)
+          : 0;
+        const paymentsPending = Array.isArray(payments) 
+          ? payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + (p.totalAmount || 0), 0)
+          : 0;
+        const paymentsTotal = Array.isArray(payments) 
+          ? payments.reduce((sum, p) => sum + (p.totalAmount || 0), 0)
+          : 0;
+
+        setStats({
+          farmers,
+          collectionsToday,
+          totalCollected,
+          productionBatches: production,
+          paymentsPending,
+          paymentsTotal,
+          inventoryItems: inventory,
+          loading: false,
+        });
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+        setStats(prev => ({ ...prev, loading: false }));
+      }
+    }
+
+    fetchDashboardData();
+  }, []);
 
   const userName = userProfile?.displayName || ROLE_LABELS[role] || "User";
 
@@ -198,84 +254,123 @@ export default function DashboardPage() {
           {greeting}, {userName}
         </h1>
         <p className="mt-1 text-sm text-text-secondary">{date}</p>
-        <p className="mt-1 text-sm text-text-secondary">{config.subtitle}</p>
       </motion.div>
 
       {/* Stat Cards */}
-      <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${config.stats.length <= 4 ? "lg:grid-cols-4" : "lg:grid-cols-5"}`}>
-        {config.stats.map((card, idx) => (
-          <StatCard
-            key={card.label}
-            icon={card.icon}
-            label={card.label}
-            value={card.value}
-            change={card.change}
-            up={card.up}
-            color={card.color}
-            bg={card.bg}
-            borderColor={card.borderColor}
-            delay={idx * 0.06}
-          />
-        ))}
-      </div>
+      <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={Users}
+          label="Total Farmers"
+          value={stats.farmers.toString()}
+          change="+3"
+          up={true}
+          color="text-primary"
+          bg="bg-primary/10"
+          borderColor="#2E7D32"
+          delay={0}
+        />
+        <StatCard
+          icon={Coffee}
+          label="Coffee Received Today"
+          value={`${stats.collectionsToday.toLocaleString()} kg`}
+          change="+12%"
+          up={true}
+          color="text-info"
+          bg="bg-info/10"
+          borderColor="#0288D1"
+          delay={0.06}
+        />
+        <StatCard
+          icon={Factory}
+          label="Total Coffee Processed"
+          value={`${stats.totalCollected.toLocaleString()} kg`}
+          change="+8%"
+          up={true}
+          color="text-secondary"
+          bg="bg-secondary/10"
+          borderColor="#1B5E20"
+          delay={0.12}
+        />
+        <StatCard
+          icon={Banknote}
+          label="Payments Made"
+          value={formatCurrency(stats.paymentsTotal)}
+          change={`${stats.paymentsPending > 0 ? `${stats.paymentsPending} pending` : 'All clear'}`}
+          up={stats.paymentsPending === 0}
+          color="text-accent-dark"
+          bg="bg-accent/10"
+          borderColor="#F9A825"
+          delay={0.18}
+        />
+      </motion.div>
 
-      {/* Bottom Row: Activities & Quick Actions */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Recent Activities */}
-        {config.activities.length > 0 && (
-          <motion.div variants={itemVariants} className="rounded-2xl border border-border bg-card p-6 shadow-sm lg:col-span-2">
-            <div className="mb-5">
-              <h3 className="text-lg font-semibold text-text-primary">Recent Activities</h3>
-              <p className="text-sm text-text-secondary">Latest updates relevant to your role</p>
-            </div>
-            <div className="space-y-1">
-              {config.activities.map((activity) => (
-                <div key={activity.id} className="group flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-bg">
-                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${activity.bg}`}>
-                    <activity.icon className={`h-4 w-4 ${activity.color}`} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-text-primary">{activity.description}</p>
-                    <div className="mt-0.5 flex items-center gap-2">
-                      <span className="flex items-center gap-1 text-xs text-text-secondary">
-                        <Clock className="h-3 w-3" />
-                        {activity.time}
-                      </span>
-                      <span className="rounded-full bg-bg px-2 py-0.5 text-xs font-medium text-text-secondary">
-                        {activity.module}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
+      {/* Second Row Stats */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+          icon={ClipboardList}
+          label="Production Batches"
+          value={stats.productionBatches.toString()}
+          change="Active"
+          up={true}
+          color="text-purple-600"
+          bg="bg-purple-100"
+          borderColor="#9333EA"
+          delay={0.24}
+        />
+        <StatCard
+          icon={Package}
+          label="Inventory Items"
+          value={stats.inventoryItems.toString()}
+          change="Tracked"
+          up={true}
+          color="text-teal-600"
+          bg="bg-teal-100"
+          borderColor="#0D9488"
+          delay={0.3}
+        />
+        <StatCard
+          icon={Clock}
+          label="Pending Payments"
+          value={formatCurrency(stats.paymentsPending)}
+          change={stats.paymentsPending > 0 ? "Needs attention" : "Clear"}
+          up={stats.paymentsPending === 0}
+          color="text-warning"
+          bg="bg-warning/10"
+          borderColor="#F57C00"
+          delay={0.36}
+        />
+      </motion.div>
 
-        {/* Quick Actions */}
-        {config.quickActions.length > 0 && (
-          <motion.div variants={itemVariants} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <div className="mb-5">
-              <h3 className="text-lg font-semibold text-text-primary">Quick Actions</h3>
-              <p className="text-sm text-text-secondary">Shortcuts to common tasks</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {config.quickActions.map((action) => (
-                <Link
-                  key={action.label}
-                  to={action.to}
-                  className={`group flex flex-col items-center gap-2.5 rounded-xl border border-border p-4 text-center transition-all hover:border-transparent hover:shadow-md ${action.color} text-white`}
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
-                    <action.icon className="h-5 w-5" />
-                  </div>
-                  <span className="text-xs font-medium leading-tight">{action.label}</span>
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </div>
+      {/* Bottom Row: Quick Actions */}
+      <motion.div variants={itemVariants} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="mb-5">
+          <h3 className="text-lg font-semibold text-text-primary">Quick Actions</h3>
+          <p className="text-sm text-text-secondary">Shortcuts to common tasks</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "Record Collection", icon: Coffee, to: "/collections/new", color: "bg-primary" },
+            { label: "New Production", icon: Factory, to: "/production/new", color: "bg-secondary" },
+            { label: "Add Farmer", icon: UserPlus, to: "/farmers/new", color: "bg-info" },
+            { label: "Create Payment", icon: Banknote, to: "/payments/new", color: "bg-accent-dark" },
+            { label: "View Reports", icon: ClipboardList, to: "/reports", color: "bg-purple-600" },
+            { label: "Inventory", icon: Package, to: "/inventory", color: "bg-teal-600" },
+            { label: "Sales", icon: ShoppingCart, to: "/sales", color: "bg-secondary" },
+            { label: "Expenses", icon: Receipt, to: "/expenses", color: "bg-danger" },
+          ].map((action) => (
+            <Link
+              key={action.label}
+              to={action.to}
+              className={`group flex flex-col items-center gap-2.5 rounded-xl border border-border p-4 text-center transition-all hover:border-transparent hover:shadow-md ${action.color} text-white`}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+                <action.icon className="h-5 w-5" />
+              </div>
+              <span className="text-xs font-medium leading-tight">{action.label}</span>
+            </Link>
+          ))}
+        </div>
+      </motion.div>
     </motion.div>
   );
 }

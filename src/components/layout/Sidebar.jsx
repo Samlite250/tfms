@@ -18,6 +18,7 @@ import {
   Leaf,
   MessageSquare,
   Tractor,
+  Banknote,
 } from 'lucide-react';
 import { ROLE_LABELS } from '../../utils/constants';
 
@@ -35,6 +36,7 @@ const iconMap = {
   Shield,
   MessageSquare,
   Tractor,
+  Banknote,
 };
 
 const sidebarVariants = {
