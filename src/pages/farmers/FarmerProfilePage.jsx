@@ -24,6 +24,7 @@ import Badge from "../../components/ui/Badge";
 import Modal from "../../components/ui/Modal";
 import DataTable from "../../components/ui/DataTable";
 import { useToast } from "../../components/ui/Toast";
+import { useAuth } from "../../contexts/AuthContext";
 import useRealtimeCollection from "../../hooks/useRealtimeCollection";
 import { farmersSeed } from "../../firebase/seedData";
 
@@ -68,10 +69,12 @@ function FarmerProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { success, error } = useToast();
+  const { userProfile } = useAuth();
   const [deleteModal, setDeleteModal] = useState(false);
   const { data: farmersList, remove: removeFarmer } = useRealtimeCollection("farmers", {
     seedData: farmersSeed,
   });
+  const canEdit = userProfile?.role !== "farmer";
 
   const farmer = useMemo(() => {
     return farmersList.find((f) => f.id === id) || farmers.find((f) => f.id === id) || farmers[0];
@@ -126,7 +129,7 @@ function FarmerProfilePage() {
       >
         <motion.div variants={staggerItem} className="mb-6">
           <button
-            onClick={() => navigate("/farmers")}
+            onClick={() => navigate(canEdit ? "/farmers" : "/my-collections")}
             className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-primary transition-colors cursor-pointer mb-4"
           >
             <ArrowLeft size={16} />
@@ -163,14 +166,16 @@ function FarmerProfilePage() {
                   </span>
                 </div>
               </div>
-              <div className="flex gap-2 shrink-0">
-                <Button variant="outline" size="sm" icon={Pencil} onClick={() => navigate(`/farmers/${farmer.id}/edit`)}>
-                  Edit
-                </Button>
-                <Button variant="danger" size="sm" icon={Trash2} onClick={() => setDeleteModal(true)}>
-                  Delete
-                </Button>
-              </div>
+              {canEdit && (
+                <div className="flex gap-2 shrink-0">
+                  <Button variant="outline" size="sm" icon={Pencil} onClick={() => navigate(`/farmers/${farmer.id}/edit`)}>
+                    Edit
+                  </Button>
+                  <Button variant="danger" size="sm" icon={Trash2} onClick={() => setDeleteModal(true)}>
+                    Delete
+                  </Button>
+                </div>
+              )}
             </div>
           </Card>
         </motion.div>

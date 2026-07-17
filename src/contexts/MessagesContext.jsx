@@ -1,81 +1,107 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { sendMessageNotification } from '../services/emailService';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 
 const MessagesContext = createContext(null);
 
-const STORAGE_KEY = 'coms_messages';
-
-function loadMessages() {
+let _firebaseAvailable = null;
+async function isFirebaseAvailable() {
+  if (_firebaseAvailable !== null) return _firebaseAvailable;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
-  return [];
-}
-
-function saveMessages(msgs) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
-  } catch { /* ignore */ }
+    const { auth } = await import('../firebase/config');
+    const apiKey = auth?.app?.options?.apiKey || '';
+    const projectId = auth?.app?.options?.projectId || '';
+    _firebaseAvailable = apiKey && projectId && !apiKey.includes('demo-placeholder') && apiKey.length > 20;
+  } catch { _firebaseAvailable = false; }
+  return _firebaseAvailable;
 }
 
 export function MessagesProvider({ children }) {
-  const [messages, setMessages] = useState(loadMessages);
+  const [messages, setMessages] = useState([]);
+  const unsubRef = useRef(null);
 
   useEffect(() => {
-    saveMessages(messages);
-  }, [messages]);
-
-  const sendMessage = useCallback((msg) => {
-    const newMsg = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      timestamp: new Date().toISOString(),
-      read: false,
-      replies: [],
-      ...msg,
-    };
-    setMessages((prev) => [newMsg, ...prev]);
-    if (newMsg.toEmail) {
-      sendMessageNotification({
-        to: newMsg.toEmail,
-        recipientName: newMsg.to,
-        senderName: newMsg.from,
-        subject: newMsg.subject,
-        body: newMsg.body,
-      }).then((result) => {
-        if (!result?.success) console.warn('Message email notification failed:', result?.error);
+    let cancelled = false;
+    isFirebaseAvailable().then((available) => {
+      if (cancelled || !available) return;
+      Promise.all([
+        import('firebase/firestore'),
+        import('../firebase/config'),
+      ]).then(([{ collection, query, orderBy, onSnapshot }, { db }]) => {
+        if (cancelled) return;
+        const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
+        unsubRef.current = onSnapshot(q, (snap) => {
+          if (!cancelled) setMessages(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        }, () => { if (!cancelled) setMessages([]); });
       });
-    }
-    return newMsg;
+    });
+    return () => {
+      cancelled = true;
+      if (unsubRef.current) { unsubRef.current(); unsubRef.current = null; }
+    };
   }, []);
 
-  const replyToMessage = useCallback((messageId, reply) => {
+  const sendMessage = useCallback(async (msg) => {
+    const newMsg = {
+      ...msg,
+      createdAt: new Date().toISOString(),
+      read: false,
+      replies: [],
+    };
+    if (await isFirebaseAvailable()) {
+      const { collection: col, addDoc } = await import('firebase/firestore');
+      const { db } = await import('../firebase/config');
+      const docRef = await addDoc(col(db, 'messages'), newMsg);
+      return { id: docRef.id, ...newMsg };
+    }
+    const localMsg = { id: `msg-${Date.now()}`, ...newMsg };
+    setMessages((prev) => [localMsg, ...prev]);
+    return localMsg;
+  }, []);
+
+  const replyToMessage = useCallback(async (messageId, reply) => {
     const newReply = {
-      id: `reply-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      timestamp: new Date().toISOString(),
+      id: `reply-${Date.now()}`,
+      createdAt: new Date().toISOString(),
       ...reply,
     };
+    if (await isFirebaseAvailable()) {
+      const { doc, updateDoc, arrayUnion } = await import('firebase/firestore');
+      const { db } = await import('../firebase/config');
+      await updateDoc(doc(db, 'messages', messageId), {
+        replies: arrayUnion(newReply),
+      });
+      return newReply;
+    }
     setMessages((prev) =>
       prev.map((m) =>
         m.id === messageId
-          ? { ...m, replies: [...(m.replies || []), newReply], read: true }
+          ? { ...m, replies: [...(m.replies || []), newReply] }
           : m
       )
     );
     return newReply;
   }, []);
 
-  const markAsRead = useCallback((messageId) => {
+  const markAsRead = useCallback(async (messageId) => {
+    if (await isFirebaseAvailable()) {
+      try {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../firebase/config');
+        await updateDoc(doc(db, 'messages', messageId), { read: true });
+      } catch { /* ignore */ }
+    }
     setMessages((prev) =>
       prev.map((m) => (m.id === messageId ? { ...m, read: true } : m))
     );
   }, []);
 
-  const markAllAsRead = useCallback(() => {
-    setMessages((prev) => prev.map((m) => ({ ...m, read: true })));
-  }, []);
-
-  const deleteMessage = useCallback((messageId) => {
+  const deleteMessage = useCallback(async (messageId) => {
+    if (await isFirebaseAvailable()) {
+      try {
+        const { doc, deleteDoc } = await import('firebase/firestore');
+        const { db } = await import('../firebase/config');
+        await deleteDoc(doc(db, 'messages', messageId));
+      } catch { /* ignore */ }
+    }
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   }, []);
 
@@ -84,7 +110,6 @@ export function MessagesProvider({ children }) {
     sendMessage,
     replyToMessage,
     markAsRead,
-    markAllAsRead,
     deleteMessage,
   };
 

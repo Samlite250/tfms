@@ -32,6 +32,7 @@ import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
 import useRealtimeCollection from "../../hooks/useRealtimeCollection";
 import { farmersSeed } from "../../firebase/seedData";
+import { ROLES } from "../../utils/constants";
 
 const collectionCenterOptions = [
   { value: null, label: "All Centers" },
@@ -71,7 +72,7 @@ function statusBadge(status) {
 function FarmersPage() {
   const navigate = useNavigate();
   const { success, error: toastError } = useToast();
-  const { approveUser, rejectUser: rejectUserAuth } = useAuth();
+  const { approveUser, rejectUser: rejectUserAuth, userProfile } = useAuth();
   const { data: farmersList, loading, error, remove } = useRealtimeCollection("farmers", {
     orderByField: "joinedDate",
     orderDirection: "desc",
@@ -110,6 +111,12 @@ function FarmersPage() {
     subscribeToPendingFarmers();
     return () => unsubscribe?.();
   }, []);
+
+  useEffect(() => {
+    if (userProfile?.role === ROLES.FARMER) navigate("/my-collections", { replace: true });
+  }, [userProfile, navigate]);
+
+  if (userProfile?.role === ROLES.FARMER) return null;
 
   // Merge: pending farmers at top, deduplicated with active list
   const allFarmersList = useMemo(() => {
