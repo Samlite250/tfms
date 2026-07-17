@@ -115,15 +115,17 @@ export default function MessagingPage() {
 
   const threadMessages = useMemo(() => {
     if (!selectedMsg) return [];
+    const other = selectedMsg.otherEmail;
     return messages
       .filter((m) => m.subject === selectedMsg.subject)
-      .filter((m) =>
-        isAdmin ||
-        (m.fromEmail === userEmail && m.toEmail === selectedMsg.otherEmail) ||
-        (m.toEmail === userEmail && m.fromEmail === selectedMsg.otherEmail) ||
-        (m.fromEmail === selectedMsg.fromEmail && m.toEmail === selectedMsg.toEmail) ||
-        (m.toEmail === selectedMsg.fromEmail && m.fromEmail === selectedMsg.toEmail)
-      )
+      .filter((m) => {
+        if (isAdmin) return true;
+        const iAmSender = m.fromEmail === userEmail;
+        const iAmRecipient = m.toEmail === userEmail;
+        if (!iAmSender && !iAmRecipient) return false;
+        if (!other) return true;
+        return m.fromEmail === other || m.toEmail === other;
+      })
       .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   }, [selectedMsg, messages, userEmail, isAdmin]);
 
