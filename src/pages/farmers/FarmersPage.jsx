@@ -88,18 +88,29 @@ function FarmersPage() {
   // Keep pending registrations in sync so a newly registered farmer appears
   // immediately, without requiring the administrator to refresh the page.
   useEffect(() => {
-    let unsubscribe;
+    let channel;
     async function subscribeToPendingFarmers() {
       try {
-        const { collection: col, onSnapshot } = await import("firebase/firestore");
-        const { db } = await import("../../firebase/config");
-        unsubscribe = onSnapshot(
-          col(db, "pending_farmers"),
-          (snapshot) => setPendingFarmersList(snapshot.docs.map((d) => ({ id: d.id, ...d.data(), status: "Pending" }))),
-          () => setPendingFarmersList([])
-        );
+        const { supabase } = await import("../../firebase/config");
+        const { data: rows } = await supabase
+          .from("pending_farmers")
+          .select("*")
+          .order("created_at", { ascending: false });
+        setPendingFarmersList((rows || []).map((d) => ({ id: d.id, ...d, name: d.name, displayName: d.name, status: "Pending" })));
+
+        channel = supabase
+          .channel("pending-farmers-realtime")
+          .on("postgres_changes", { event: "*", schema: "public", table: "pending_farmers" }, (payload) => {
+            if (payload.eventType === "INSERT") {
+              const item = payload.new;
+              setPendingFarmersList((prev) => [{ id: item.id, ...item, name: item.name, displayName: item.name, status: "Pending" }, ...prev]);
+            } else if (payload.eventType === "DELETE") {
+              const deletedId = payload.old?.id;
+              if (deletedId) setPendingFarmersList((prev) => prev.filter((f) => f.id !== deletedId));
+            }
+          })
+          .subscribe();
       } catch {
-        // Offline fallback
         try {
           const stored = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
           setPendingFarmersList(stored.map((f) => ({ ...f, status: "Pending" })));
@@ -109,7 +120,7 @@ function FarmersPage() {
       }
     }
     subscribeToPendingFarmers();
-    return () => unsubscribe?.();
+    return () => { if (channel) supabase.removeChannel(channel); };
   }, []);
 
   useEffect(() => {
@@ -176,9 +187,8 @@ function FarmersPage() {
       await remove(farmerId);
 
       try {
-        const { doc: firestoreDoc, deleteDoc: firestoreDeleteDoc } = await import("firebase/firestore");
-        const { db } = await import("../../firebase/config");
-        await firestoreDeleteDoc(firestoreDoc(db, "users", farmerId));
+        const { supabase } = await import("../../firebase/config");
+        await supabase.from("users").delete().eq("id", farmerId);
       } catch (err) {
         console.warn("Failed to delete corresponding user account:", err);
       }

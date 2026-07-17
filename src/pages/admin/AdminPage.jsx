@@ -320,9 +320,8 @@ export default function AdminPage() {
       await removeFarmer(farmerId);
 
       try {
-        const { doc: firestoreDoc, deleteDoc: firestoreDeleteDoc } = await import("firebase/firestore");
-        const { db } = await import("../../firebase/config");
-        await firestoreDeleteDoc(firestoreDoc(db, "users", farmerId));
+        const { supabase } = await import("../../firebase/config");
+        await supabase.from("users").delete().eq("id", farmerId);
       } catch (err) {
         console.warn("Failed to delete corresponding user account:", err);
       }
@@ -368,8 +367,8 @@ export default function AdminPage() {
     }
     setPendingLoading(true);
 
-    const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
-    const isDemo = !apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+    const isDemo = !supabaseUrl;
     if (isDemo) {
       try {
         const pending = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
@@ -393,40 +392,35 @@ export default function AdminPage() {
     }
 
     try {
-      const { collection, query, where, onSnapshot, doc, getDoc } = await import("firebase/firestore");
-      const { db } = await import("../../firebase/config");
-      const q = query(collection(db, "users"), where("status", "==", "pending"));
-      pendingUnsubRef.current = onSnapshot(
-        q,
-        async (snapshot) => {
-          const rawList = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-          const mergedList = await Promise.all(
-            rawList.map(async (u) => {
-              if (u.role === "farmer") {
-                try {
-                  const pendingFarmerDoc = await getDoc(doc(db, "pending_farmers", u.id));
-                  if (pendingFarmerDoc.exists()) {
-                    return { ...u, ...pendingFarmerDoc.data() };
-                  }
-                } catch (e) {
-                  console.error("Error fetching pending farmer doc:", e);
-                }
+      const { supabase } = await import("../../firebase/config");
+      const { data: rawList, error: fetchErr } = await supabase
+        .from("users")
+        .select("*")
+        .eq("status", "pending");
+      if (fetchErr) throw fetchErr;
+      const mergedList = await Promise.all(
+        (rawList || []).map(async (u) => {
+          if (u.role === "farmer") {
+            try {
+              const { data: pendingFarmerDoc } = await supabase
+                .from("pending_farmers")
+                .select("*")
+                .eq("id", u.id)
+                .single();
+              if (pendingFarmerDoc) {
+                return { ...u, ...pendingFarmerDoc, displayName: pendingFarmerDoc.name };
               }
-              return u;
-            })
-          );
-          setPendingUsers(mergedList);
-          setPendingLoading(false);
-        },
-        (err) => {
-          console.error("Pending users snapshot error:", err);
-          toastError("Failed to load pending users from the server.");
-          setPendingUsers([]);
-          setPendingLoading(false);
-        }
+            } catch (e) {
+              console.error("Error fetching pending farmer doc:", e);
+            }
+          }
+          return u;
+        })
       );
+      setPendingUsers(mergedList);
+      setPendingLoading(false);
     } catch (err) {
-      console.error("Failed to subscribe to pending users:", err);
+      console.error("Failed to fetch pending users:", err);
       toastError("Could not connect to the database. Pending users unavailable.");
       setPendingUsers([]);
       setPendingLoading(false);

@@ -57,25 +57,41 @@ export default function MessagingPage() {
   useEffect(() => {
     if (activeTab !== "contact") return;
     let cancelled = false;
+    let channel;
     async function fetchContactMessages() {
       setContactLoading(true);
       try {
-        const { collection, query, orderBy, onSnapshot } = await import("firebase/firestore");
-        const { db } = await import("../../firebase/config");
-        const q = query(collection(db, "contact_messages"), orderBy("createdAt", "desc"));
-        const unsub = onSnapshot(q, (snapshot) => {
-          if (!cancelled) {
-            setContactMessages(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
-            setContactLoading(false);
-          }
-        }, () => { if (!cancelled) { setContactMessages([]); setContactLoading(false); } });
-        return () => { cancelled = true; unsub(); };
+        const { supabase } = await import("../../firebase/config");
+        const { data: rows } = await supabase
+          .from("contact_messages")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (!cancelled) {
+          setContactMessages(rows || []);
+          setContactLoading(false);
+        }
+        channel = supabase
+          .channel("contact-messages-realtime")
+          .on("postgres_changes", { event: "*", schema: "public", table: "contact_messages" }, (payload) => {
+            if (cancelled) return;
+            if (payload.eventType === "INSERT") {
+              setContactMessages((prev) => [payload.new, ...prev]);
+            } else if (payload.eventType === "UPDATE") {
+              setContactMessages((prev) => prev.map((m) => m.id === payload.new.id ? payload.new : m));
+            } else if (payload.eventType === "DELETE") {
+              setContactMessages((prev) => prev.filter((m) => m.id !== payload.old?.id));
+            }
+          })
+          .subscribe();
       } catch {
         if (!cancelled) setContactLoading(false);
       }
     }
-    const cleanup = fetchContactMessages();
-    return () => { cancelled = true; cleanup?.then?.((fn) => fn?.()); };
+    fetchContactMessages();
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [activeTab]);
 
   useEffect(() => {
@@ -156,13 +172,16 @@ export default function MessagingPage() {
     let toName = composeTo ? composeTo.split("@")[0] : (isAdmin ? "Farmer" : "Admin");
     if (!toEmail && !isAdmin) {
       try {
-        const { collection, query, where, getDocs, limit } = await import("firebase/firestore");
-        const { db } = await import("../../firebase/config");
-        const adminQuery = query(collection(db, "users"), where("role", "==", "admin"), where("status", "==", "active"), limit(1));
-        const snap = await getDocs(adminQuery);
-        if (!snap.empty) {
-          toEmail = snap.docs[0].data().email;
-          toName = snap.docs[0].data().displayName || "Admin";
+        const { supabase } = await import("../../firebase/config");
+        const { data: adminUsers } = await supabase
+          .from("users")
+          .select("email, display_name")
+          .eq("role", "admin")
+          .eq("status", "active")
+          .limit(1);
+        if (adminUsers && adminUsers.length > 0) {
+          toEmail = adminUsers[0].email;
+          toName = adminUsers[0].display_name || "Admin";
         }
       } catch { /* ignore */ }
     }

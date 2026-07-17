@@ -1,60 +1,120 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { supabase } from '../firebase/config';
 
 const MessagesContext = createContext(null);
 
-let _firebaseAvailable = null;
-async function isFirebaseAvailable() {
-  if (_firebaseAvailable !== null) return _firebaseAvailable;
-  try {
-    const { auth } = await import('../firebase/config');
-    const apiKey = auth?.app?.options?.apiKey || '';
-    const projectId = auth?.app?.options?.projectId || '';
-    _firebaseAvailable = apiKey && projectId && !apiKey.includes('demo-placeholder') && apiKey.length > 20;
-  } catch { _firebaseAvailable = false; }
-  return _firebaseAvailable;
-}
-
 export function MessagesProvider({ children }) {
   const [messages, setMessages] = useState([]);
-  const unsubRef = useRef(null);
+  const channelRef = useRef(null);
 
   useEffect(() => {
-    let cancelled = false;
-    isFirebaseAvailable().then((available) => {
-      if (cancelled || !available) return;
-      Promise.all([
-        import('firebase/firestore'),
-        import('../firebase/config'),
-      ]).then(([{ collection, query, orderBy, onSnapshot }, { db }]) => {
-        if (cancelled) return;
-        const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
-        unsubRef.current = onSnapshot(q, (snap) => {
-          if (!cancelled) setMessages(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        }, () => { if (!cancelled) setMessages([]); });
+    const url = import.meta.env.VITE_SUPABASE_URL || '';
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    if (!url || !key) return;
+
+    supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setMessages(data.map((row) => ({
+            id: row.id,
+            from: row.from_name,
+            fromEmail: row.from_email,
+            fromRole: row.from_role,
+            to: row.to_name,
+            toEmail: row.to_email,
+            subject: row.subject,
+            body: row.body,
+            read: row.read,
+            createdAt: row.created_at,
+            replies: row.replies || [],
+          })));
+        }
       });
-    });
+
+    channelRef.current = supabase
+      .channel('messages-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const row = payload.new;
+          const msg = {
+            id: row.id,
+            from: row.from_name,
+            fromEmail: row.from_email,
+            fromRole: row.from_role,
+            to: row.to_name,
+            toEmail: row.to_email,
+            subject: row.subject,
+            body: row.body,
+            read: row.read,
+            createdAt: row.created_at,
+            replies: row.replies || [],
+          };
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === msg.id)) return prev;
+            return [msg, ...prev];
+          });
+        } else if (payload.eventType === 'UPDATE') {
+          const row = payload.new;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === row.id
+                ? { ...m, read: row.read, body: row.body || m.body }
+                : m
+            )
+          );
+        } else if (payload.eventType === 'DELETE') {
+          const deletedId = payload.old?.id;
+          if (deletedId) {
+            setMessages((prev) => prev.filter((m) => m.id !== deletedId));
+          }
+        }
+      })
+      .subscribe();
+
     return () => {
-      cancelled = true;
-      if (unsubRef.current) { unsubRef.current(); unsubRef.current = null; }
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, []);
 
   const sendMessage = useCallback(async (msg) => {
     const newMsg = {
-      ...msg,
-      createdAt: new Date().toISOString(),
+      from_name: msg.from || '',
+      from_email: msg.fromEmail || '',
+      from_role: msg.fromRole || '',
+      to_name: msg.to || '',
+      to_email: msg.toEmail || '',
+      subject: msg.subject || '',
+      body: msg.body || '',
       read: false,
+    };
+
+    const { data, error } = await supabase
+      .from('messages')
+      .insert(newMsg)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      from: data.from_name,
+      fromEmail: data.from_email,
+      fromRole: data.from_role,
+      to: data.to_name,
+      toEmail: data.to_email,
+      subject: data.subject,
+      body: data.body,
+      read: data.read,
+      createdAt: data.created_at,
       replies: [],
     };
-    if (await isFirebaseAvailable()) {
-      const { collection: col, addDoc } = await import('firebase/firestore');
-      const { db } = await import('../firebase/config');
-      const docRef = await addDoc(col(db, 'messages'), newMsg);
-      return { id: docRef.id, ...newMsg };
-    }
-    const localMsg = { id: `msg-${Date.now()}`, ...newMsg };
-    setMessages((prev) => [localMsg, ...prev]);
-    return localMsg;
   }, []);
 
   const replyToMessage = useCallback(async (messageId, reply) => {
@@ -63,14 +123,6 @@ export function MessagesProvider({ children }) {
       createdAt: new Date().toISOString(),
       ...reply,
     };
-    if (await isFirebaseAvailable()) {
-      const { doc, updateDoc, arrayUnion } = await import('firebase/firestore');
-      const { db } = await import('../firebase/config');
-      await updateDoc(doc(db, 'messages', messageId), {
-        replies: arrayUnion(newReply),
-      });
-      return newReply;
-    }
     setMessages((prev) =>
       prev.map((m) =>
         m.id === messageId
@@ -82,26 +134,22 @@ export function MessagesProvider({ children }) {
   }, []);
 
   const markAsRead = useCallback(async (messageId) => {
-    if (await isFirebaseAvailable()) {
-      try {
-        const { doc, updateDoc } = await import('firebase/firestore');
-        const { db } = await import('../firebase/config');
-        await updateDoc(doc(db, 'messages', messageId), { read: true });
-      } catch { /* ignore */ }
-    }
+    await supabase
+      .from('messages')
+      .update({ read: true })
+      .eq('id', messageId);
+
     setMessages((prev) =>
       prev.map((m) => (m.id === messageId ? { ...m, read: true } : m))
     );
   }, []);
 
   const deleteMessage = useCallback(async (messageId) => {
-    if (await isFirebaseAvailable()) {
-      try {
-        const { doc, deleteDoc } = await import('firebase/firestore');
-        const { db } = await import('../firebase/config');
-        await deleteDoc(doc(db, 'messages', messageId));
-      } catch { /* ignore */ }
-    }
+    await supabase
+      .from('messages')
+      .delete()
+      .eq('id', messageId);
+
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
   }, []);
 

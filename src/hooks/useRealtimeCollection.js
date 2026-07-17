@@ -1,20 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  collection,
-  onSnapshot,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  where,
-  orderBy,
-  serverTimestamp,
-  getDocs,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
-import { db } from "../firebase/config";
+import { supabase } from "../firebase/config";
 
 function loadSeedFromStorage(collectionName) {
   try {
@@ -30,21 +15,41 @@ function saveToStorage(collectionName, items) {
   } catch { /* ignore */ }
 }
 
+function toSnake(s) {
+  return s.replace(/[A-Z]/g, (l) => '_' + l.toLowerCase());
+}
+
+function toCamel(s) {
+  return s.replace(/_([a-z])/g, (_, l) => l.toUpperCase());
+}
+
+function convertRow(row) {
+  const result = {};
+  for (const [k, v] of Object.entries(row)) {
+    result[toCamel(k)] = v;
+  }
+  return result;
+}
+
+function convertFilterToSQL(filter) {
+  return { field: toSnake(filter.field), operator: filter.operator || "==", value: filter.value };
+}
+
 export default function useRealtimeCollection(collectionName, options = {}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const seededRef = useRef(false);
+  const channelRef = useRef(null);
 
   const { filters = [], orderByField = null, orderDirection = "desc", seedData = null } = options;
 
   useEffect(() => {
     let settled = false;
+    const url = import.meta.env.VITE_SUPABASE_URL || "";
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
-    const activateOfflineFallback = (reason, silent = false) => {
-      if (settled) return;
-      settled = true;
-      if (!silent) console.warn(`Offline mode for ${collectionName}:`, reason);
+    if (!url || !key) {
       const stored = loadSeedFromStorage(collectionName);
       const seededKey = `coms_seeded_${collectionName}`;
       const isSeeded = localStorage.getItem(seededKey) === "true";
@@ -61,156 +66,163 @@ export default function useRealtimeCollection(collectionName, options = {}) {
       saveToStorage(collectionName, items);
       setData(items);
       setLoading(false);
-    };
-
-    // Skip Firestore entirely when running with a demo/placeholder API key
-    const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || "";
-    if (!apiKey || apiKey.includes("demo") || apiKey.includes("placeholder") || apiKey.length < 20) {
-      activateOfflineFallback("demo API key — using localStorage", true);
       return;
     }
 
-    const timeout = setTimeout(() => {
-      activateOfflineFallback('Firestore connection timed out (no real Firebase configured)');
-    }, 12000);
+    async function fetchData() {
+      try {
+        let q = supabase.from(collectionName).select("*");
 
-    try {
-      let q = collection(db, collectionName);
-
-      const constraints = [];
-      for (const f of filters) {
-        constraints.push(where(f.field, f.operator || "==", f.value));
-      }
-      if (orderByField) {
-        constraints.push(orderBy(orderByField, orderDirection));
-      }
-
-      if (constraints.length > 0) {
-        q = query(q, ...constraints);
-      }
-
-      const unsubscribe = onSnapshot(
-        q,
-        async (snapshot) => {
-          clearTimeout(timeout);
-          if (settled) { unsubscribe(); return; }
-          settled = true;
-
-          const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-          if (items.length > 0) {
-            try {
-              localStorage.setItem(`coms_seeded_${collectionName}`, "true");
-              const statusDocRef = doc(db, "system_status", collectionName);
-              getDoc(statusDocRef).then((statusSnap) => {
-                if (!statusSnap.exists() || !statusSnap.data().seeded) {
-                  setDoc(statusDocRef, { seeded: true, updatedAt: serverTimestamp() });
-                }
-              }).catch(() => { });
-            } catch { }
-          } else if (seedData && seedData.length > 0 && !seededRef.current) {
-            seededRef.current = true;
-            try {
-              const statusDocRef = doc(db, "system_status", collectionName);
-              const statusSnap = await getDoc(statusDocRef);
-              if (statusSnap.exists() && statusSnap.data().seeded) {
-                console.log(`Collection ${collectionName} was already seeded online.`);
-                localStorage.setItem(`coms_seeded_${collectionName}`, "true");
-              } else {
-                console.log(`Seeding ${collectionName} online...`);
-                for (const item of seedData) {
-                  const { id: _id, ...rest } = item;
-                  await addDoc(collection(db, collectionName), {
-                    ...rest,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp(),
-                  });
-                }
-                await setDoc(statusDocRef, { seeded: true, updatedAt: serverTimestamp() });
-                localStorage.setItem(`coms_seeded_${collectionName}`, "true");
-              }
-            } catch (err) {
-              console.error(`Error checking/seeding ${collectionName}:`, err);
-            }
+        for (const f of filters) {
+          const sf = convertFilterToSQL(f);
+          if (sf.operator === "in") {
+            q = q.in(sf.field, Array.isArray(sf.value) ? sf.value : [sf.value]);
+          } else if (sf.operator === "array-contains") {
+            q = q.contains(sf.field, sf.value);
+          } else {
+            const opMap = { "==": "eq", "!=": "neq", "<": "lt", "<=": "lte", ">": "gt", ">=": "gte" };
+            q = q.filter(sf.field, opMap[sf.operator] || "eq", sf.value);
           }
+        }
 
+        if (orderByField) {
+          q = q.order(toSnake(orderByField), { ascending: orderDirection === "asc" });
+        }
+
+        const { data: rows, error: fetchError } = await q;
+
+        if (fetchError) {
+          throw fetchError;
+        }
+
+        const items = (rows || []).map(convertRow);
+
+        if (items.length > 0) {
+          localStorage.setItem(`coms_seeded_${collectionName}`, "true");
+        } else if (seedData && seedData.length > 0 && !seededRef.current) {
+          seededRef.current = true;
+          const seededKey = `coms_seeded_${collectionName}`;
+          if (localStorage.getItem(seededKey) !== "true") {
+            for (const item of seedData) {
+              const { id: _id, ...rest } = item;
+              const snakeRest = {};
+              for (const [k, v] of Object.entries(rest)) {
+                snakeRest[toSnake(k)] = v;
+              }
+              snakeRest.created_at = new Date().toISOString();
+              snakeRest.updated_at = new Date().toISOString();
+              await supabase.from(collectionName).insert(snakeRest);
+            }
+            localStorage.setItem(seededKey, "true");
+          }
+        }
+
+        if (!settled) {
+          settled = true;
           setData(items);
           setLoading(false);
-        },
-        (err) => {
-          clearTimeout(timeout);
-          console.error(`Real-time error for ${collectionName}:`, err);
-          activateOfflineFallback(err.message);
         }
-      );
-
-      return () => { clearTimeout(timeout); unsubscribe(); };
-    } catch (err) {
-      clearTimeout(timeout);
-      activateOfflineFallback(err.message);
+      } catch (err) {
+        if (!settled) {
+          settled = true;
+          console.error(`Error fetching ${collectionName}:`, err);
+          setError(err.message);
+          const stored = loadSeedFromStorage(collectionName) || seedData || [];
+          setData(stored);
+          setLoading(false);
+        }
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    fetchData();
+
+    channelRef.current = supabase
+      .channel(`${collectionName}-realtime`)
+      .on("postgres_changes", { event: "*", schema: "public", table: collectionName }, (payload) => {
+        if (payload.eventType === "INSERT") {
+          const item = convertRow(payload.new);
+          setData((prev) => {
+            if (prev.some((d) => d.id === item.id)) return prev;
+            const updated = [item, ...prev];
+            saveToStorage(collectionName, updated);
+            return updated;
+          });
+        } else if (payload.eventType === "UPDATE") {
+          const item = convertRow(payload.new);
+          setData((prev) => {
+            const updated = prev.map((d) => (d.id === item.id ? item : d));
+            saveToStorage(collectionName, updated);
+            return updated;
+          });
+        } else if (payload.eventType === "DELETE") {
+          const deletedId = payload.old?.id;
+          if (deletedId) {
+            setData((prev) => {
+              const updated = prev.filter((d) => d.id !== deletedId);
+              saveToStorage(collectionName, updated);
+              return updated;
+            });
+          }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      settled = true;
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
   }, [collectionName, JSON.stringify(filters), orderByField, orderDirection]);
 
   const add = useCallback(
     async (item) => {
-      try {
-        const docRef = await addDoc(collection(db, collectionName), {
-          ...item,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-        return docRef.id;
-      } catch (err) {
-        console.warn(`Offline add for ${collectionName}:`, err.message);
-        const offlineId = `offline-${Date.now()}`;
-        const newItem = { id: offlineId, ...item, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-        setData((prev) => {
-          const updated = [newItem, ...prev];
-          saveToStorage(collectionName, updated);
-          return updated;
-        });
-        return offlineId;
+      const snakeItem = {};
+      for (const [k, v] of Object.entries(item)) {
+        snakeItem[toSnake(k)] = v;
       }
+      snakeItem.created_at = new Date().toISOString();
+      snakeItem.updated_at = new Date().toISOString();
+
+      const { data: result, error } = await supabase
+        .from(collectionName)
+        .insert(snakeItem)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result.id;
     },
     [collectionName]
   );
 
   const update = useCallback(
     async (id, updates) => {
-      try {
-        const docRef = doc(db, collectionName, id);
-        await updateDoc(docRef, {
-          ...updates,
-          updatedAt: serverTimestamp(),
-        });
-      } catch (err) {
-        console.warn(`Offline update for ${collectionName}:`, err.message);
-        setData((prev) => {
-          const updated = prev.map((item) =>
-            item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item
-          );
-          saveToStorage(collectionName, updated);
-          return updated;
-        });
+      const snakeUpdates = {};
+      for (const [k, v] of Object.entries(updates)) {
+        snakeUpdates[toSnake(k)] = v;
       }
+      snakeUpdates.updated_at = new Date().toISOString();
+
+      const { error } = await supabase
+        .from(collectionName)
+        .update(snakeUpdates)
+        .eq("id", id);
+
+      if (error) throw error;
     },
     [collectionName]
   );
 
   const remove = useCallback(
     async (id) => {
-      try {
-        const docRef = doc(db, collectionName, id);
-        await deleteDoc(docRef);
-      } catch (err) {
-        console.warn(`Offline remove for ${collectionName}:`, err.message);
-        setData((prev) => {
-          const updated = prev.filter((item) => item.id !== id);
-          saveToStorage(collectionName, updated);
-          return updated;
-        });
-      }
+      const { error } = await supabase
+        .from(collectionName)
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
     },
     [collectionName]
   );
