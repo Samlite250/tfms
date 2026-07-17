@@ -12,6 +12,12 @@ import {
   Trash2,
   Clock,
   Loader2,
+  Phone,
+  MapPin,
+  Tractor,
+  Coffee,
+  Mail,
+  Home,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
@@ -23,6 +29,7 @@ import StatCard from "../../components/ui/StatCard";
 import DataTable from "../../components/ui/DataTable";
 import Select from "../../components/ui/Select";
 import { useToast } from "../../components/ui/Toast";
+import { useAuth } from "../../contexts/AuthContext";
 import useRealtimeCollection from "../../hooks/useRealtimeCollection";
 import { farmersSeed } from "../../firebase/seedData";
 
@@ -64,6 +71,7 @@ function statusBadge(status) {
 function FarmersPage() {
   const navigate = useNavigate();
   const { success, error: toastError } = useToast();
+  const { approveUser, rejectUser: rejectUserAuth } = useAuth();
   const { data: farmersList, loading, error, remove } = useRealtimeCollection("farmers", {
     orderByField: "joinedDate",
     orderDirection: "desc",
@@ -74,6 +82,7 @@ function FarmersPage() {
   const [statusFilter, setStatusFilter] = useState(null);
   const [centerFilter, setCenterFilter] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, farmer: null });
+  const [viewFarmer, setViewFarmer] = useState(null);
 
   // Keep pending registrations in sync so a newly registered farmer appears
   // immediately, without requiring the administrator to refresh the page.
@@ -172,6 +181,28 @@ function FarmersPage() {
       toastError(`Failed to delete farmer. ${err.message}`);
     }
     setDeleteModal({ open: false, farmer: null });
+  }
+
+  async function handleApproveFarmer(farmer) {
+    try {
+      await approveUser(farmer.id);
+      setPendingFarmersList((prev) => prev.filter((f) => f.id !== farmer.id));
+      setViewFarmer(null);
+      success(`"${farmer.name}" has been approved and can now log in.`);
+    } catch (err) {
+      toastError(err?.message || "Failed to approve farmer. Please try again.");
+    }
+  }
+
+  async function handleRejectFarmer(farmer) {
+    try {
+      await rejectUserAuth(farmer.id);
+      setPendingFarmersList((prev) => prev.filter((f) => f.id !== farmer.id));
+      setViewFarmer(null);
+      success(`"${farmer.name}" registration has been rejected.`);
+    } catch (err) {
+      toastError(err?.message || "Failed to reject farmer. Please try again.");
+    }
   }
 
   const columns = [
@@ -281,7 +312,14 @@ function FarmersPage() {
               actions={(row) => (
                 <>
                   <button
-                    onClick={(e) => { e.stopPropagation(); navigate(`/farmers/${row.id}`); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (row.status === "Pending") {
+                        setViewFarmer(row);
+                      } else {
+                        navigate(`/farmers/${row.id}`);
+                      }
+                    }}
                     className="p-2 rounded-lg text-text-secondary hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
                     title="View"
                   >
@@ -345,6 +383,125 @@ function FarmersPage() {
             {deleteModal.farmer?.name} ({deleteModal.farmer?.id}) will be permanently removed. This action cannot be undone.
           </p>
         </div>
+      </Modal>
+
+      {/* Pending Farmer Detail Modal */}
+      <Modal
+        isOpen={!!viewFarmer}
+        onClose={() => setViewFarmer(null)}
+        title="Farmer Registration Details"
+        size="lg"
+        footer={
+          viewFarmer && viewFarmer.status === "Pending" && (
+            <>
+              <Button variant="ghost" onClick={() => setViewFarmer(null)}>
+                Close
+              </Button>
+              <Button
+                variant="danger"
+                icon={UserX}
+                onClick={() => handleRejectFarmer(viewFarmer)}
+              >
+                Reject
+              </Button>
+              <Button
+                icon={UserCheck}
+                className="bg-success text-white hover:bg-success/90"
+                onClick={() => handleApproveFarmer(viewFarmer)}
+              >
+                Approve
+              </Button>
+            </>
+          )
+        }
+      >
+        {viewFarmer && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center shrink-0 ${viewFarmer.status === "Pending" ? "bg-warning/10" : "bg-primary/10"}`}>
+                <span className={`text-xl font-bold ${viewFarmer.status === "Pending" ? "text-warning" : "text-primary"}`}>
+                  {(viewFarmer.name || "?")
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-text-primary">{viewFarmer.name || "No Name"}</h3>
+                <p className="text-sm text-text-secondary">{viewFarmer.email}</p>
+                <div className="mt-1">{statusBadge(viewFarmer.status)}</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Phone size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Phone</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.phone || "Not provided"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Mail size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Email</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.email || "Not provided"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <MapPin size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">District</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.district || "—"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <MapPin size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Sector</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.sector || "—"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <MapPin size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Cell</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.cell || "—"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Home size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Village</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.village || "—"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Tractor size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Farm Size</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.farmSize ? `${viewFarmer.farmSize} ha` : "—"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Coffee size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Coffee Variety</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.coffeeVariety || "—"}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-1">
+                  <Coffee size={14} className="text-text-secondary" />
+                  <span className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Collection Center</span>
+                </div>
+                <p className="text-sm font-medium text-text-primary">{viewFarmer.collectionCenter || "—"}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

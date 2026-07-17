@@ -2,9 +2,9 @@ import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Coffee, Factory, Package, ShoppingCart, DollarSign, Users, TrendingUp,
+  Coffee, Factory, Package, Users, TrendingUp,
   Clock, FileText, ArrowRight, Weight,
-  UserPlus, Receipt, ClipboardList, Tractor, AlertTriangle, Banknote,
+  UserPlus, ClipboardList, Tractor, AlertTriangle, Banknote,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROLES, ROLE_LABELS } from "../../utils/constants";
@@ -45,7 +45,7 @@ function getRoleConfig(role) {
           { label: "Coffee Collected Today", value: "1,250 kg", change: "+12%", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
           { label: "Production Today", value: "320 kg", change: "+8%", up: true, icon: Factory, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
           { label: "Active Employees", value: "48", change: "On shift", up: true, icon: Users, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA" },
-          { label: "Monthly Revenue", value: "RWF 128,500", change: "+22%", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
+          { label: "Monthly Revenue", value: "RWF 128,500", change: "+22%", up: true, icon: Banknote, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
         ],
         quickActions: [
           { label: "Record Collection", icon: Coffee, to: "/collections/new", color: "bg-primary" },
@@ -55,9 +55,9 @@ function getRoleConfig(role) {
         ],
         activities: [
           { id: 1, icon: Coffee, description: "Collection recorded: 450 kg from Mahembe cooperative", time: "12 min ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
-          { id: 2, icon: Factory, description: "Batch #1042 completed: 320 kg green coffee", time: "2 hrs ago", module: "Production", color: "text-secondary", bg: "bg-secondary/10" },
+          { id: 2, icon: Factory, description: "Batch #1042 completed: 320 kg green coffee", time: "2 hrs ago", module: "Production", color: "text-secondary", bg: "text-secondary" },
           { id: 3, icon: Users, description: "Shift assignment updated for evening crew", time: "3 hrs ago", module: "Employees", color: "text-info", bg: "bg-info/10" },
-          { id: 4, icon: ShoppingCart, description: "Invoice #2087 issued: RWF 4,200 to Nairobi Coffee Merchants", time: "4 hrs ago", module: "Sales", color: "text-accent-dark", bg: "bg-accent/10" },
+          { id: 4, icon: Banknote, description: "Payment of RWF 4,200 processed for cooperative", time: "4 hrs ago", module: "Payment", color: "text-accent-dark", bg: "bg-accent/10" },
         ],
       };
 
@@ -126,22 +126,21 @@ function getRoleConfig(role) {
 
     case ROLES.ACCOUNTANT:
       return {
-        subtitle: "Track sales, expenses, and financials",
+        subtitle: "Track payments and financials",
         stats: [
-          { label: "Total Sales", value: "RWF 45,200", change: "+15%", up: true, icon: ShoppingCart, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20" },
-          { label: "Monthly Revenue", value: "RWF 128,500", change: "+22%", up: true, icon: DollarSign, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
-          { label: "Total Expenses", value: "RWF 78,400", change: "+8%", up: false, icon: Receipt, color: "text-danger", bg: "bg-danger/10", borderColor: "#D32F2F" },
-          { label: "Net Profit", value: "RWF 50,100", change: "+35%", up: true, icon: TrendingUp, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
+          { label: "Total Payments", value: "RWF 128,500", change: "+22%", up: true, icon: Banknote, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
+          { label: "Monthly Revenue", value: "RWF 128,500", change: "+22%", up: true, icon: TrendingUp, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
+          { label: "Pending Payments", value: "RWF 12,400", change: "3 pending", up: false, icon: Clock, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
+          { label: "Completed This Month", value: "RWF 116,100", change: "+18%", up: true, icon: FileText, color: "text-secondary", bg: "bg-secondary/10", borderColor: "#1B5E20" },
         ],
         quickActions: [
-          { label: "Record Sale", icon: ShoppingCart, to: "/sales/new", color: "bg-secondary" },
-          { label: "Add Expense", icon: Receipt, to: "/expenses/new", color: "bg-danger" },
+          { label: "Create Payment", icon: Banknote, to: "/payments/new", color: "bg-primary" },
           { label: "View Reports", icon: ClipboardList, to: "/reports", color: "bg-purple-600" },
         ],
         activities: [
-          { id: 1, icon: ShoppingCart, description: "Invoice #2087 issued: RWF 4,200 to Nairobi Coffee Merchants", time: "3 hrs ago", module: "Sales", color: "text-secondary", bg: "bg-secondary/10" },
-          { id: 2, icon: Receipt, description: "Expense: RWF 1,850 for machinery maintenance", time: "4 hrs ago", module: "Expenses", color: "text-danger", bg: "bg-danger/10" },
-          { id: 3, icon: DollarSign, description: "Payment received: RWF 5,200 from European Coffee Imports", time: "5 hrs ago", module: "Sales", color: "text-primary", bg: "bg-primary/10" },
+          { id: 1, icon: Banknote, description: "Payment of RWF 5,200 processed for Jean Mugabo", time: "3 hrs ago", module: "Payment", color: "text-primary", bg: "bg-primary/10" },
+          { id: 2, icon: Banknote, description: "Payment of RWF 1,850 processed for Emmanuel Ndayisaba", time: "4 hrs ago", module: "Payment", color: "text-primary", bg: "bg-primary/10" },
+          { id: 3, icon: Clock, description: "Payment pending for COL-5005: RWF 675,000", time: "5 hrs ago", module: "Payment", color: "text-warning", bg: "bg-warning/10" },
           { id: 4, icon: FileText, description: "Monthly financial report generated", time: "Yesterday", module: "Reports", color: "text-accent-dark", bg: "bg-accent/10" },
         ],
       };
@@ -152,7 +151,7 @@ function getRoleConfig(role) {
         stats: [
           { label: "My Collections", value: "8", change: "Total deliveries", up: true, icon: Coffee, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32" },
           { label: "Total Collected", value: "965 kg", change: "+120 kg this month", up: true, icon: Weight, color: "text-info", bg: "bg-info/10", borderColor: "#0288D1" },
-          { label: "Total Earnings", value: "RWF 4,027,500", change: "All time", up: true, icon: DollarSign, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
+          { label: "Total Earnings", value: "RWF 4,027,500", change: "All time", up: true, icon: Banknote, color: "text-accent-dark", bg: "bg-accent/10", borderColor: "#F9A825" },
           { label: "Pending Payment", value: "RWF 1,017,000", change: "2 invoices", up: false, icon: Clock, color: "text-warning", bg: "bg-warning/10", borderColor: "#F57C00" },
         ],
         quickActions: [
@@ -160,7 +159,7 @@ function getRoleConfig(role) {
         ],
         activities: [
           { id: 1, icon: Coffee, description: "Collection completed: 120 kg AA grade at Mahembe Central", time: "2 days ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
-          { id: 2, icon: DollarSign, description: "Payment of RWF 540,000 received for COL-5001", time: "2 days ago", module: "Payment", color: "text-success", bg: "bg-success/10" },
+          { id: 2, icon: Banknote, description: "Payment of RWF 540,000 received for COL-5001", time: "2 days ago", module: "Payment", color: "text-success", bg: "bg-success/10" },
           { id: 3, icon: Coffee, description: "Collection completed: 85 kg AB grade at Mahembe Central", time: "6 days ago", module: "Collection", color: "text-primary", bg: "bg-primary/10" },
           { id: 4, icon: Clock, description: "Payment pending for COL-5005: RWF 675,000", time: "1 week ago", module: "Payment", color: "text-warning", bg: "bg-warning/10" },
         ],
@@ -347,7 +346,7 @@ export default function DashboardPage() {
           <h3 className="text-lg font-semibold text-text-primary">Quick Actions</h3>
           <p className="text-sm text-text-secondary">Shortcuts to common tasks</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
             { label: "Record Collection", icon: Coffee, to: "/collections/new", color: "bg-primary" },
             { label: "New Production", icon: Factory, to: "/production/new", color: "bg-secondary" },
@@ -355,8 +354,6 @@ export default function DashboardPage() {
             { label: "Create Payment", icon: Banknote, to: "/payments/new", color: "bg-accent-dark" },
             { label: "View Reports", icon: ClipboardList, to: "/reports", color: "bg-purple-600" },
             { label: "Inventory", icon: Package, to: "/inventory", color: "bg-teal-600" },
-            { label: "Sales", icon: ShoppingCart, to: "/sales", color: "bg-secondary" },
-            { label: "Expenses", icon: Receipt, to: "/expenses", color: "bg-danger" },
           ].map((action) => (
             <Link
               key={action.label}
