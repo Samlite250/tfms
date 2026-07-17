@@ -7,7 +7,6 @@ import {
   UserCheck,
   Tractor,
   Briefcase,
-  HeartPulse,
   Clock,
   Search,
   Plus,
@@ -20,7 +19,6 @@ import {
   AlertTriangle,
   Eye,
   EyeOff,
-  Calendar,
   Filter,
   RefreshCw,
   Mail,
@@ -203,13 +201,13 @@ export default function AdminPage() {
   const [activityPage, setActivityPage] = useState(1);
   const [activityUserFilter, setActivityUserFilter] = useState("");
   const [activityModuleFilter, setActivityModuleFilter] = useState("");
-  const [activityDateFrom, setActivityDateFrom] = useState("");
-  const [activityDateTo, setActivityDateTo] = useState("");
   const activityPageSize = 8;
 
   const [pendingUsers, setPendingUsers] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(false);
   const [pendingSearch, setPendingSearch] = useState("");
+  const [showApproveAll, setShowApproveAll] = useState(false);
+  const [approvingAll, setApprovingAll] = useState(false);
 
   const { success, error: toastError, info } = useToast();
   const { approveUser, rejectUser: rejectUserAuth, userProfile } = useAuth();
@@ -241,7 +239,6 @@ export default function AdminPage() {
       totalUsers: users.length,
       activeUsers: users.filter((u) => u.status === "active").length,
       totalFarmers: 523,
-      totalEmployees: 120,
     }),
     [users]
   );
@@ -261,16 +258,9 @@ export default function AdminPage() {
     return mockActivities.filter((a) => {
       const matchUser = !activityUserFilter || a.user === activityUserFilter;
       const matchModule = !activityModuleFilter || a.module === activityModuleFilter;
-      let matchDate = true;
-      if (activityDateFrom) {
-        matchDate = matchDate && a.timestamp >= activityDateFrom;
-      }
-      if (activityDateTo) {
-        matchDate = matchDate && a.timestamp <= activityDateTo + " 23:59:59";
-      }
-      return matchUser && matchModule && matchDate;
+      return matchUser && matchModule;
     });
-  }, [activityUserFilter, activityModuleFilter, activityDateFrom, activityDateTo]);
+  }, [activityUserFilter, activityModuleFilter]);
 
   const activityTotalPages = Math.ceil(filteredActivities.length / activityPageSize);
   const paginatedActivities = filteredActivities.slice(
@@ -474,6 +464,28 @@ export default function AdminPage() {
     }
   }
 
+  async function handleApproveAll() {
+    setApprovingAll(true);
+    let approved = 0;
+    let failed = 0;
+    for (const pendingUser of pendingUsers) {
+      try {
+        await approveUser(pendingUser.id);
+        approved++;
+      } catch {
+        failed++;
+      }
+    }
+    setPendingUsers([]);
+    setShowApproveAll(false);
+    setApprovingAll(false);
+    if (failed === 0) {
+      success(`All ${approved} pending user${approved !== 1 ? "s" : ""} approved successfully.`);
+    } else {
+      toastError(`${approved} approved, ${failed} failed. Check individual entries and try again.`);
+    }
+  }
+
   const filteredPendingUsers = useMemo(() => {
     if (!pendingSearch) return pendingUsers;
     const s = pendingSearch.toLowerCase();
@@ -527,7 +539,6 @@ export default function AdminPage() {
         </Badge>
       ),
     },
-    { header: "Last Login", accessor: "lastLogin" },
   ];
 
   const tabs = [
@@ -696,14 +707,12 @@ export default function AdminPage() {
       </motion.div>
 
       {/* Dashboard Stats */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "Total Users", value: stats.totalUsers, icon: Users, color: "text-primary", bg: "bg-primary/10", borderColor: "#2E7D32", change: "+12%", up: true },
           { label: "Active Users", value: stats.activeUsers, icon: UserCheck, color: "text-green-600", bg: "bg-green-100", borderColor: "#16A34A", change: "+8%", up: true },
           { label: "Total Farmers", value: `${stats.totalFarmers}+`, icon: Tractor, color: "text-blue-600", bg: "bg-blue-100", borderColor: "#2563EB", change: "+5%", up: true },
-          { label: "Total Employees", value: stats.totalEmployees, icon: Briefcase, color: "text-purple-600", bg: "bg-purple-100", borderColor: "#9333EA", change: "+3%", up: true },
-          { label: "System Health", value: "Good", icon: HeartPulse, color: "text-emerald-600", bg: "bg-emerald-100", borderColor: "#059669", change: "Stable", up: true },
-          { label: "Last Backup", value: "2h ago", icon: Clock, color: "text-amber-600", bg: "bg-amber-100", borderColor: "#D97706", change: "On time", up: true },
+          { label: "Pending Approvals", value: pendingUsers.length, icon: Clock, color: "text-amber-600", bg: "bg-amber-100", borderColor: "#D97706", change: pendingUsers.length > 0 ? "Action needed" : "All clear", up: pendingUsers.length === 0 },
         ].map((stat, idx) => (
           <StatCard
             key={stat.label}
@@ -894,9 +903,19 @@ export default function AdminPage() {
                       <RefreshCw size={16} />
                     </button>
                   </div>
-                  <span className="text-sm text-text-secondary">
+                    <span className="text-sm text-text-secondary">
                     {filteredPendingUsers.length} pending request{filteredPendingUsers.length !== 1 ? "s" : ""}
                   </span>
+                  {filteredPendingUsers.length > 1 && (
+                    <Button
+                      size="sm"
+                      icon={UserCheck}
+                      onClick={() => setShowApproveAll(true)}
+                      className="bg-success text-white hover:bg-success/90"
+                    >
+                      Approve All ({filteredPendingUsers.length})
+                    </Button>
+                  )}
                 </div>
 
                 {pendingLoading ? (
@@ -1006,7 +1025,7 @@ export default function AdminPage() {
             >
               <Card padding="none">
                 <div className="p-4 border-b border-border">
-                  <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center">
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                     <div className="flex items-center gap-2 text-sm font-medium text-text-primary">
                       <Filter size={16} />
                       Filters:
@@ -1037,40 +1056,11 @@ export default function AdminPage() {
                         <option key={m} value={m}>{m}</option>
                       ))}
                     </select>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                        <input
-                          type="date"
-                          value={activityDateFrom}
-                          onChange={(e) => {
-                            setActivityDateFrom(e.target.value);
-                            setActivityPage(1);
-                          }}
-                          className="rounded-xl border border-border bg-white pl-9 pr-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                        />
-                      </div>
-                      <span className="text-text-secondary text-sm">to</span>
-                      <div className="relative">
-                        <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                        <input
-                          type="date"
-                          value={activityDateTo}
-                          onChange={(e) => {
-                            setActivityDateTo(e.target.value);
-                            setActivityPage(1);
-                          }}
-                          className="rounded-xl border border-border bg-white pl-9 pr-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                        />
-                      </div>
-                    </div>
-                    {(activityUserFilter || activityModuleFilter || activityDateFrom || activityDateTo) && (
+                    {(activityUserFilter || activityModuleFilter) && (
                       <button
                         onClick={() => {
                           setActivityUserFilter("");
                           setActivityModuleFilter("");
-                          setActivityDateFrom("");
-                          setActivityDateTo("");
                           setActivityPage(1);
                         }}
                         className="text-sm text-primary hover:text-primary-dark font-medium cursor-pointer flex items-center gap-1"
@@ -1347,6 +1337,33 @@ export default function AdminPage() {
           </div>
         )}
       </Modal>
+      {/* Approve All Confirmation Modal */}
+      <Modal
+        isOpen={showApproveAll}
+        onClose={() => !approvingAll && setShowApproveAll(false)}
+        title="Approve All Pending Users"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowApproveAll(false)} disabled={approvingAll}>
+              Cancel
+            </Button>
+            <Button
+              icon={UserCheck}
+              className="bg-success text-white hover:bg-success/90"
+              onClick={handleApproveAll}
+              loading={approvingAll}
+            >
+              {approvingAll ? "Approving..." : `Approve All (${pendingUsers.length})`}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-text-secondary">
+          Are you sure you want to approve <span className="font-semibold text-text-primary">{pendingUsers.length} pending user{pendingUsers.length !== 1 ? "s" : ""}</span>?
+          They will all be able to log in immediately.
+        </p>
+      </Modal>
+
     </motion.div>
   );
 }
