@@ -28,6 +28,9 @@ import {
   UserX,
   CheckCircle2,
   Coffee,
+  Leaf,
+  DollarSign,
+  Calendar,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
@@ -43,6 +46,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { ROLES, ROLE_LABELS, DEPARTMENTS } from "../../utils/constants";
 import useRealtimeCollection from "../../hooks/useRealtimeCollection";
 import { farmersSeed } from "../../firebase/seedData";
+import { sendCoffeeReceivedEmail } from "../../services/emailService";
 
 const ROLE_BADGE_VARIANT = {
   [ROLES.ADMIN]: "danger",
@@ -113,6 +117,43 @@ const mockActivities = [
   { id: 28, user: "Mahinda Gamage", action: "Updated", module: "Production", details: "Machine maintenance log updated - CTC Line 2", timestamp: "2026-07-13 12:15:00" },
   { id: 29, user: "Dissanayake Bandara", action: "Created", module: "Users", details: "Created new admin account for system auditor", timestamp: "2026-07-13 11:45:00" },
 ];
+
+// Coffee Submissions mock data (mirrors CollectionPage data structure)
+const SUBMISSION_FARMERS = [
+  "Jean Mugabo", "Emmanuel Ndayisaba", "Marie Claire Uwimana", "Pacifique Habimana",
+  "Claudine Mukamana", "Theophile Nzeyimana", "Beatrice Ingabire", "Augustin Karangwa",
+  "Solange Umubyeyi", "Fidele Nshimiyimana", "Esperance Tuyisenge", "Joseph Havugimana",
+];
+const SUBMISSION_CENTERS = [
+  "Mahembe Central", "Nyungwe Station", "Kigali Cooperative", "Huye Collection Post", "Musanze Hub",
+];
+const SUBMISSION_GRADES = { AA: 1200, AB: 1000, PB: 900, C: 750, TT: 650, T: 580 };
+function generateSubmissions() {
+  const grades = Object.keys(SUBMISSION_GRADES);
+  return Array.from({ length: 30 }, (_, i) => {
+    const grade = grades[i % grades.length];
+    const pricePerKg = SUBMISSION_GRADES[grade];
+    const weight = Math.round((20 + Math.random() * 120) * 10) / 10;
+    const totalPrice = Math.round(weight * pricePerKg);
+    const d = new Date("2026-08-19");
+    d.setDate(d.getDate() - Math.floor(Math.random() * 40));
+    const farmer = SUBMISSION_FARMERS[i % SUBMISSION_FARMERS.length];
+    const receiptNumber = `REC-2026${String(d.getMonth() + 1).padStart(2, "0")}-${String(i + 1).padStart(4, "0")}`;
+    return {
+      id: i + 1,
+      receiptNumber,
+      farmer,
+      farmerEmail: `${farmer.toLowerCase().replace(/\s+/g, ".").replace(/[^a-z.]/g, "")}@mahembe-coffee.rw`,
+      date: d.toISOString().split("T")[0],
+      weight,
+      grade,
+      pricePerKg,
+      totalPrice,
+      center: SUBMISSION_CENTERS[i % SUBMISSION_CENTERS.length],
+    };
+  }).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+const MOCK_SUBMISSIONS = generateSubmissions();
 
 const ACTION_COLORS = {
   Created: { text: "text-green-700", bg: "bg-green-100", dot: "bg-green-500" },
@@ -198,6 +239,12 @@ export default function AdminPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [pendingViewUser, setPendingViewUser] = useState(null);
 
+  // Coffee Submissions tab state
+  const [submissionSearch, setSubmissionSearch] = useState("");
+  const [submissionDateFilter, setSubmissionDateFilter] = useState("");
+  const [submissionPage, setSubmissionPage] = useState(1);
+  const submissionPageSize = 10;
+
   const [activityPage, setActivityPage] = useState(1);
   const [activityUserFilter, setActivityUserFilter] = useState("");
   const [activityModuleFilter, setActivityModuleFilter] = useState("");
@@ -261,6 +308,22 @@ export default function AdminPage() {
       return matchUser && matchModule;
     });
   }, [activityUserFilter, activityModuleFilter]);
+
+  const filteredSubmissions = useMemo(() => {
+    return MOCK_SUBMISSIONS.filter((s) => {
+      const matchSearch = !submissionSearch ||
+        s.farmer.toLowerCase().includes(submissionSearch.toLowerCase()) ||
+        s.receiptNumber.toLowerCase().includes(submissionSearch.toLowerCase());
+      const matchDate = !submissionDateFilter || s.date === submissionDateFilter;
+      return matchSearch && matchDate;
+    });
+  }, [submissionSearch, submissionDateFilter]);
+
+  const submissionTotalPages = Math.ceil(filteredSubmissions.length / submissionPageSize);
+  const paginatedSubmissions = filteredSubmissions.slice(
+    (submissionPage - 1) * submissionPageSize,
+    submissionPage * submissionPageSize
+  );
 
   const activityTotalPages = Math.ceil(filteredActivities.length / activityPageSize);
   const paginatedActivities = filteredActivities.slice(
@@ -539,6 +602,7 @@ export default function AdminPage() {
     { key: "users", label: "Users", icon: Users },
     { key: "approvals", label: "Approvals", icon: Clock, badge: pendingUsers.length },
     { key: "activity", label: "Activity", icon: Activity },
+    { key: "submissions", label: "Coffee Submissions", icon: Coffee },
   ];
 
   function renderUserFormModal(isEdit) {
@@ -897,7 +961,7 @@ export default function AdminPage() {
                       <RefreshCw size={16} />
                     </button>
                   </div>
-                    <span className="text-sm text-text-secondary">
+                  <span className="text-sm text-text-secondary">
                     {filteredPendingUsers.length} pending request{filteredPendingUsers.length !== 1 ? "s" : ""}
                   </span>
                   {filteredPendingUsers.length > 1 && (
@@ -1122,6 +1186,158 @@ export default function AdminPage() {
                       onPageChange={setActivityPage}
                       pageSize={activityPageSize}
                       totalItems={filteredActivities.length}
+                    />
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Coffee Submissions Tab */}
+          {activeTab === "submissions" && (
+            <motion.div
+              key="submissions"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <Card padding="none">
+                {/* Header */}
+                <div className="p-4 border-b border-border">
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                    <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                      <SearchInput
+                        value={submissionSearch}
+                        onChange={(v) => { setSubmissionSearch(v); setSubmissionPage(1); }}
+                        placeholder="Search by farmer name or receipt..."
+                        className="sm:w-72"
+                      />
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={submissionDateFilter}
+                          onChange={(e) => { setSubmissionDateFilter(e.target.value); setSubmissionPage(1); }}
+                          className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                        />
+                      </div>
+                      {(submissionSearch || submissionDateFilter) && (
+                        <button
+                          onClick={() => { setSubmissionSearch(""); setSubmissionDateFilter(""); setSubmissionPage(1); }}
+                          className="text-sm text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <RefreshCw size={14} /> Clear
+                        </button>
+                      )}
+                    </div>
+                    <span className="text-sm text-text-secondary">
+                      {filteredSubmissions.length} submission{filteredSubmissions.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        {["Farmer Name", "Date", "Amount (kg)", "Grade", "Price / kg (RWF)", "Total Price (RWF)", "Action"].map((h) => (
+                          <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {paginatedSubmissions.length === 0 ? (
+                        <tr>
+                          <td colSpan={7}>
+                            <EmptyState
+                              icon={Coffee}
+                              title="No submissions found"
+                              description="Try adjusting your search or date filter."
+                            />
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedSubmissions.map((row, idx) => (
+                          <motion.tr
+                            key={row.id}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.02 }}
+                            className="hover:bg-primary/5 transition-colors"
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                  <span className="text-xs font-bold text-primary">
+                                    {row.farmer.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                                  </span>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-text-primary text-sm">{row.farmer}</p>
+                                  <p className="text-xs text-text-secondary">{row.receiptNumber}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary whitespace-nowrap">
+                              {new Date(row.date).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="font-semibold text-text-primary">{row.weight.toFixed(1)}</span>
+                              <span className="text-xs text-text-secondary ml-1">kg</span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge variant="info">{row.grade}</Badge>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-text-primary">
+                              {row.pricePerKg.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="font-bold text-primary">
+                                {row.totalPrice.toLocaleString()}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await sendCoffeeReceivedEmail(row.farmerEmail, row.farmer, {
+                                      weight: row.weight,
+                                      grade: row.grade,
+                                      center: row.center,
+                                      receiptNumber: row.receiptNumber,
+                                      pricePerKg: row.pricePerKg,
+                                      totalPrice: row.totalPrice,
+                                    });
+                                    success(`Email sent to ${row.farmer}`);
+                                  } catch (err) {
+                                    toastError(`Failed to send email to ${row.farmer}`);
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary border border-primary/30 hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                                title="Resend email to farmer"
+                              >
+                                <Mail size={13} />
+                                Send Email
+                              </button>
+                            </td>
+                          </motion.tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {filteredSubmissions.length > submissionPageSize && (
+                  <div className="px-4 py-3 border-t border-border">
+                    <Pagination
+                      currentPage={submissionPage}
+                      totalPages={submissionTotalPages}
+                      onPageChange={setSubmissionPage}
+                      pageSize={submissionPageSize}
+                      totalItems={filteredSubmissions.length}
                     />
                   </div>
                 )}

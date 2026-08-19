@@ -13,12 +13,14 @@ import {
   Building2,
   Coffee,
   DollarSign,
+  Mail,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import Modal from "../../components/ui/Modal";
+import { sendCoffeeReceivedEmail } from "../../services/emailService";
 
 const TEA_GRADES = ["PF1", "PF2", "PF3", "PD", "Dust", "Fannings"];
 
@@ -32,18 +34,18 @@ const GRADE_PRICES = {
 };
 
 const farmers = [
-  { id: "F001", name: "James Kamau", phone: "0712345678" },
-  { id: "F002", name: "Grace Wanjiku", phone: "0723456789" },
-  { id: "F003", name: "Peter Mwangi", phone: "0734567890" },
-  { id: "F004", name: "Mary Njeri", phone: "0745678901" },
-  { id: "F005", name: "John Ochieng", phone: "0756789012" },
-  { id: "F006", name: "Sarah Akinyi", phone: "0767890123" },
-  { id: "F007", name: "David Kipchoge", phone: "0778901234" },
-  { id: "F008", name: "Faith Jepkorir", phone: "0789012345" },
-  { id: "F009", name: "Robert Simiyu", phone: "0790123456" },
-  { id: "F010", name: "Anne Chebet", phone: "0701234567" },
-  { id: "F011", name: "Samuel Mutua", phone: "0712345670" },
-  { id: "F012", name: "Lucy Wairimu", phone: "0723456780" },
+  { id: "F001", name: "James Kamau", phone: "0712345678", email: "james.kamau@mahembe-coffee.rw" },
+  { id: "F002", name: "Grace Wanjiku", phone: "0723456789", email: "grace.wanjiku@mahembe-coffee.rw" },
+  { id: "F003", name: "Peter Mwangi", phone: "0734567890", email: "peter.mwangi@mahembe-coffee.rw" },
+  { id: "F004", name: "Mary Njeri", phone: "0745678901", email: "mary.njeri@mahembe-coffee.rw" },
+  { id: "F005", name: "John Ochieng", phone: "0756789012", email: "john.ochieng@mahembe-coffee.rw" },
+  { id: "F006", name: "Sarah Akinyi", phone: "0767890123", email: "sarah.akinyi@mahembe-coffee.rw" },
+  { id: "F007", name: "David Kipchoge", phone: "0778901234", email: "david.kipchoge@mahembe-coffee.rw" },
+  { id: "F008", name: "Faith Jepkorir", phone: "0789012345", email: "faith.jepkorir@mahembe-coffee.rw" },
+  { id: "F009", name: "Robert Simiyu", phone: "0790123456", email: "robert.simiyu@mahembe-coffee.rw" },
+  { id: "F010", name: "Anne Chebet", phone: "0701234567", email: "anne.chebet@mahembe-coffee.rw" },
+  { id: "F011", name: "Samuel Mutua", phone: "0712345670", email: "samuel.mutua@mahembe-coffee.rw" },
+  { id: "F012", name: "Lucy Wairimu", phone: "0723456780", email: "lucy.wairimu@mahembe-coffee.rw" },
 ];
 
 const collectionCenters = [
@@ -85,6 +87,7 @@ function CollectionFormPage() {
   const [receiptNumber] = useState(generateReceiptNumber);
   const [showSuccess, setShowSuccess] = useState(false);
   const [savedRecord, setSavedRecord] = useState(null);
+  const [emailSent, setEmailSent] = useState(false);
 
   const {
     register,
@@ -127,25 +130,46 @@ function CollectionFormPage() {
     }
   }
 
-  function onSubmit(data) {
+  async function onSubmit(data) {
     const farmer = farmers.find((f) => f.id === data.farmerId);
     const center = collectionCenters.find((c) => c.value === data.center);
+    const finalPricePerKg = parseFloat(data.pricePerKg) || autoPrice;
     const record = {
       receiptNumber,
       ...data,
       farmerName: farmer?.name,
       farmerPhone: farmer?.phone,
+      farmerEmail: farmer?.email,
       centerName: center?.label,
       totalAmount,
-      pricePerKg: parseFloat(data.pricePerKg) || autoPrice,
+      pricePerKg: finalPricePerKg,
     };
     setSavedRecord(record);
     setShowSuccess(true);
+
+    // Send email notification to farmer
+    if (farmer?.email) {
+      try {
+        await sendCoffeeReceivedEmail(farmer.email, farmer.name, {
+          weight: parseFloat(data.weight),
+          grade: data.grade,
+          center: center?.label || data.center,
+          receiptNumber,
+          pricePerKg: finalPricePerKg,
+          totalPrice: totalAmount,
+        });
+        setEmailSent(true);
+      } catch (err) {
+        console.warn("Email notification failed:", err);
+        setEmailSent(false);
+      }
+    }
   }
 
   function handleRecordAnother() {
     setShowSuccess(false);
     setSavedRecord(null);
+    setEmailSent(false);
     reset({
       date: new Date().toISOString().split("T")[0],
       farmerId: "",
@@ -396,7 +420,13 @@ function CollectionFormPage() {
               <CheckCircle size={32} className="text-primary" />
             </motion.div>
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Receipt Generated</h3>
-            <p className="text-sm text-gray-500 mb-6">Collection has been recorded successfully.</p>
+            <p className="text-sm text-gray-500 mb-2">Collection has been recorded successfully.</p>
+            {emailSent && (
+              <div className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1 mb-4">
+                <Mail size={12} />
+                Email notification sent to farmer
+              </div>
+            )}
 
             <div className="bg-gray-50 rounded-xl p-5 text-left space-y-3">
               <div className="flex justify-between text-sm">

@@ -1,54 +1,54 @@
 import nodemailer from 'nodemailer';
 
 export default async function handler(req, res) {
-    // CORS Headers for API calls
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+  // CORS Headers for API calls
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-    const { type, to, name, role, user, recipientName, senderName, subject, body, weight, grade, center, receiptNumber, amount, paymentMethod, prices, effectiveDate, message } = req.body;
-    console.log(`Email handler triggered: type=${type}, to=${to}`);
+  const { type, to, name, role, user, recipientName, senderName, subject, body, weight, grade, center, receiptNumber, amount, paymentMethod, prices, effectiveDate, message, pricePerKg, totalPrice } = req.body;
+  console.log(`Email handler triggered: type=${type}, to=${to}`);
 
-    if (!process.env.EMAIL_GMAIL_USER || !process.env.EMAIL_GMAIL_APP_PASSWORD) {
-        return res.status(500).json({ error: 'Gmail credentials not configured on server' });
-    }
+  if (!process.env.EMAIL_GMAIL_USER || !process.env.EMAIL_GMAIL_APP_PASSWORD) {
+    return res.status(500).json({ error: 'Gmail credentials not configured on server' });
+  }
 
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL_GMAIL_USER,
-            pass: process.env.EMAIL_GMAIL_APP_PASSWORD,
-        },
-    });
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_GMAIL_USER,
+      pass: process.env.EMAIL_GMAIL_APP_PASSWORD,
+    },
+  });
 
-    const send = async (subject, html, recipient = to) => {
-        const mailOptions = {
-            from: `"COMS Notifications" <${process.env.EMAIL_GMAIL_USER}>`,
-            to: recipient,
-            subject,
-            html,
-        };
-        return transporter.sendMail(mailOptions);
+  const send = async (subject, html, recipient = to) => {
+    const mailOptions = {
+      from: `"COMS Notifications" <${process.env.EMAIL_GMAIL_USER}>`,
+      to: recipient,
+      subject,
+      html,
     };
+    return transporter.sendMail(mailOptions);
+  };
 
-    try {
-        switch (type) {
-            case 'registration_confirmation':
-                await send(
-                    'COMS Registration Received',
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+  try {
+    switch (type) {
+      case 'registration_confirmation':
+        await send(
+          'COMS Registration Received',
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
             <h2 style="color: #1e3a8a; margin-top: 0;">Welcome, ${name}!</h2>
             <p style="font-size: 16px; color: #334155; line-height: 1.5;">
               Thank you for signing up for the <strong>Coffee Factory Operation Management System (COMS)</strong>.
@@ -65,14 +65,14 @@ export default async function handler(req, res) {
               This email was sent automatically by COMS. Please do not reply to this email.
             </p>
           </div>`
-                );
-                break;
+        );
+        break;
 
-            case 'account_approved': {
-                const formattedRole = role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                await send(
-                    'COMS Account Approved',
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'account_approved': {
+        const formattedRole = role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        await send(
+          'COMS Account Approved',
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
             <h2 style="color: #15803d; margin-top: 0;">Account Approved!</h2>
             <p style="font-size: 16px; color: #334155; line-height: 1.5;">
               Great news, ${name}! Your COMS account has been approved by the administrator.
@@ -92,14 +92,14 @@ export default async function handler(req, res) {
               This email was sent automatically by COMS. Please do not reply to this email.
             </p>
           </div>`
-                );
-                break;
-            }
+        );
+        break;
+      }
 
-            case 'account_rejected':
-                await send(
-                    'COMS Registration Rejected',
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'account_rejected':
+        await send(
+          'COMS Registration Rejected',
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
             <h2 style="color: #b91c1c; margin-top: 0;">Registration Rejected</h2>
             <p style="font-size: 16px; color: #334155; line-height: 1.5;">
               Hello ${name},
@@ -115,15 +115,15 @@ export default async function handler(req, res) {
               This email was sent automatically by COMS. Please do not reply to this email.
             </p>
           </div>`
-                );
-                break;
+        );
+        break;
 
-            case 'admin_alert': {
-                const formattedRole = user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                const adminEmail = process.env.EMAIL_ADMIN || 'admin@mahembe-coffee.rw';
-                await send(
-                    'COMS Alert: New Pending Registration',
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'admin_alert': {
+        const formattedRole = user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const adminEmail = process.env.EMAIL_ADMIN || 'admin@mahembe-coffee.rw';
+        await send(
+          'COMS Alert: New Pending Registration',
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
             <h2 style="color: #2b6cb0; margin-top: 0;">New User Pending Approval</h2>
             <p style="font-size: 16px; color: #334155; line-height: 1.5;">
               A new user registration has been requested on the COMS platform and is awaiting approval:
@@ -154,50 +154,54 @@ export default async function handler(req, res) {
               This email was sent automatically by COMS. Please do not reply to this email.
             </p>
           </div>`,
-                    adminEmail
-                );
-                break;
-            }
+          adminEmail
+        );
+        break;
+      }
 
-            case 'message_notification':
-                if (!to || !subject || !body) {
-                    return res.status(400).json({ error: 'Recipient, subject, and message are required' });
-                }
-                await send(
-                    `COMS: ${subject}`,
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'message_notification':
+        if (!to || !subject || !body) {
+          return res.status(400).json({ error: 'Recipient, subject, and message are required' });
+        }
+        await send(
+          `COMS: ${subject}`,
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
                       <h2 style="color: #1e3a8a; margin-top: 0;">New COMS Message</h2>
                       <p style="color: #334155;">Hello ${recipientName || 'there'},</p>
                       <p style="color: #334155;"><strong>${senderName || 'A COMS user'}</strong> sent you a message:</p>
                       <div style="white-space: pre-wrap; margin: 16px 0; padding: 16px; background: #f8fafc; border-radius: 8px; color: #334155;">${body}</div>
                       <p style="font-size: 12px; color: #64748b;">Please sign in to COMS to reply.</p>
                     </div>`
-                );
-                break;
+        );
+        break;
 
-            case 'coffee_received':
-                await send(
-                    `COMS: Coffee Received - ${receiptNumber}`,
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-                      <h2 style="color: #15803d; margin-top: 0;">Coffee Received</h2>
-                      <p style="font-size: 16px; color: #334155; line-height: 1.5;">Hello ${name}, your coffee delivery has been received.</p>
+      case 'coffee_received':
+        await send(
+          `COMS: Coffee Submission Confirmed - ${receiptNumber}`,
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+                      <h2 style="color: #15803d; margin-top: 0;">&#9749; Coffee Submission Received</h2>
+                      <p style="font-size: 16px; color: #334155; line-height: 1.5;">Hello <strong>${name}</strong>, your coffee delivery has been received and recorded. Here is your full submission summary:</p>
                       <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Receipt #</td><td style="padding: 10px 0; color: #0f172a;">${receiptNumber}</td></tr>
-                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Weight</td><td style="padding: 10px 0; color: #0f172a;">${weight} kg</td></tr>
-                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Grade</td><td style="padding: 10px 0; color: #0f172a;">${grade}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Receipt #</td><td style="padding: 10px 0; color: #0f172a; font-family: monospace; font-weight: 600;">${receiptNumber}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Date</td><td style="padding: 10px 0; color: #0f172a;">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Amount Submitted</td><td style="padding: 10px 0; color: #0f172a; font-weight: 700;">${weight} kg</td></tr>
+                        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Coffee Grade</td><td style="padding: 10px 0; color: #0f172a;">${grade}</td></tr>
                         <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Collection Center</td><td style="padding: 10px 0; color: #0f172a;">${center}</td></tr>
+                        ${pricePerKg ? `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">Price per kg</td><td style="padding: 10px 0; color: #0f172a;">RWF ${Number(pricePerKg).toLocaleString()}</td></tr>` : ''}
+                        ${totalPrice ? `<tr style="background-color: #f0fdf4;"><td style="padding: 12px 0; font-weight: 700; color: #15803d; font-size: 15px;">Total Payment</td><td style="padding: 12px 0; color: #15803d; font-weight: 800; font-size: 18px;">RWF ${Number(totalPrice).toLocaleString()}</td></tr>` : ''}
                       </table>
-                      <div style="margin: 24px 0; padding: 16px; background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 4px;"><span style="font-weight: 600; color: #15803d;">Status: Received - Pending Quality Check</span></div>
+                      <div style="margin: 24px 0; padding: 16px; background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 4px;"><span style="font-weight: 600; color: #15803d;">&#10003; Status: Received &mdash; Pending Quality Check</span></div>
+                      <p style="font-size: 14px; color: #475569;">You will receive another notification once your coffee passes quality inspection and your payment is processed. Thank you!</p>
                       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-                      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">This email was sent automatically by COMS. Please do not reply to this email.</p>
+                      <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">This email was sent automatically by COMS &mdash; Mahembe Coffee Factory. Please do not reply to this email.</p>
                     </div>`
-                );
-                break;
+        );
+        break;
 
-            case 'coffee_accepted':
-                await send(
-                    `COMS: Coffee Accepted - ${receiptNumber}`,
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'coffee_accepted':
+        await send(
+          `COMS: Coffee Accepted - ${receiptNumber}`,
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
                       <h2 style="color: #15803d; margin-top: 0;">Coffee Accepted</h2>
                       <p style="font-size: 16px; color: #334155; line-height: 1.5;">Hello ${name}, your coffee delivery has been accepted.</p>
                       <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
@@ -209,13 +213,13 @@ export default async function handler(req, res) {
                       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
                       <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">This email was sent automatically by COMS. Please do not reply to this email.</p>
                     </div>`
-                );
-                break;
+        );
+        break;
 
-            case 'payment_ready':
-                await send(
-                    `COMS: Payment Ready - RWF ${(amount || 0).toLocaleString()}`,
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'payment_ready':
+        await send(
+          `COMS: Payment Ready - RWF ${(amount || 0).toLocaleString()}`,
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
                       <h2 style="color: #15803d; margin-top: 0;">Payment Ready</h2>
                       <p style="font-size: 16px; color: #334155; line-height: 1.5;">Hello ${name}, your payment is ready for collection.</p>
                       <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
@@ -227,13 +231,13 @@ export default async function handler(req, res) {
                       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
                       <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">This email was sent automatically by COMS. Please do not reply to this email.</p>
                     </div>`
-                );
-                break;
+        );
+        break;
 
-            case 'payment_completed':
-                await send(
-                    `COMS: Payment Completed - RWF ${(amount || 0).toLocaleString()}`,
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'payment_completed':
+        await send(
+          `COMS: Payment Completed - RWF ${(amount || 0).toLocaleString()}`,
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
                       <h2 style="color: #15803d; margin-top: 0;">Payment Completed</h2>
                       <p style="font-size: 16px; color: #334155; line-height: 1.5;">Hello ${name}, your payment has been completed.</p>
                       <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
@@ -244,19 +248,19 @@ export default async function handler(req, res) {
                       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
                       <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">This email was sent automatically by COMS. Please do not reply to this email.</p>
                     </div>`
-                );
-                break;
+        );
+        break;
 
-            case 'price_announcement': {
-                let priceRows = '';
-                if (prices && typeof prices === 'object') {
-                    priceRows = Object.entries(prices).map(([grade, price]) =>
-                        `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">${grade}</td><td style="padding: 10px 0; color: #0f172a;">RWF ${(price || 0).toLocaleString()}/kg</td></tr>`
-                    ).join('');
-                }
-                await send(
-                    'COMS: New Coffee Prices Announced',
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'price_announcement': {
+        let priceRows = '';
+        if (prices && typeof prices === 'object') {
+          priceRows = Object.entries(prices).map(([grade, price]) =>
+            `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px 0; font-weight: 600; color: #475569;">${grade}</td><td style="padding: 10px 0; color: #0f172a;">RWF ${(price || 0).toLocaleString()}/kg</td></tr>`
+          ).join('');
+        }
+        await send(
+          'COMS: New Coffee Prices Announced',
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
                       <h2 style="color: #2b6cb0; margin-top: 0;">Coffee Price Announcement</h2>
                       <p style="font-size: 16px; color: #334155; line-height: 1.5;">Hello ${name}, the factory has announced new coffee prices.</p>
                       <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
@@ -267,42 +271,42 @@ export default async function handler(req, res) {
                       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
                       <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">This email was sent automatically by COMS. Please do not reply to this email.</p>
                     </div>`
-                );
-                break;
-            }
+        );
+        break;
+      }
 
-            case 'important_notice':
-                await send(
-                    'COMS: Important Notice',
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'important_notice':
+        await send(
+          'COMS: Important Notice',
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
                       <h2 style="color: #b91c1c; margin-top: 0;">Important Notice</h2>
                       <p style="font-size: 16px; color: #334155; line-height: 1.5;">Hello ${name || 'there'},</p>
                       <div style="margin: 24px 0; padding: 16px; background-color: #fef2f2; border-left: 4px solid #dc2626; border-radius: 4px;"><p style="font-size: 16px; color: #991b1b; line-height: 1.5; margin: 0;">${message || ''}</p></div>
                       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
                       <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">This email was sent automatically by COMS. Please do not reply to this email.</p>
                     </div>`
-                );
-                break;
+        );
+        break;
 
-            case 'reminder':
-                await send(
-                    'COMS: Reminder',
-                    `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      case 'reminder':
+        await send(
+          'COMS: Reminder',
+          `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
                       <h2 style="color: #2b6cb0; margin-top: 0;">Reminder</h2>
                       <p style="font-size: 16px; color: #334155; line-height: 1.5;">Hello ${name || 'there'},</p>
                       <div style="margin: 24px 0; padding: 16px; background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;"><p style="font-size: 16px; color: #1e40af; line-height: 1.5; margin: 0;">${message || ''}</p></div>
                       <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
                       <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">This email was sent automatically by COMS. Please do not reply to this email.</p>
                     </div>`
-                );
-                break;
+        );
+        break;
 
-            default:
-                return res.status(400).json({ error: `Unknown email type: ${type}` });
-        }
-        return res.status(200).json({ success: true });
-    } catch (error) {
-        console.error('Failed to send email:', error);
-        return res.status(500).json({ error: error.message || 'Failed to send email' });
+      default:
+        return res.status(400).json({ error: `Unknown email type: ${type}` });
     }
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Failed to send email:', error);
+    return res.status(500).json({ error: error.message || 'Failed to send email' });
+  }
 }

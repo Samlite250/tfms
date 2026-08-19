@@ -40,8 +40,8 @@ export async function sendMessageNotification({ to, recipientName, senderName, s
     return triggerEmail({ type: 'message_notification', to, recipientName, senderName, subject, body });
 }
 
-export async function sendCoffeeReceivedEmail(to, name, { weight, grade, center, receiptNumber }) {
-    return triggerEmail({ type: 'coffee_received', to, name, weight, grade, center, receiptNumber });
+export async function sendCoffeeReceivedEmail(to, name, { weight, grade, center, receiptNumber, pricePerKg, totalPrice }) {
+    return triggerEmail({ type: 'coffee_received', to, name, weight, grade, center, receiptNumber, pricePerKg, totalPrice });
 }
 
 export async function sendCoffeeAcceptedEmail(to, name, { weight, grade, receiptNumber }) {
