@@ -61,14 +61,14 @@ function CollectionPage() {
   const [deleteModal, setDeleteModal] = useState(null);
 
   const filteredCollections = useMemo(() => {
-    return collectionsList.filter((c) => {
+    return (collectionsList || []).filter((c) => {
       if (search) {
         const q = search.toLowerCase();
         if (
-          !c.receiptNumber.toLowerCase().includes(q) &&
-          !c.farmer.toLowerCase().includes(q) &&
-          !c.center.toLowerCase().includes(q) &&
-          !c.id.toLowerCase().includes(q)
+          !(c.receiptNumber || "").toLowerCase().includes(q) &&
+          !(c.farmer || "").toLowerCase().includes(q) &&
+          !(c.center || "").toLowerCase().includes(q) &&
+          !(c.id || "").toLowerCase().includes(q)
         ) return false;
       }
       if (gradeFilter && c.grade !== gradeFilter) return false;
@@ -78,6 +78,60 @@ function CollectionPage() {
       return true;
     });
   }, [collectionsList, search, gradeFilter, farmerFilter, dateFrom, dateTo]);
+
+  const statsConfig = useMemo(() => {
+    const list = collectionsList || [];
+    const totalWeight = list.reduce((s, c) => s + (Number(c.weight) || 0), 0);
+    const totalValue = list.reduce((s, c) => s + (Number(c.amount) || 0), 0);
+    const uniqueFarmers = new Set(list.map((c) => c.farmer).filter(Boolean)).size;
+    const today = new Date().toISOString().split("T")[0];
+    const todayWeight = list
+      .filter((c) => c.date === today)
+      .reduce((s, c) => s + (Number(c.weight) || 0), 0);
+
+    return [
+      {
+        label: "Total Weight",
+        value: `${totalWeight.toLocaleString()} kg`,
+        change: "+15%",
+        up: true,
+        icon: Weight,
+        color: "text-primary",
+        bg: "bg-primary/10",
+        borderColor: "#2E7D32",
+      },
+      {
+        label: "Today's Collection",
+        value: `${todayWeight.toLocaleString()} kg`,
+        change: "Today",
+        up: true,
+        icon: Calendar,
+        color: "text-info",
+        bg: "bg-info/10",
+        borderColor: "#0288D1",
+      },
+      {
+        label: "Unique Farmers",
+        value: uniqueFarmers.toString(),
+        change: "Active",
+        up: true,
+        icon: Users,
+        color: "text-purple-600",
+        bg: "bg-purple-100",
+        borderColor: "#9333EA",
+      },
+      {
+        label: "Total Value",
+        value: `RWF ${totalValue.toLocaleString()}`,
+        change: "+22%",
+        up: true,
+        icon: TrendingUp,
+        color: "text-accent-dark",
+        bg: "bg-accent/10",
+        borderColor: "#F9A825",
+      },
+    ];
+  }, [collectionsList]);
 
   const columns = [
     {
