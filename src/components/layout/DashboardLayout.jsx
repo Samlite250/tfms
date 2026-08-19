@@ -9,6 +9,7 @@ const allMenuItems = [
   { label: 'Farmers', path: '/farmers', icon: 'Tractor', permission: 'farmers' },
   { label: 'Coffee Collection', path: '/collections', icon: 'Coffee', permission: 'collections' },
   { label: 'My Collections', path: '/my-collections', icon: 'Coffee', permission: 'my_collections' },
+  { label: 'Production', path: '/production', icon: 'Factory', permission: 'production' },
   { label: 'Inventory', path: '/inventory', icon: 'Package', permission: 'inventory' },
   { label: 'Payments', path: '/payments', icon: 'Banknote', permission: 'payments' },
   { label: 'Reports', path: '/reports', icon: 'BarChart3', permission: 'reports' },
