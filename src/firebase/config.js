@@ -10,14 +10,17 @@ function sanitizeSupabaseKey(key) {
   return key;
 }
 
-const supabaseUrl = rawUrl;
-const supabaseAnonKey = sanitizeSupabaseKey(rawKey);
+const isValidUrl = rawUrl.startsWith('http://') || rawUrl.startsWith('https://');
+const isValidKey = rawKey.length > 0;
+
+const supabaseUrl = isValidUrl ? rawUrl : 'https://placeholder.supabase.co';
+const supabaseAnonKey = isValidKey ? sanitizeSupabaseKey(rawKey) : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
+    autoRefreshToken: isValidUrl,
+    persistSession: isValidUrl,
+    detectSessionInUrl: isValidUrl,
   },
 });
 

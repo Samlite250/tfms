@@ -179,6 +179,17 @@ export default function useRealtimeCollection(collectionName, options = {}) {
 
   const add = useCallback(
     async (item) => {
+      const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+      const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+      if (!url || !rawKey) {
+        const existing = loadSeedFromStorage(collectionName) || [];
+        const newItem = { id: item.id || `local-${Date.now()}`, ...item };
+        const updated = [newItem, ...existing];
+        saveToStorage(collectionName, updated);
+        setData(updated);
+        return newItem.id;
+      }
+
       const snakeItem = {};
       for (const [k, v] of Object.entries(item)) {
         snakeItem[toSnake(k)] = v;
@@ -200,6 +211,16 @@ export default function useRealtimeCollection(collectionName, options = {}) {
 
   const update = useCallback(
     async (id, updates) => {
+      const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+      const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+      if (!url || !rawKey) {
+        const existing = loadSeedFromStorage(collectionName) || [];
+        const updated = existing.map((d) => (d.id === id ? { ...d, ...updates } : d));
+        saveToStorage(collectionName, updated);
+        setData(updated);
+        return;
+      }
+
       const snakeUpdates = {};
       for (const [k, v] of Object.entries(updates)) {
         snakeUpdates[toSnake(k)] = v;
@@ -218,6 +239,16 @@ export default function useRealtimeCollection(collectionName, options = {}) {
 
   const remove = useCallback(
     async (id) => {
+      const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+      const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+      if (!url || !rawKey) {
+        const existing = loadSeedFromStorage(collectionName) || [];
+        const updated = existing.filter((d) => d.id !== id);
+        saveToStorage(collectionName, updated);
+        setData(updated);
+        return;
+      }
+
       const { error } = await supabase
         .from(collectionName)
         .delete()
