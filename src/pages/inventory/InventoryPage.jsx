@@ -46,10 +46,22 @@ const staggerContainer = { visible: { transition: { staggerChildren: 0.05 } } };
 function InventoryPage() {
   const navigate = useNavigate();
   const toast = useToast();
-  const [itemsList, setItemsList] = useState(MOCK_ITEMS);
+  const { data: inventoryData, deleteItem } = useRealtimeCollection("inventory", inventorySeed);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [deleteModal, setDeleteModal] = useState({ open: false, item: null });
+
+  const itemsList = useMemo(() => {
+    return (inventoryData || []).map((item) => ({
+      ...item,
+      quantity: Number(item.stock ?? item.quantity ?? 0),
+      minStock: Number(item.capacity ? Math.round(item.capacity * 0.2) : item.minStock ?? 500),
+      costPerUnit: Number(item.unitPrice ?? item.costPerUnit ?? 1000),
+      category: item.category || "Coffee Stock",
+      supplier: item.supplier || "Mahembe Cooperative",
+      description: item.description || item.location || "Warehouse Storage",
+    }));
+  }, [inventoryData]);
 
   const filteredItems = useMemo(() => {
     let items = itemsList;
@@ -60,9 +72,9 @@ function InventoryPage() {
       const q = search.toLowerCase();
       items = items.filter(
         (i) =>
-          i.name.toLowerCase().includes(q) ||
-          i.category.toLowerCase().includes(q) ||
-          i.supplier.toLowerCase().includes(q)
+          (i.name && i.name.toLowerCase().includes(q)) ||
+          (i.category && i.category.toLowerCase().includes(q)) ||
+          (i.supplier && i.supplier.toLowerCase().includes(q))
       );
     }
     return items;
@@ -80,10 +92,12 @@ function InventoryPage() {
     setDeleteModal({ open: true, item });
   }
 
-  function confirmDelete() {
-    setItemsList((prev) => prev.filter((i) => i.id !== deleteModal.item.id));
-    toast.success(`"${deleteModal.item.name}" has been deleted.`);
-    setDeleteModal({ open: false, item: null });
+  async function confirmDelete() {
+    if (deleteModal.item) {
+      await deleteItem(deleteModal.item.id);
+      toast.success(`"${deleteModal.item.name}" has been deleted.`);
+      setDeleteModal({ open: false, item: null });
+    }
   }
 
   const columns = [
@@ -196,8 +210,8 @@ function InventoryPage() {
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${activeCategory === cat
-                          ? "bg-primary text-white"
-                          : "bg-gray-100 text-text-secondary hover:bg-gray-200"
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 text-text-secondary hover:bg-gray-200"
                         }`}
                     >
                       {cat}
