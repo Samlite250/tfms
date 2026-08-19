@@ -34,6 +34,15 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (registrationInProgressRef.current) return;
+
+      if (event === 'PASSWORD_RECOVERY') {
+        if (session?.user) {
+          setUser(normalizeUser(session.user));
+        }
+        setLoading(false);
+        return;
+      }
+
       if (session?.user) {
         try {
           const { data: profile, error } = await supabase
@@ -146,8 +155,8 @@ export function AuthProvider({ children }) {
         pendingFarmers.push(farmerProfile);
         localStorage.setItem('coms_pending_farmers', JSON.stringify(pendingFarmers));
       }
-      try { await sendRegistrationConfirmation(email, profileData.displayName); } catch {}
-      try { await sendAdminAlert({ displayName: profileData.displayName, email, role: profileData.role, phone: profileData.phone }); } catch {}
+      try { await sendRegistrationConfirmation(email, profileData.displayName); } catch { }
+      try { await sendAdminAlert({ displayName: profileData.displayName, email, role: profileData.role, phone: profileData.phone }); } catch { }
       return localProfile;
     }
 
@@ -230,7 +239,7 @@ export function AuthProvider({ children }) {
             localStorage.setItem('coms_pending_farmers', JSON.stringify(pendingFarmers.filter((f) => f.userId !== uid && f.id !== uid)));
           }
         }
-        try { await sendAccountApproved(approved.email, approved.displayName, approved.role); } catch {}
+        try { await sendAccountApproved(approved.email, approved.displayName, approved.role); } catch { }
       }
       return;
     }
@@ -238,9 +247,9 @@ export function AuthProvider({ children }) {
     try {
       const { data: userData } = await supabase.from('users').select('*').eq('id', uid).single();
       if (userData) {
-        try { await sendAccountApproved(userData.email, userData.display_name, userData.role); } catch {}
+        try { await sendAccountApproved(userData.email, userData.display_name, userData.role); } catch { }
       }
-    } catch {}
+    } catch { }
 
     await supabase.from('users').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', uid);
 
@@ -278,7 +287,7 @@ export function AuthProvider({ children }) {
       const pending = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
       const rejectedUser = pending.find((u) => u.uid === uid);
       if (rejectedUser) {
-        try { await sendAccountRejected(rejectedUser.email, rejectedUser.displayName); } catch {}
+        try { await sendAccountRejected(rejectedUser.email, rejectedUser.displayName); } catch { }
       }
       localStorage.setItem('coms_pending_users', JSON.stringify(pending.filter((u) => u.uid !== uid)));
       return;
@@ -287,9 +296,9 @@ export function AuthProvider({ children }) {
     try {
       const { data: userData } = await supabase.from('users').select('*').eq('id', uid).single();
       if (userData) {
-        try { await sendAccountRejected(userData.email, userData.display_name); } catch {}
+        try { await sendAccountRejected(userData.email, userData.display_name); } catch { }
       }
-    } catch {}
+    } catch { }
 
     await supabase.from('users').update({ status: 'rejected', updated_at: new Date().toISOString() }).eq('id', uid);
 
@@ -312,8 +321,9 @@ export function AuthProvider({ children }) {
   }
 
   async function forgotPassword(email) {
-    const url = import.meta.env.VITE_SUPABASE_URL || '';
-    if (url) {
+    const url = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+    const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+    if (url && rawKey) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/reset-password',
       });
@@ -321,11 +331,19 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function resetPassword(oobCode, newPassword) {
-    const url = import.meta.env.VITE_SUPABASE_URL || '';
-    if (url) {
+  async function resetPassword(newPassword, email) {
+    const url = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+    const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+    if (url && rawKey) {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
+    } else {
+      const approved = JSON.parse(localStorage.getItem('coms_approved_users') || '[]');
+      if (email) {
+        const found = approved.find((u) => u.email === email);
+        if (found) found.password = newPassword;
+        localStorage.setItem('coms_approved_users', JSON.stringify(approved));
+      }
     }
   }
 

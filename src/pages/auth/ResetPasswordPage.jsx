@@ -27,7 +27,7 @@ function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const { resetPassword } = useAuth();
 
-  const oobCode = searchParams.get('oobCode') || '';
+  const emailParam = searchParams.get('email') || '';
 
   const {
     register,
@@ -43,18 +43,13 @@ function ResetPasswordPage() {
 
   const onSubmit = async (data) => {
     setAuthError('');
-    if (!oobCode) {
-      setAuthError('Invalid or expired reset link. Please request a new one.');
-      return;
-    }
     try {
-      await resetPassword(oobCode, data.password);
+      await resetPassword(data.password, emailParam);
       setSuccess(true);
     } catch (err) {
-      const code = err?.code;
-      if (code === 'auth/invalid-action-code') setAuthError('Invalid or expired reset link. Please request a new one.');
-      else if (code === 'auth/weak-password') setAuthError('Password is too weak. Please choose a stronger password.');
-      else setAuthError('Failed to reset password. Please try again.');
+      const msg = err?.message || '';
+      if (msg.includes('weak')) setAuthError('Password is too weak. Please choose a stronger password.');
+      else setAuthError(msg || 'Failed to reset password. Please try again.');
     }
   };
 
@@ -141,11 +136,10 @@ function ResetPasswordPage() {
                       <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Enter new password"
-                        className={`w-full pl-10 pr-11 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                          errors.password
+                        className={`w-full pl-10 pr-11 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.password
                             ? 'border-danger focus:ring-danger/30 focus:border-danger'
                             : 'border-border focus:ring-primary/30 focus:border-primary'
-                        }`}
+                          }`}
                         {...register('password', {
                           required: 'Password is required',
                           minLength: { value: 8, message: 'Password must be at least 8 characters' },
@@ -172,9 +166,8 @@ function ResetPasswordPage() {
                           {[1, 2, 3, 4, 5].map((i) => (
                             <div
                               key={i}
-                              className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                                i <= strength.score ? strength.color : 'bg-gray-200'
-                              }`}
+                              className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${i <= strength.score ? strength.color : 'bg-gray-200'
+                                }`}
                             />
                           ))}
                         </div>
@@ -193,11 +186,10 @@ function ResetPasswordPage() {
                       <input
                         type={showConfirm ? 'text' : 'password'}
                         placeholder="Confirm new password"
-                        className={`w-full pl-10 pr-11 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                          errors.confirmPassword
+                        className={`w-full pl-10 pr-11 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.confirmPassword
                             ? 'border-danger focus:ring-danger/30 focus:border-danger'
                             : 'border-border focus:ring-primary/30 focus:border-primary'
-                        }`}
+                          }`}
                         {...register('confirmPassword', {
                           required: 'Please confirm your password',
                           validate: (value) => value === passwordValue || 'Passwords do not match',

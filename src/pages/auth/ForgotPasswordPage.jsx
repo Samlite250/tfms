@@ -68,13 +68,21 @@ function ForgotPasswordPage() {
                 <p className="text-sm text-text-secondary mb-8">
                   Didn't receive the email? Check your spam folder or try again.
                 </p>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-primary text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-dark hover:shadow-md"
-                >
-                  <ArrowLeft size={18} />
-                  Back to Login
-                </Link>
+                <div className="flex flex-col gap-3">
+                  <Link
+                    to={`/reset-password?email=${encodeURIComponent(getValues('email'))}`}
+                    className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-primary text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-dark hover:shadow-md"
+                  >
+                    Reset Password Now
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl border border-border text-text-primary font-semibold text-sm transition-all duration-200 hover:bg-gray-50"
+                  >
+                    <ArrowLeft size={18} />
+                    Back to Login
+                  </Link>
+                </div>
               </motion.div>
             ) : (
               <motion.div
@@ -115,11 +123,10 @@ function ForgotPasswordPage() {
                       <input
                         type="email"
                         placeholder="you@example.com"
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                          errors.email
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.email
                             ? 'border-danger focus:ring-danger/30 focus:border-danger'
                             : 'border-border focus:ring-primary/30 focus:border-primary'
-                        }`}
+                          }`}
                         {...register('email', {
                           required: 'Email is required',
                           pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' },
