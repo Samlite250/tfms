@@ -142,15 +142,16 @@ function ProductionPage() {
   }, [dataList]);
 
   const filteredData = useMemo(() => {
-    return dataList.filter((row) => {
-      const matchesSearch =
-        !searchTerm ||
-        row.batchNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.supervisor.toLowerCase().includes(searchTerm.toLowerCase());
+    return (dataList || []).filter((row) => {
+      const batchMatch = (row.batchNumber || "").toLowerCase().includes(searchTerm.toLowerCase());
+      const supervisorMatch = (row.operator || row.supervisor || "").toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = !searchTerm || batchMatch || supervisorMatch;
       const matchesDate = !dateFilter || row.date === dateFilter;
-      const matchesGrade = gradeFilter === "all" || row.teaGrade === gradeFilter;
+      const rowGrade = row.grade || row.teaGrade || "";
+      const matchesGrade = gradeFilter === "all" || rowGrade === gradeFilter;
       const matchesStatus = statusFilter === "all" || row.status === statusFilter;
-      const matchesStage = stageFilter === "all" || row.processingStage === stageFilter;
+      const rowStage = row.processingStage || row.status || "";
+      const matchesStage = stageFilter === "all" || rowStage === stageFilter;
       return matchesSearch && matchesDate && matchesGrade && matchesStatus && matchesStage;
     });
   }, [dataList, searchTerm, dateFilter, gradeFilter, statusFilter, stageFilter]);
@@ -175,40 +176,45 @@ function ProductionPage() {
     {
       header: "Date",
       accessor: "date",
+      render: (row) => row.date || "—",
     },
     {
       header: "Coffee Grade",
-      accessor: "teaGrade",
-      render: (row) => (
-        <Badge variant="info">{row.teaGrade}</Badge>
-      ),
+      accessor: "grade",
+      render: (row) => {
+        const grade = row.grade || row.teaGrade || "—";
+        return <Badge variant="info">{grade}</Badge>;
+      },
     },
     {
-      header: "Raw Material (kg)",
-      accessor: "rawMaterial",
-      render: (row) => <span className="font-medium">{row.rawMaterial}</span>,
+      header: "Raw Input (kg)",
+      accessor: "cherryInput",
+      render: (row) => <span className="font-medium">{row.cherryInput ?? row.rawMaterial ?? "—"}</span>,
     },
     {
-      header: "Finished (kg)",
-      accessor: "finishedProduct",
-      render: (row) => <span className="font-medium">{row.finishedProduct}</span>,
+      header: "Parchment (kg)",
+      accessor: "parchmentWeight",
+      render: (row) => <span className="font-medium">{row.parchmentWeight ?? row.finishedProduct ?? "—"}</span>,
     },
     {
       header: "Yield %",
       accessor: "yieldPercent",
-      render: (row) => (
-        <span
-          className={
-            row.yieldPercent >= 85
-              ? "text-success font-semibold"
-              : row.yieldPercent >= 75
-                ? "text-warning font-semibold"
-                : "text-danger font-semibold"
-          }
-        >
-          {row.yieldPercent}%
-        </span>
-      ),
+      render: (row) => {
+        const yp = row.yieldPercent ?? 0;
+        return (
+          <span
+            className={
+              yp >= 25
+                ? "text-success font-semibold"
+                : yp >= 20
+                  ? "text-warning font-semibold"
+                  : "text-danger font-semibold"
+            }
+          >
+            {yp}%
+          </span>
+        );
+      },
     },
     {
       header: "Status",
@@ -216,15 +222,17 @@ function ProductionPage() {
       render: (row) => statusBadge(row.status),
     },
     {
-      header: "Processing Stage",
+      header: "Stage",
       accessor: "processingStage",
-      render: (row) => (
-        <Badge variant={stageBadgeVariant[row.processingStage] || "default"} dot>{row.processingStage}</Badge>
-      ),
+      render: (row) => {
+        const stage = row.processingStage || row.status || "—";
+        return <Badge variant={stageBadgeVariant[stage] || "default"} dot>{stage}</Badge>;
+      },
     },
     {
-      header: "Supervisor",
-      accessor: "supervisor",
+      header: "Operator",
+      accessor: "operator",
+      render: (row) => row.operator || row.supervisor || "—",
     },
   ];
 
