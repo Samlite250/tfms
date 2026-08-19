@@ -45,18 +45,19 @@ export default function EmployeesPage() {
     const list = employeesList || [];
     const total = list.length;
     const active = list.filter((e) => e.status === "Active").length;
-    const departments = new Set(list.map((e) => e.department)).size;
+    const departments = new Set(list.map((e) => e.department).filter(Boolean)).size;
     const onLeave = list.filter((e) => e.status === "On Leave").length;
     return { total, active, departments, onLeave };
   }, [employeesList]);
 
   const filtered = useMemo(() => {
     return (employeesList || []).filter((emp) => {
+      const fullName = `${emp.firstName || emp.name || ""} ${emp.lastName || ""}`.toLowerCase();
       const matchSearch =
         !search ||
-        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
-        (emp.id && emp.id.toLowerCase().includes(search.toLowerCase())) ||
-        (emp.phone && emp.phone.includes(search));
+        fullName.includes(search.toLowerCase()) ||
+        (emp.id && String(emp.id).toLowerCase().includes(search.toLowerCase())) ||
+        (emp.phone && String(emp.phone).includes(search));
       const matchDept = !deptFilter || emp.department === deptFilter;
       const matchStatus = !statusFilter || emp.status === statusFilter;
       return matchSearch && matchDept && matchStatus;
@@ -66,7 +67,7 @@ export default function EmployeesPage() {
   async function handleDelete() {
     if (deleteModal) {
       await deleteItem(deleteModal.id);
-      success(`Employee ${deleteModal.firstName} ${deleteModal.lastName} deleted successfully`);
+      success(`Employee ${deleteModal.firstName || deleteModal.name || ""} ${deleteModal.lastName || ""} deleted successfully`);
       setDeleteModal(null);
     }
   }
@@ -80,34 +81,40 @@ export default function EmployeesPage() {
     {
       header: "Name",
       accessor: "firstName",
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
-            {row.firstName[0]}{row.lastName[0]}
+      render: (row) => {
+        const first = row.firstName || row.name || "Employee";
+        const last = row.lastName || "";
+        const fInitial = (first && first[0]) ? first[0] : "E";
+        const lInitial = (last && last[0]) ? last[0] : "";
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0 uppercase">
+              {fInitial}{lInitial}
+            </div>
+            <div>
+              <p className="font-medium text-text-primary">{first} {last}</p>
+              <p className="text-xs text-text-secondary">{row.email || "N/A"}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-medium text-text-primary">{row.firstName} {row.lastName}</p>
-            <p className="text-xs text-text-secondary">{row.email}</p>
-          </div>
-        </div>
-      ),
+        );
+      },
     },
-    { header: "Department", accessor: "department" },
-    { header: "Position", accessor: "position" },
-    { header: "Phone", accessor: "phone" },
+    { header: "Department", accessor: "department", render: (row) => row.department || "N/A" },
+    { header: "Position", accessor: "position", render: (row) => row.position || "N/A" },
+    { header: "Phone", accessor: "phone", render: (row) => row.phone || "N/A" },
     {
       header: "Status",
       accessor: "status",
       render: (row) => (
         <Badge variant={STATUS_VARIANT[row.status] || "default"} dot>
-          {row.status}
+          {row.status || "Active"}
         </Badge>
       ),
     },
     {
       header: "Join Date",
       accessor: "joinDate",
-      render: (row) => new Date(row.joinDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+      render: (row) => row.joinDate ? new Date(row.joinDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "N/A",
     },
   ];
 
