@@ -7,7 +7,6 @@ import {
   Hash,
   Calendar,
   Weight,
-  CheckCircle2,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
@@ -21,18 +20,6 @@ const coffeeGradeOptions = [
   { value: "C", label: "Grade C (Low Grade)" },
 ];
 
-const supervisorOptions = [
-  { value: "R. Perera", label: "R. Perera" },
-  { value: "K. Fernando", label: "K. Fernando" },
-  { value: "M. de Silva", label: "M. de Silva" },
-  { value: "A. Bandara", label: "A. Bandara" },
-];
-
-const methodOptions = [
-  { value: "Washed", label: "Washed Process" },
-  { value: "Natural", label: "Natural Process" },
-];
-
 const qualityGradeOptions = [
   { value: "A", label: "Grade A - Excellent" },
   { value: "B", label: "Grade B - Standard" },
@@ -40,15 +27,12 @@ const qualityGradeOptions = [
 ];
 
 const mockEditData = {
-  batchNumber: "BATCH-2026-025",
+  recordId: "REC-2026-025",
   productionDate: "2026-07-10",
-  teaGrade: "AA",
-  supervisor: "R. Perera",
-  greenLeafInput: 450,
-  processingMethod: "Washed",
-  finishedProductWeight: 365,
+  coffeeGrade: "AA",
+  weight: 450,
   qualityGrade: "A",
-  notes: "Good quality batch.",
+  notes: "Good quality record.",
 };
 
 function ProductionFormPage() {
@@ -67,25 +51,14 @@ function ProductionFormPage() {
     defaultValues: isEdit
       ? mockEditData
       : {
-        batchNumber: `BATCH-2026-${String(Math.floor(Math.random() * 900) + 100).padStart(3, "0")}`,
+        recordId: `REC-2026-${String(Math.floor(Math.random() * 900) + 100).padStart(3, "0")}`,
         productionDate: new Date().toISOString().split("T")[0],
-        teaGrade: "AA",
-        supervisor: "",
-        greenLeafInput: "",
-        processingMethod: "Washed",
-        finishedProductWeight: "",
+        coffeeGrade: "AA",
+        weight: "",
         qualityGrade: "A",
         notes: "",
       },
   });
-
-  const greenLeafInput = watch("greenLeafInput");
-  const finishedProductWeight = watch("finishedProductWeight");
-
-  const yieldPercentage =
-    greenLeafInput && finishedProductWeight
-      ? ((parseFloat(finishedProductWeight) / parseFloat(greenLeafInput)) * 100).toFixed(1)
-      : "0.0";
 
   useEffect(() => {
     if (isEdit) {
@@ -97,13 +70,13 @@ function ProductionFormPage() {
 
   const onSubmit = async () => {
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setIsSubmitting(false);
     navigate("/production");
   };
 
   return (
-    <div className="space-y-5 max-w-2xl mx-auto">
+    <div className="space-y-5 max-w-xl mx-auto">
       <div>
         <Button
           variant="ghost"
@@ -111,25 +84,24 @@ function ProductionFormPage() {
           onClick={() => navigate("/production")}
           className="mb-2"
         >
-          Back to Batches
+          Back to Production
         </Button>
         <h1 className="text-xl font-bold text-text-primary">
-          {isEdit ? "Edit Coffee Batch" : "New Coffee Batch"}
+          {isEdit ? "Edit Production Record" : "New Production Record"}
         </h1>
         <p className="text-sm text-text-secondary mt-0.5">
           {isEdit
-            ? `Editing ${mockEditData.batchNumber}`
-            : "Fill in this simple form to record a new coffee batch."}
+            ? `Editing ${mockEditData.recordId}`
+            : "Fill in this simple form to add a production record."}
         </p>
       </div>
 
       <Card padding="lg">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Simple Form Fields */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Batch ID"
-              value={watch("batchNumber")}
+              label="ID"
+              value={watch("recordId")}
               disabled
               icon={Hash}
               helperText="Auto-created"
@@ -140,61 +112,38 @@ function ProductionFormPage() {
               icon={Calendar}
               error={errors.productionDate?.message}
               {...register("productionDate", {
-                required: "Please pick a date",
+                required: "Please select a date",
               })}
             />
             <Select
               label="Coffee Grade *"
               options={coffeeGradeOptions}
-              placeholder="Select coffee grade"
-              value={watch("teaGrade")}
-              onChange={(val) => setValue("teaGrade", val)}
-              error={errors.teaGrade?.message}
-            />
-            <Select
-              label="Supervisor Name *"
-              options={supervisorOptions}
-              placeholder="Select supervisor"
-              value={watch("supervisor")}
-              onChange={(val) => setValue("supervisor", val)}
-              error={errors.supervisor?.message}
+              placeholder="Select grade"
+              value={watch("coffeeGrade")}
+              onChange={(val) => setValue("coffeeGrade", val)}
+              error={errors.coffeeGrade?.message}
             />
             <Input
-              label="Fresh Cherry Received (kg) *"
+              label="Weight (kg) *"
               type="number"
               icon={Weight}
               placeholder="e.g. 500"
-              error={errors.greenLeafInput?.message}
-              {...register("greenLeafInput", {
-                required: "Please enter cherry weight",
+              error={errors.weight?.message}
+              {...register("weight", {
+                required: "Please enter weight in kg",
                 min: { value: 1, message: "Must be at least 1 kg" },
                 valueAsNumber: true,
               })}
             />
-            <Select
-              label="Process Type"
-              options={methodOptions}
-              placeholder="Select process"
-              value={watch("processingMethod")}
-              onChange={(val) => setValue("processingMethod", val)}
-            />
-            <Input
-              label="Processed Parchment (kg)"
-              type="number"
-              icon={Weight}
-              placeholder="e.g. 400"
-              {...register("finishedProductWeight", {
-                min: { value: 0, message: "Cannot be negative" },
-                valueAsNumber: true,
-              })}
-            />
-            <Select
-              label="Quality Grade"
-              options={qualityGradeOptions}
-              placeholder="Select quality"
-              value={watch("qualityGrade")}
-              onChange={(val) => setValue("qualityGrade", val)}
-            />
+            <div className="sm:col-span-2">
+              <Select
+                label="Quality Grade"
+                options={qualityGradeOptions}
+                placeholder="Select quality grade"
+                value={watch("qualityGrade")}
+                onChange={(val) => setValue("qualityGrade", val)}
+              />
+            </div>
           </div>
 
           <div>
@@ -203,23 +152,12 @@ function ProductionFormPage() {
             </label>
             <textarea
               className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary min-h-[60px]"
-              placeholder="Any extra details about this batch..."
+              placeholder="Add optional notes..."
               {...register("notes")}
             />
           </div>
 
-          {/* Automatic Yield Summary */}
-          {(greenLeafInput || finishedProductWeight) && (
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-text-secondary">
-                <CheckCircle2 size={16} className="text-primary" />
-                <span>Calculated Yield:</span>
-              </div>
-              <span className="text-lg font-bold text-primary">{yieldPercentage}%</span>
-            </div>
-          )}
-
-          {/* Form Action Buttons */}
+          {/* Form Actions */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
             <Button
               type="button"
@@ -234,7 +172,7 @@ function ProductionFormPage() {
               icon={Save}
               loading={isSubmitting}
             >
-              {isEdit ? "Save Changes" : "Save Coffee Batch"}
+              {isEdit ? "Save Changes" : "Save Record"}
             </Button>
           </div>
         </form>
