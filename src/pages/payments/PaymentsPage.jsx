@@ -106,10 +106,10 @@ export default function PaymentsPage() {
 
   const stats = useMemo(() => {
     const list = paymentsList || [];
-    const total = list.reduce((s, p) => s + p.totalAmount, 0);
-    const paid = list.filter((p) => p.status === "Paid").reduce((s, p) => s + p.totalAmount, 0);
-    const pending = list.filter((p) => p.status === "Pending").reduce((s, p) => s + p.totalAmount, 0);
-    const farmers = new Set(list.map((p) => p.farmer)).size;
+    const total = list.reduce((s, p) => s + (Number(p.totalAmount) || 0), 0);
+    const paid = list.filter((p) => p.status === "Paid").reduce((s, p) => s + (Number(p.totalAmount) || 0), 0);
+    const pending = list.filter((p) => p.status === "Pending").reduce((s, p) => s + (Number(p.totalAmount) || 0), 0);
+    const farmers = new Set(list.map((p) => p.farmer).filter(Boolean)).size;
     return { total, paid, pending, farmers };
   }, [paymentsList]);
 
@@ -118,9 +118,9 @@ export default function PaymentsPage() {
       if (search) {
         const q = search.toLowerCase();
         if (
-          !p.paymentNumber.toLowerCase().includes(q) &&
-          !p.farmer.toLowerCase().includes(q) &&
-          !p.collectionRef.toLowerCase().includes(q)
+          !(p.paymentNumber || "").toLowerCase().includes(q) &&
+          !(p.farmer || "").toLowerCase().includes(q) &&
+          !(p.collectionRef || "").toLowerCase().includes(q)
         ) return false;
       }
       if (statusFilter !== "All" && p.status !== statusFilter) return false;
@@ -252,8 +252,8 @@ export default function PaymentsPage() {
                       key={s}
                       onClick={() => { setStatusFilter(s); setCurrentPage(1); }}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${statusFilter === s
-                          ? "bg-primary text-white"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                     >
                       {s}
