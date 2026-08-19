@@ -189,7 +189,7 @@ function CollectionFormPage() {
         className="mb-8"
       >
         <button
-          onClick={() => navigate("/collection")}
+          onClick={() => navigate("/collections")}
           className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors mb-4 cursor-pointer"
         >
           <ArrowLeft size={16} />
@@ -366,7 +366,7 @@ function CollectionFormPage() {
 
         <motion.div custom={5} variants={sectionVariants} initial="hidden" animate="visible">
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
-            <Link to="/collection" className="sm:order-1">
+            <Link to="/collections" className="sm:order-1">
               <Button variant="ghost" fullWidth>Cancel</Button>
             </Link>
             <Button
@@ -401,7 +401,7 @@ function CollectionFormPage() {
             <Button variant="ghost" onClick={handleRecordAnother} className="flex-1">
               Record Another
             </Button>
-            <Link to="/collection" className="flex-1">
+            <Link to="/collections" className="flex-1">
               <Button fullWidth onClick={() => setShowSuccess(false)}>
                 View All Collections
               </Button>

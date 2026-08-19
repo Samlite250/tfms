@@ -130,7 +130,7 @@ function CollectionDetailPage() {
         className="mb-8"
       >
         <button
-          onClick={() => navigate("/collection")}
+          onClick={() => navigate("/collections")}
           className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors mb-4 cursor-pointer"
         >
           <ArrowLeft size={16} />
@@ -150,7 +150,7 @@ function CollectionDetailPage() {
             <Button variant="outline" size="md" icon={Printer} onClick={handlePrint}>
               Print Receipt
             </Button>
-            <Link to={`/collection/${id}/edit`}>
+            <Link to={`/collections/${id}/edit`}>
               <Button size="md" icon={Edit}>
                 Edit
               </Button>
@@ -288,7 +288,7 @@ function CollectionDetailPage() {
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleteModal(false)}>Cancel</Button>
-            <Button variant="danger" onClick={() => { setDeleteModal(false); navigate("/collection"); }}>Delete</Button>
+            <Button variant="danger" onClick={() => { setDeleteModal(false); navigate("/collections"); }}>Delete</Button>
           </>
         }
       >

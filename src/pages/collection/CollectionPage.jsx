@@ -219,7 +219,7 @@ function CollectionPage() {
             <p className="text-sm text-gray-500">Manage and track all coffee collection records</p>
           </div>
         </div>
-        <Link to="/collection/new">
+        <Link to="/collections/new">
           <Button icon={Plus} size="md">
             Record Collection
           </Button>
@@ -348,12 +348,12 @@ function CollectionPage() {
           pageSize={10}
           actions={(row) => (
             <>
-              <Link to={`/collection/${row.id}`}>
+              <Link to={`/collections/${row.id}`}>
                 <button className="p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer" title="View">
                   <Eye size={16} />
                 </button>
               </Link>
-              <Link to={`/collection/${row.id}/edit`}>
+              <Link to={`/collections/${row.id}/edit`}>
                 <button className="p-2 rounded-lg text-gray-400 hover:text-secondary hover:bg-secondary/10 transition-colors cursor-pointer" title="Edit">
                   <Edit size={16} />
                 </button>
