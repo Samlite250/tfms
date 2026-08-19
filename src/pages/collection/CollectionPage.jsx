@@ -21,106 +21,20 @@ import DataTable from "../../components/ui/DataTable";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import StatCard from "../../components/ui/StatCard";
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { collectionsSeed } from "../../firebase/seedData";
 
-const TEA_GRADES = ["PF1", "PF2", "PF3", "PD", "Dust", "Fannings"];
+const COFFEE_GRADES = ["AA", "AB", "PB", "C", "TT"];
 
 const gradeBadgeVariant = {
-  PF1: "success",
-  PF2: "info",
-  PF3: "warning",
-  PD: "default",
-  Dust: "danger",
-  Fannings: "info",
+  AA: "success",
+  AB: "info",
+  PB: "warning",
+  C: "default",
+  TT: "danger",
 };
 
-const farmers = [
-  "James Kamau", "Grace Wanjiku", "Peter Mwangi", "Mary Njeri",
-  "John Ochieng", "Sarah Akinyi", "David Kipchoge", "Faith Jepkorir",
-  "Robert Simiyu", "Anne Chebet", "Samuel Mutua", "Lucy Wairimu",
-];
-
-const centers = [
-  "Kericho Central", "Nandi Hills", "Kisii Highlands",
-  "Nyeri Mount Kenya", "Murang'a Valley", "Kiambu Ridge",
-];
-
-const collectors = [
-  "Michael Otieno", "Patricia Wambui", "Daniel Kiptoo", "Rose Adhiambo",
-];
-
-const GRADE_PRICES = { PF1: 850, PF2: 750, PF3: 650, PD: 550, Dust: 480, Fannings: 520 };
-
-function generateCollections() {
-  const records = [];
-  const now = new Date();
-  for (let i = 1; i <= 24; i++) {
-    const daysAgo = Math.floor(Math.random() * 30);
-    const date = new Date(now);
-    date.setDate(date.getDate() - daysAgo);
-    const grade = TEA_GRADES[Math.floor(Math.random() * TEA_GRADES.length)];
-    const weight = Math.round((20 + Math.random() * 80) * 10) / 10;
-    records.push({
-      id: `COL-${String(i).padStart(4, "0")}`,
-      receiptNumber: `REC-${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}-${String(i).padStart(4, "0")}`,
-      date: date.toISOString().split("T")[0],
-      farmer: farmers[Math.floor(Math.random() * farmers.length)],
-      farmerPhone: `07${Math.floor(10000000 + Math.random() * 90000000)}`,
-      center: centers[Math.floor(Math.random() * centers.length)],
-      weight,
-      grade,
-      pricePerKg: GRADE_PRICES[grade],
-      amount: Math.round(weight * GRADE_PRICES[grade] * 100) / 100,
-      collectedBy: collectors[Math.floor(Math.random() * collectors.length)],
-      qualityNotes: ["Excellent cherry quality", "Good moisture content", "Standard grade", "Premium harvest", "Well processed"][Math.floor(Math.random() * 5)],
-    });
-  }
-  return records.sort((a, b) => new Date(b.date) - new Date(a.date));
-}
-
-const COLLECTIONS = generateCollections();
-
-const statsConfig = [
-  {
-    label: "Today's Collection",
-    value: "1,250 kg",
-    icon: Weight,
-    color: "text-primary",
-    bg: "bg-primary/10",
-    change: "+12%",
-    up: true,
-    borderColor: "#2E7D32",
-  },
-  {
-    label: "This Week",
-    value: "8,400 kg",
-    icon: Calendar,
-    color: "text-secondary",
-    bg: "bg-secondary/10",
-    change: "+8%",
-    up: true,
-    borderColor: "#1B5E20",
-  },
-  {
-    label: "This Month",
-    value: "32,000 kg",
-    icon: TrendingUp,
-    color: "text-accent-dark",
-    bg: "bg-accent/10",
-    change: "+15%",
-    up: true,
-    borderColor: "#F9A825",
-  },
-  {
-    label: "Avg per Delivery",
-    value: "45 kg",
-    icon: Users,
-    color: "text-primary",
-    bg: "bg-primary/10",
-    change: "Stable",
-    up: true,
-    borderColor: "#43A047",
-  },
-];
+const GRADE_PRICES = { AA: 1200, AB: 1000, PB: 1100, C: 800, TT: 700 };
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -137,7 +51,7 @@ const itemVariants = {
 
 function CollectionPage() {
   const { success } = useToast();
-  const [collectionsList, setCollectionsList] = useState(COLLECTIONS);
+  const { data: collectionsList, deleteItem } = useRealtimeCollection("coffeeCollections", collectionsSeed);
   const [search, setSearch] = useState("");
   const [gradeFilter, setGradeFilter] = useState("");
   const [farmerFilter, setFarmerFilter] = useState("");
@@ -388,10 +302,12 @@ function CollectionPage() {
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleteModal(null)}>Cancel</Button>
-            <Button variant="danger" onClick={() => {
-              setCollectionsList((prev) => prev.filter((c) => c.id !== deleteModal.id));
-              success(`Collection record ${deleteModal.receiptNumber} has been deleted.`);
-              setDeleteModal(null);
+            <Button variant="danger" onClick={async () => {
+              if (deleteModal) {
+                await deleteItem(deleteModal.id);
+                success(`Collection record ${deleteModal.receiptNumber} has been deleted.`);
+                setDeleteModal(null);
+              }
             }}>Delete</Button>
           </>
         }

@@ -259,5 +259,8 @@ export default function useRealtimeCollection(collectionName, options = {}) {
     [collectionName]
   );
 
-  return { data, loading, error, add, update, remove };
+  return { data, loading, error, add, update, remove, addItem: add, updateItem: update, deleteItem: remove };
 }
+
+export { useRealtimeCollection };
+

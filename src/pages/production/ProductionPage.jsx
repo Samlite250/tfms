@@ -22,6 +22,8 @@ import Select from "../../components/ui/Select";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import StatCard from "../../components/ui/StatCard";
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { productionSeed } from "../../firebase/seedData";
 
 const coffeeGrades = [
   { value: "all", label: "All Grades" },
@@ -30,11 +32,6 @@ const coffeeGrades = [
   { value: "PB", label: "PB" },
   { value: "C", label: "C" },
   { value: "TT", label: "TT" },
-  { value: "T", label: "T" },
-  { value: "E", label: "E" },
-  { value: "MH", label: "MH" },
-  { value: "SM", label: "SM" },
-  { value: "P", label: "P" },
 ];
 
 const statusOptions = [
@@ -53,103 +50,6 @@ const processingStages = [
   { value: "Milling", label: "Milling" },
   { value: "Packaging", label: "Packaging" },
   { value: "Completed", label: "Completed" },
-];
-
-const supervisors = [
-  "R. Perera",
-  "K. Fernando",
-  "M. de Silva",
-  "A. Bandara",
-  "S. Jayawardena",
-  "N. Wijesinghe",
-  "D. Rajapaksa",
-  "T. Gunasekara",
-];
-
-const coffeeGradesList = ["AA", "AB", "PB", "C", "TT", "T", "E", "MH", "SM", "P"];
-
-const stageBadgeVariant = {
-  Received: "default",
-  Washing: "info",
-  Sorting: "warning",
-  Drying: "accent",
-  Milling: "primary",
-  Packaging: "secondary",
-  Completed: "success",
-};
-
-function generateMockData() {
-  const records = [];
-  const stages = ["Received", "Washing", "Sorting", "Drying", "Milling", "Packaging", "Completed"];
-  for (let i = 1; i <= 24; i++) {
-    const rawMaterial = Math.floor(Math.random() * 200) + 200;
-    const yieldPct = 70 + Math.random() * 20;
-    const finishedProduct = Math.round(rawMaterial * yieldPct) / 100;
-    const statuses = ["Completed", "In Progress", "Quality Check"];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, "0");
-    const month = String(Math.floor(Math.random() * 2) + 6).padStart(2, "0");
-    const processingStage = status === "Completed" ? "Completed" : stages[Math.floor(Math.random() * stages.length)];
-
-    records.push({
-      id: i,
-      batchNumber: `BATCH-2026-${String(i).padStart(3, "0")}`,
-      date: `2026-${month}-${day}`,
-      teaGrade: coffeeGradesList[Math.floor(Math.random() * coffeeGradesList.length)],
-      rawMaterial,
-      finishedProduct: Math.round(finishedProduct * 10) / 10,
-      yieldPercent: Math.round(yieldPct * 10) / 10,
-      status,
-      processingStage,
-      supervisor: supervisors[Math.floor(Math.random() * supervisors.length)],
-    });
-  }
-  return records;
-}
-
-const mockData = generateMockData();
-
-const stats = [
-  {
-    label: "Today's Production",
-    value: "320 kg",
-    icon: Factory,
-    color: "text-primary",
-    bg: "bg-primary/10",
-    change: "+12%",
-    up: true,
-    borderColor: "#2E7D32",
-  },
-  {
-    label: "This Month",
-    value: "12,500 kg",
-    icon: TrendingUp,
-    color: "text-secondary",
-    bg: "bg-secondary/10",
-    change: "+8%",
-    up: true,
-    borderColor: "#1B5E20",
-  },
-  {
-    label: "Batches This Month",
-    value: "48",
-    icon: Package,
-    color: "text-accent",
-    bg: "bg-accent/10",
-    change: "+5",
-    up: true,
-    borderColor: "#F9A825",
-  },
-  {
-    label: "Average Batch Size",
-    value: "260 kg",
-    icon: BarChart3,
-    color: "text-info",
-    bg: "bg-info/10",
-    change: "+3%",
-    up: true,
-    borderColor: "#0288D1",
-  },
 ];
 
 const containerVariants = {
@@ -172,7 +72,7 @@ const itemVariants = {
 function ProductionPage() {
   const navigate = useNavigate();
   const { success } = useToast();
-  const [dataList, setDataList] = useState(mockData);
+  const { data: dataList, deleteItem } = useRealtimeCollection("production", productionSeed);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [gradeFilter, setGradeFilter] = useState("all");
@@ -241,8 +141,8 @@ function ProductionPage() {
             row.yieldPercent >= 85
               ? "text-success font-semibold"
               : row.yieldPercent >= 75
-              ? "text-warning font-semibold"
-              : "text-danger font-semibold"
+                ? "text-warning font-semibold"
+                : "text-danger font-semibold"
           }
         >
           {row.yieldPercent}%
@@ -407,10 +307,12 @@ function ProductionPage() {
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleteModal(null)}>Cancel</Button>
-            <Button variant="danger" onClick={() => {
-              setDataList((prev) => prev.filter((d) => d.id !== deleteModal.id));
-              success(`Batch ${deleteModal.batchNumber} has been deleted.`);
-              setDeleteModal(null);
+            <Button variant="danger" onClick={async () => {
+              if (deleteModal) {
+                await deleteItem(deleteModal.id);
+                success(`Batch ${deleteModal.batchNumber} has been deleted.`);
+                setDeleteModal(null);
+              }
             }}>Delete</Button>
           </>
         }

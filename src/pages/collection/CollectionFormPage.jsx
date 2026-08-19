@@ -21,51 +21,26 @@ import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import Modal from "../../components/ui/Modal";
 import { sendCoffeeReceivedEmail } from "../../services/emailService";
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { farmersSeed, collectionsSeed } from "../../firebase/seedData";
 
-const TEA_GRADES = ["PF1", "PF2", "PF3", "PD", "Dust", "Fannings"];
+const COFFEE_GRADES = ["AA", "AB", "PB", "C", "TT"];
 
 const GRADE_PRICES = {
-  PF1: 850,
-  PF2: 750,
-  PF3: 650,
-  PD: 550,
-  Dust: 480,
-  Fannings: 520,
+  AA: 1200,
+  AB: 1000,
+  PB: 1100,
+  C: 800,
+  TT: 700,
 };
 
-const farmers = [
-  { id: "F001", name: "James Kamau", phone: "0712345678", email: "james.kamau@mahembe-coffee.rw" },
-  { id: "F002", name: "Grace Wanjiku", phone: "0723456789", email: "grace.wanjiku@mahembe-coffee.rw" },
-  { id: "F003", name: "Peter Mwangi", phone: "0734567890", email: "peter.mwangi@mahembe-coffee.rw" },
-  { id: "F004", name: "Mary Njeri", phone: "0745678901", email: "mary.njeri@mahembe-coffee.rw" },
-  { id: "F005", name: "John Ochieng", phone: "0756789012", email: "john.ochieng@mahembe-coffee.rw" },
-  { id: "F006", name: "Sarah Akinyi", phone: "0767890123", email: "sarah.akinyi@mahembe-coffee.rw" },
-  { id: "F007", name: "David Kipchoge", phone: "0778901234", email: "david.kipchoge@mahembe-coffee.rw" },
-  { id: "F008", name: "Faith Jepkorir", phone: "0789012345", email: "faith.jepkorir@mahembe-coffee.rw" },
-  { id: "F009", name: "Robert Simiyu", phone: "0790123456", email: "robert.simiyu@mahembe-coffee.rw" },
-  { id: "F010", name: "Anne Chebet", phone: "0701234567", email: "anne.chebet@mahembe-coffee.rw" },
-  { id: "F011", name: "Samuel Mutua", phone: "0712345670", email: "samuel.mutua@mahembe-coffee.rw" },
-  { id: "F012", name: "Lucy Wairimu", phone: "0723456780", email: "lucy.wairimu@mahembe-coffee.rw" },
-];
-
 const collectionCenters = [
-  { value: "kericho-central", label: "Kericho Central Collection Center" },
-  { value: "nandi-hills", label: "Nandi Hills Collection Center" },
-  { value: "kisii-highlands", label: "Kisii Highlands Collection Center" },
-  { value: "nyeri-mount-kenya", label: "Nyeri Mount Kenya Collection Center" },
-  { value: "muranga-valley", label: "Murang'a Valley Collection Center" },
-  { value: "kiambu-ridge", label: "Kiambu Ridge Collection Center" },
+  { value: "mahembe-cc", label: "Mahembe Central Collection Center" },
+  { value: "muhanga-cc", label: "Muhanga Collection Center" },
+  { value: "ruyanza-cc", label: "Ruyanza Collection Center" },
+  { value: "kabuga-cc", label: "Kabuga Collection Center" },
+  { value: "nyamagana-cc", label: "Nyamagana Collection Center" },
 ];
-
-const farmerOptions = farmers.map((f) => ({
-  value: f.id,
-  label: `${f.name} — ${f.phone}`,
-}));
-
-const gradeOptions = TEA_GRADES.map((g) => ({
-  value: g,
-  label: `${g} — KES ${GRADE_PRICES[g].toLocaleString()}/kg`,
-}));
 
 function generateReceiptNumber() {
   const now = new Date();
@@ -88,6 +63,23 @@ function CollectionFormPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [savedRecord, setSavedRecord] = useState(null);
   const [emailSent, setEmailSent] = useState(false);
+
+  const { data: farmers } = useRealtimeCollection("farmers", farmersSeed);
+  const { addItem: addCollection } = useRealtimeCollection("coffeeCollections", collectionsSeed);
+
+  const farmerOptions = useMemo(() => {
+    return (farmers || []).map((f) => ({
+      value: f.id,
+      label: `${f.name} — ${f.phone || f.id}`,
+    }));
+  }, [farmers]);
+
+  const gradeOptions = useMemo(() => {
+    return COFFEE_GRADES.map((g) => ({
+      value: g,
+      label: `${g} — RWF ${(GRADE_PRICES[g] || 0).toLocaleString()}/kg`,
+    }));
+  }, []);
 
   const {
     register,
@@ -112,7 +104,7 @@ function CollectionFormPage() {
   const weight = watch("weight");
   const pricePerKg = watch("pricePerKg");
 
-  const autoPrice = selectedGrade ? GRADE_PRICES[selectedGrade] : 0;
+  const autoPrice = selectedGrade ? (GRADE_PRICES[selectedGrade] || 0) : 0;
 
   const totalAmount = useMemo(() => {
     const w = parseFloat(weight) || 0;
@@ -120,7 +112,7 @@ function CollectionFormPage() {
     return Math.round(w * p * 100) / 100;
   }, [weight, pricePerKg, autoPrice]);
 
-  const selectedFarmer = farmers.find((f) => f.id === watch("farmerId"));
+  const selectedFarmer = (farmers || []).find((f) => f.id === watch("farmerId"));
 
   function onGradeChange(e) {
     const grade = e.target.value;
@@ -131,19 +123,30 @@ function CollectionFormPage() {
   }
 
   async function onSubmit(data) {
-    const farmer = farmers.find((f) => f.id === data.farmerId);
+    const farmer = (farmers || []).find((f) => f.id === data.farmerId);
     const center = collectionCenters.find((c) => c.value === data.center);
     const finalPricePerKg = parseFloat(data.pricePerKg) || autoPrice;
     const record = {
+      id: `COL-${Date.now()}`,
       receiptNumber,
-      ...data,
-      farmerName: farmer?.name,
-      farmerPhone: farmer?.phone,
-      farmerEmail: farmer?.email,
-      centerName: center?.label,
-      totalAmount,
+      date: data.date,
+      farmer: farmer?.name || "Unknown Farmer",
+      farmerId: data.farmerId,
+      farmerPhone: farmer?.phone || "",
+      farmerEmail: farmer?.email || "",
+      center: center?.label || data.center,
+      weight: parseFloat(data.weight),
+      grade: data.grade,
       pricePerKg: finalPricePerKg,
+      amount: totalAmount,
+      totalAmount,
+      qualityNotes: data.qualityNotes || "",
+      collectedBy: "Collection Officer",
     };
+
+    // Add to real-time storage
+    await addCollection(record);
+
     setSavedRecord(record);
     setShowSuccess(true);
 
@@ -340,7 +343,7 @@ function CollectionFormPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <Input
-                label="Price per kg (KES)"
+                label="Price per kg (RWF)"
                 type="number"
                 step="0.01"
                 min="0"
@@ -349,13 +352,13 @@ function CollectionFormPage() {
                   min: { value: 0, message: "Price must be positive" },
                 })}
                 error={errors.pricePerKg?.message}
-                helperText={autoPrice ? `Auto-set for ${selectedGrade}: KES ${autoPrice.toLocaleString()}` : "Select a grade to auto-set price"}
+                helperText={autoPrice ? `Auto-set for ${selectedGrade}: RWF ${autoPrice.toLocaleString()}` : "Select a grade to auto-set price"}
               />
               <div className="sm:col-span-2">
                 <label className="text-sm font-medium text-gray-700 block mb-1.5">Total Amount</label>
                 <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5">
                   <p className="text-2xl font-bold text-primary">
-                    KES {totalAmount.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    RWF {totalAmount.toLocaleString("en-RW", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">Calculated automatically (read-only)</p>
                 </div>
@@ -447,12 +450,12 @@ function CollectionFormPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Price per kg</span>
-                <span className="font-medium text-gray-900">KES {(parseFloat(savedRecord.pricePerKg) || autoPrice).toLocaleString()}</span>
+                <span className="font-medium text-gray-900">RWF {(parseFloat(savedRecord.pricePerKg) || autoPrice).toLocaleString()}</span>
               </div>
               <div className="border-t border-gray-200 pt-3 flex justify-between">
                 <span className="text-sm font-semibold text-gray-900">Total Amount</span>
                 <span className="text-lg font-bold text-primary">
-                  KES {totalAmount.toLocaleString("en-KE", { minimumFractionDigits: 2 })}
+                  RWF {totalAmount.toLocaleString("en-RW", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                 </span>
               </div>
             </div>

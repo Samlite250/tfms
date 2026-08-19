@@ -25,6 +25,8 @@ import StatCard from "../../components/ui/StatCard";
 import { useToast } from "../../components/ui/Toast";
 import { formatCurrency } from "../../utils/helpers";
 
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+
 const STATUSES = ["All", "Pending", "Approved", "Paid", "Rejected"];
 const STATUS_VARIANT = {
   Pending: "warning",
@@ -79,7 +81,7 @@ function generatePayments() {
   return payments.sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
-const MOCK_PAYMENTS = generatePayments();
+const defaultPayments = generatePayments();
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -92,7 +94,7 @@ const itemVariants = {
 
 export default function PaymentsPage() {
   const { success } = useToast();
-  const [paymentsList, setPaymentsList] = useState(MOCK_PAYMENTS);
+  const { data: paymentsList, updateItem, deleteItem } = useRealtimeCollection("payments", defaultPayments);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [dateFrom, setDateFrom] = useState("");
@@ -103,15 +105,16 @@ export default function PaymentsPage() {
   const pageSize = 10;
 
   const stats = useMemo(() => {
-    const total = paymentsList.reduce((s, p) => s + p.totalAmount, 0);
-    const paid = paymentsList.filter((p) => p.status === "Paid").reduce((s, p) => s + p.totalAmount, 0);
-    const pending = paymentsList.filter((p) => p.status === "Pending").reduce((s, p) => s + p.totalAmount, 0);
-    const farmers = new Set(paymentsList.map((p) => p.farmer)).size;
+    const list = paymentsList || [];
+    const total = list.reduce((s, p) => s + p.totalAmount, 0);
+    const paid = list.filter((p) => p.status === "Paid").reduce((s, p) => s + p.totalAmount, 0);
+    const pending = list.filter((p) => p.status === "Pending").reduce((s, p) => s + p.totalAmount, 0);
+    const farmers = new Set(list.map((p) => p.farmer)).size;
     return { total, paid, pending, farmers };
   }, [paymentsList]);
 
   const filtered = useMemo(() => {
-    return paymentsList.filter((p) => {
+    return (paymentsList || []).filter((p) => {
       if (search) {
         const q = search.toLowerCase();
         if (
@@ -130,31 +133,28 @@ export default function PaymentsPage() {
   const totalPages = Math.ceil(filtered.length / pageSize);
   const paginatedData = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  function handleDelete() {
-    setPaymentsList((prev) => prev.filter((p) => p.id !== deleteModal.id));
-    success(`Payment ${deleteModal.paymentNumber} deleted successfully`);
-    setDeleteModal(null);
+  async function handleDelete() {
+    if (deleteModal) {
+      await deleteItem(deleteModal.id);
+      success(`Payment ${deleteModal.paymentNumber} deleted successfully`);
+      setDeleteModal(null);
+    }
   }
 
-  function handleApprove(payment) {
-    setPaymentsList((prev) =>
-      prev.map((p) =>
-        p.id === payment.id
-          ? { ...p, status: "Approved", approvedBy: "Admin User", approvedDate: new Date().toISOString().split("T")[0] }
-          : p
-      )
-    );
+  async function handleApprove(payment) {
+    await updateItem(payment.id, {
+      status: "Approved",
+      approvedBy: "Admin User",
+      approvedDate: new Date().toISOString().split("T")[0],
+    });
     success(`Payment ${payment.paymentNumber} approved`);
   }
 
-  function handleMarkPaid(payment) {
-    setPaymentsList((prev) =>
-      prev.map((p) =>
-        p.id === payment.id
-          ? { ...p, status: "Paid", approvedDate: new Date().toISOString().split("T")[0] }
-          : p
-      )
-    );
+  async function handleMarkPaid(payment) {
+    await updateItem(payment.id, {
+      status: "Paid",
+      approvedDate: new Date().toISOString().split("T")[0],
+    });
     success(`Payment ${payment.paymentNumber} marked as paid`);
   }
 
@@ -251,11 +251,10 @@ export default function PaymentsPage() {
                     <button
                       key={s}
                       onClick={() => { setStatusFilter(s); setCurrentPage(1); }}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                        statusFilter === s
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${statusFilter === s
                           ? "bg-primary text-white"
                           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}
+                        }`}
                     >
                       {s}
                     </button>
@@ -370,9 +369,8 @@ export default function PaymentsPage() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                          currentPage === page ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100"
-                        }`}
+                        className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors cursor-pointer ${currentPage === page ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100"
+                          }`}
                       >
                         {page}
                       </button>

@@ -13,11 +13,16 @@ import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 
+import { useToast } from "../../components/ui/Toast";
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { productionSeed } from "../../firebase/seedData";
+
 const coffeeGradeOptions = [
   { value: "AA", label: "Grade AA (Premium)" },
   { value: "AB", label: "Grade AB (Standard)" },
   { value: "PB", label: "Grade PB (Peaberry)" },
   { value: "C", label: "Grade C (Low Grade)" },
+  { value: "TT", label: "Grade TT (Triage)" },
 ];
 
 const qualityGradeOptions = [
@@ -26,20 +31,15 @@ const qualityGradeOptions = [
   { value: "C", label: "Grade C - Low" },
 ];
 
-const mockEditData = {
-  recordId: "REC-2026-025",
-  productionDate: "2026-07-10",
-  coffeeGrade: "AA",
-  weight: 450,
-  qualityGrade: "A",
-  notes: "Good quality record.",
-};
-
 function ProductionFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const { success } = useToast();
+  const { data: productionList, addItem, updateItem } = useRealtimeCollection("production", productionSeed);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const existingRecord = isEdit ? (productionList || []).find((r) => String(r.id) === String(id) || r.batchNumber === id) : null;
 
   const {
     register,
@@ -48,10 +48,17 @@ function ProductionFormPage() {
     setValue,
     formState: { errors },
   } = useForm({
-    defaultValues: isEdit
-      ? mockEditData
+    defaultValues: existingRecord
+      ? {
+        recordId: existingRecord.batchNumber,
+        productionDate: existingRecord.date,
+        coffeeGrade: existingRecord.teaGrade || "AA",
+        weight: existingRecord.rawMaterial || 0,
+        qualityGrade: "A",
+        notes: existingRecord.qualityNotes || "",
+      }
       : {
-        recordId: `REC-2026-${String(Math.floor(Math.random() * 900) + 100).padStart(3, "0")}`,
+        recordId: `BATCH-2026-${String(Math.floor(Math.random() * 900) + 100).padStart(3, "0")}`,
         productionDate: new Date().toISOString().split("T")[0],
         coffeeGrade: "AA",
         weight: "",
@@ -61,16 +68,40 @@ function ProductionFormPage() {
   });
 
   useEffect(() => {
-    if (isEdit) {
-      Object.entries(mockEditData).forEach(([key, value]) => {
-        setValue(key, value);
-      });
+    if (existingRecord) {
+      setValue("recordId", existingRecord.batchNumber);
+      setValue("productionDate", existingRecord.date);
+      setValue("coffeeGrade", existingRecord.teaGrade || "AA");
+      setValue("weight", existingRecord.rawMaterial || 0);
     }
-  }, [isEdit, setValue]);
+  }, [existingRecord, setValue]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const weightVal = parseFloat(data.weight) || 0;
+    const yieldPct = 80;
+    const finishedProduct = Math.round(weightVal * (yieldPct / 100) * 10) / 10;
+
+    const payload = {
+      batchNumber: data.recordId,
+      date: data.productionDate,
+      teaGrade: data.coffeeGrade,
+      rawMaterial: weightVal,
+      finishedProduct,
+      yieldPercent: yieldPct,
+      status: "In Progress",
+      processingStage: "Washing",
+      supervisor: "Factory Manager",
+      qualityNotes: data.notes || "",
+    };
+
+    if (isEdit && existingRecord) {
+      await updateItem(existingRecord.id, payload);
+      success(`Production batch ${data.recordId} updated.`);
+    } else {
+      await addItem({ id: `BATCH-${Date.now()}`, ...payload });
+      success(`New production batch ${data.recordId} recorded.`);
+    }
     setIsSubmitting(false);
     navigate("/production");
   };
