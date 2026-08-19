@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield,
   Users,
   UserCheck,
+  UserPlus,
   Tractor,
   Briefcase,
   Clock,
@@ -228,6 +230,7 @@ function getAvatarColor(idx) {
 }
 
 export default function AdminPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("users");
   const [userSearch, setUserSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
@@ -762,6 +765,11 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          <Button icon={UserPlus} onClick={() => navigate("/farmers/new")}>
+            Add New Farmer
+          </Button>
+        </div>
       </motion.div>
 
       {/* Dashboard Stats */}
@@ -843,9 +851,14 @@ export default function AdminPage() {
                       ))}
                     </select>
                   </div>
-                  <Button icon={Plus} onClick={() => setShowAddModal(true)}>
-                    Add User
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" icon={UserPlus} onClick={() => navigate("/farmers/new")}>
+                      Add Farmer
+                    </Button>
+                    <Button icon={Plus} onClick={() => setShowAddModal(true)}>
+                      Add User
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">

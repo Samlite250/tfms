@@ -1,13 +1,5 @@
-import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
-import { motion } from "framer-motion";
-import { ArrowLeft, Save, X, User, MapPin, Leaf, Building2 } from "lucide-react";
-import Button from "../../components/ui/Button";
-import Card from "../../components/ui/Card";
-import Input from "../../components/ui/Input";
-import Select from "../../components/ui/Select";
-import { useToast } from "../../components/ui/Toast";
+import useRealtimeCollection from "../../hooks/useRealtimeCollection";
+import { farmersSeed } from "../../firebase/seedData";
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -22,11 +14,11 @@ const coffeeVarietyOptions = [
 ];
 
 const collectionCenterOptions = [
-  { value: "Mushubi CC", label: "Mushubi CC" },
-  { value: "Rulangala CC", label: "Rulangala CC" },
-  { value: "Kyanja CC", label: "Kyanja CC" },
-  { value: "Ntinda CC", label: "Ntinda CC" },
-  { value: "Kisementi CC", label: "Kisementi CC" },
+  { value: "Mahembe CC", label: "Mahembe CC" },
+  { value: "Muhanga CC", label: "Muhanga CC" },
+  { value: "Ruyanza CC", label: "Ruyanza CC" },
+  { value: "Kabuga CC", label: "Kabuga CC" },
+  { value: "Nyamagana CC", label: "Nyamagana CC" },
 ];
 
 const statusOptions = [
@@ -35,18 +27,18 @@ const statusOptions = [
 ];
 
 const mockFarmer = {
-  name: "Mugisha Patrick",
-  phone: "+256 772 123456",
-  email: "mugisha.p@gmail.com",
+  name: "Jean Mugabo",
+  phone: "+250 788 200 101",
+  email: "j.mugabo@mahembe-coffee.rw",
   dateOfBirth: "1985-06-15",
   gender: "Male",
-  village: "Kyanja",
-  district: "Kampala",
-  province: "Central",
-  country: "Uganda",
+  village: "Mahembe",
+  district: "Nyamagabe",
+  province: "Southern Province",
+  country: "Rwanda",
   farmSize: 2.5,
   coffeeVariety: "Red Bourbon",
-  collectionCenter: "Kyanja CC",
+  collectionCenter: "Mahembe CC",
   status: "Active",
 };
 
@@ -70,6 +62,7 @@ function FarmerFormPage() {
   const navigate = useNavigate();
   const { success, error: toastError } = useToast();
   const isEdit = Boolean(id);
+  const { add, update } = useRealtimeCollection("farmers", { seedData: farmersSeed });
 
   const {
     register,
@@ -87,7 +80,7 @@ function FarmerFormPage() {
       village: "",
       district: "",
       province: "",
-      country: "Uganda",
+      country: "Rwanda",
       farmSize: "",
       coffeeVariety: null,
       collectionCenter: null,
@@ -101,13 +94,38 @@ function FarmerFormPage() {
     }
   }, [isEdit, reset]);
 
-  function onSubmit(data) {
-    if (isEdit) {
-      success(`Farmer ${data.name} has been updated successfully.`);
-    } else {
-      success(`Farmer ${data.name} has been registered successfully.`);
+  async function onSubmit(data) {
+    try {
+      const farmerId = `FRM-${Math.floor(Math.random() * 9000) + 1000}`;
+      const farmerRecord = {
+        id: isEdit ? id : farmerId,
+        name: data.name,
+        phone: data.phone,
+        email: data.email || `${data.name.toLowerCase().replace(/\s+/g, '.')}.${farmerId.toLowerCase()}@mahembe-coffee.rw`,
+        dateOfBirth: data.dateOfBirth || "",
+        gender: data.gender || "Male",
+        village: data.village || "",
+        district: data.district || "",
+        province: data.province || "Southern Province",
+        country: data.country || "Rwanda",
+        farmSize: parseFloat(data.farmSize) || 1.0,
+        coffeeVariety: data.coffeeVariety || "Red Bourbon",
+        collectionCenter: data.collectionCenter || "Mahembe CC",
+        status: data.status || "Active",
+        joinedDate: new Date().toISOString().split("T")[0],
+      };
+
+      if (isEdit) {
+        await update(id, farmerRecord);
+        success(`Farmer ${data.name} has been updated successfully.`);
+      } else {
+        await add(farmerRecord);
+        success(`Farmer ${data.name} has been registered successfully.`);
+      }
+      navigate("/farmers");
+    } catch (err) {
+      toastError(`Failed to save farmer: ${err.message}`);
     }
-    navigate("/farmers");
   }
 
   return (
@@ -155,13 +173,13 @@ function FarmerFormPage() {
                 />
                 <Input
                   label="Phone Number"
-                  placeholder="+256 7XX XXX XXX"
+                  placeholder="+250 7XX XXX XXX"
                   error={errors.phone?.message}
                   {...register("phone", {
                     required: "Phone number is required",
                     pattern: {
-                      value: /^\+256\s?\d{3}\s?\d{3,6}$/,
-                      message: "Enter a valid Ugandan phone number (e.g. +256 772 123456)",
+                      value: /^[\d\s+\-()]{8,20}$/,
+                      message: "Enter a valid phone number (e.g. +250 788 200 101)",
                     },
                   })}
                 />
