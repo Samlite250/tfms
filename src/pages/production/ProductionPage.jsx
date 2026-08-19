@@ -69,6 +69,16 @@ const itemVariants = {
   },
 };
 
+const stageBadgeVariant = {
+  Received: "default",
+  Washing: "info",
+  Sorting: "warning",
+  Drying: "warning",
+  Milling: "info",
+  Packaging: "primary",
+  Completed: "success",
+};
+
 function ProductionPage() {
   const navigate = useNavigate();
   const { success } = useToast();
@@ -79,6 +89,57 @@ function ProductionPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [stageFilter, setStageFilter] = useState("all");
   const [deleteModal, setDeleteModal] = useState(null);
+
+  const stats = useMemo(() => {
+    const totalBatches = dataList.length;
+    const completedBatches = dataList.filter((b) => b.status === "Completed").length;
+    const totalRaw = dataList.reduce((sum, b) => sum + (Number(b.cherryInput || b.rawMaterial) || 0), 0);
+    const totalFinished = dataList.reduce((sum, b) => sum + (Number(b.parchmentWeight || b.finishedProduct) || 0), 0);
+    const avgYield = totalRaw > 0 ? ((totalFinished / totalRaw) * 100).toFixed(1) : 0;
+
+    return [
+      {
+        label: "Total Batches",
+        value: totalBatches.toString(),
+        change: "+12%",
+        up: true,
+        icon: Factory,
+        color: "primary",
+        bg: "bg-primary/10",
+        borderColor: "border-primary/20",
+      },
+      {
+        label: "Completed Batches",
+        value: completedBatches.toString(),
+        change: "+8%",
+        up: true,
+        icon: Package,
+        color: "success",
+        bg: "bg-success/10",
+        borderColor: "border-success/20",
+      },
+      {
+        label: "Total Raw Input",
+        value: `${totalRaw.toLocaleString()} kg`,
+        change: "+15%",
+        up: true,
+        icon: TrendingUp,
+        color: "info",
+        bg: "bg-info/10",
+        borderColor: "border-info/20",
+      },
+      {
+        label: "Average Yield",
+        value: `${avgYield}%`,
+        change: "+2.4%",
+        up: true,
+        icon: BarChart3,
+        color: "accent",
+        bg: "bg-accent/10",
+        borderColor: "border-accent/20",
+      },
+    ];
+  }, [dataList]);
 
   const filteredData = useMemo(() => {
     return dataList.filter((row) => {
