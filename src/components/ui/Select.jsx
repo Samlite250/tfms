@@ -54,7 +54,7 @@ function Select({
   }
 
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`} ref={containerRef}>
+    <div className={`flex flex-col gap-1.5 ${isOpen ? "relative z-30" : "relative"} ${className}`} ref={containerRef}>
       {label && (
         <label className="text-sm font-medium text-text-primary">
           {label}
@@ -69,10 +69,9 @@ function Select({
             px-4 py-2.5 text-sm text-left cursor-pointer
             transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-offset-0
-            ${
-              error
-                ? "border-danger focus:ring-danger/30 focus:border-danger"
-                : "border-border focus:ring-primary/30 focus:border-primary"
+            ${error
+              ? "border-danger focus:ring-danger/30 focus:border-danger"
+              : "border-border focus:ring-primary/30 focus:border-primary"
             }
             ${isOpen ? "ring-2 ring-primary/30 border-primary" : ""}
           `}
@@ -91,9 +90,8 @@ function Select({
             )}
             <ChevronDown
               size={16}
-              className={`text-text-secondary transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`text-text-secondary transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                }`}
             />
           </div>
         </button>
@@ -129,10 +127,9 @@ function Select({
                     className={`
                       w-full px-4 py-2.5 text-sm text-left cursor-pointer
                       transition-colors duration-150
-                      ${
-                        value === opt.value
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-text-primary hover:bg-gray-50"
+                      ${value === opt.value
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-text-primary hover:bg-gray-50"
                       }
                     `}
                   >

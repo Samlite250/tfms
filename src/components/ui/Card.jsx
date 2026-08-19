@@ -27,7 +27,7 @@ function Card({
     <div
       style={style}
       className={`
-        bg-card rounded-2xl overflow-hidden
+        bg-card rounded-2xl
         ${shadows[shadow]}
         ${bordered ? "border border-border" : ""}
         ${hover ? "transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5" : ""}
