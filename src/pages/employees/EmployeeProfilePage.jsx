@@ -20,6 +20,9 @@ import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { employeesSeed } from "../../firebase/seedData";
+
 const STATUS_VARIANT = {
   Active: "success",
   Inactive: "default",
@@ -27,26 +30,26 @@ const STATUS_VARIANT = {
   Suspended: "danger",
 };
 
-const mockEmployee = {
+const DEFAULT_EMPLOYEE = {
   id: "EMP001",
-  firstName: "Kamal",
-  lastName: "Perera",
+  firstName: "Jean",
+  lastName: "Mugabo",
   department: "Production",
   position: "Factory Supervisor",
-  phone: "0771234567",
-  email: "kamal.p@coms.com",
+  phone: "+250 788 123 456",
+  email: "j.mugabo@mahembe-coffee.rw",
   status: "Active",
   joinDate: "2020-03-15",
   dateOfBirth: "1985-06-15",
   gender: "Male",
-  nationalId: "851234567V",
+  nationalId: "1198580012345678",
   employmentType: "Full-time",
-  address: "45 Temple Road, Kandy, Central Province",
-  emergencyName: "Sunethra Perera",
-  emergencyPhone: "0771234568",
+  address: "Mahembe Sector, Nyamasheke",
+  emergencyName: "Marie Claire Uwimana",
+  emergencyPhone: "+250 788 654 321",
   emergencyRelationship: "Spouse",
-  basicSalary: 85000,
-  allowances: 15000,
+  basicSalary: 250000,
+  allowances: 50000,
 };
 
 function generateAttendance() {
@@ -69,20 +72,18 @@ function generateAttendance() {
   return records;
 }
 
-function generateSalaryHistory() {
+function generateSalaryHistory(basicSalary = 250000, allowances = 50000) {
   const months = [];
   const now = new Date();
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const basic = 85000;
-    const allowances = 15000;
-    const deductions = Math.floor(Math.random() * 5000) + 2000;
+    const deductions = Math.floor(Math.random() * 10000) + 5000;
     months.push({
       month: d.toLocaleDateString("en-US", { year: "numeric", month: "long" }),
-      basic,
-      allowances,
+      basic: basicSalary,
+      allowances: allowances,
       deductions,
-      netPay: basic + allowances - deductions,
+      netPay: basicSalary + allowances - deductions,
     });
   }
   return months;
@@ -102,13 +103,19 @@ const tabs = [
 ];
 
 export default function EmployeeProfilePage() {
-  const { id: _id } = useParams();
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
-  const emp = mockEmployee;
-  const attendance = generateAttendance();
-  const salaryHistory = generateSalaryHistory();
+  const { data: employeesList } = useRealtimeCollection("employees", employeesSeed);
 
-  const fullName = `${emp.firstName} ${emp.lastName}`;
+  const foundEmp = (employeesList || []).find(
+    (e) => String(e.id) === String(id) || e.id === id || `${e.firstName} ${e.lastName}` === id
+  );
+
+  const emp = foundEmp || { ...DEFAULT_EMPLOYEE, id: id || "EMP001" };
+  const attendance = generateAttendance();
+  const salaryHistory = generateSalaryHistory(emp.basicSalary || 250000, emp.allowances || 50000);
+
+  const fullName = `${emp.firstName || ""} ${emp.lastName || ""}`.trim() || "Employee Profile";
 
   return (
     <div className="space-y-6">

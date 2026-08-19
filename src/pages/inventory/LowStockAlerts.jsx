@@ -9,18 +9,8 @@ import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import { useToast } from "../../components/ui/Toast";
 
-const MOCK_LOW_STOCK = [
-  { id: 4, name: "Robusta Coffee Beans", category: "Coffee Stock", quantity: 85, minStock: 100, unit: "kg", costPerUnit: 22.0, supplier: "Silver Tip Farms", severity: "critical" },
-  { id: 5, name: "Coffee Grade C", category: "Coffee Stock", quantity: 45, minStock: 50, unit: "kg", costPerUnit: 35.0, supplier: "ShadeGrown Co.", severity: "critical" },
-  { id: 21, name: "Water Purifier Tablets", category: "Chemicals", quantity: 50, minStock: 100, unit: "pieces", costPerUnit: 0.5, supplier: "PureWater Solutions", severity: "critical" },
-  { id: 28, name: "Bioethanol", category: "Fuel", quantity: 30, minStock: 40, unit: "liters", costPerUnit: 2.0, supplier: "GreenFuel Inc.", severity: "critical" },
-  { id: 23, name: "Citric Acid", category: "Chemicals", quantity: 15, minStock: 10, unit: "kg", costPerUnit: 4.0, supplier: "ChemPro Ltd.", severity: "warning" },
-  { id: 8, name: "Cardamom Pods", category: "Raw Materials", quantity: 65, minStock: 50, unit: "kg", costPerUnit: 28.0, supplier: "Spice Islands Ltd.", severity: "warning" },
-  { id: 10, name: "Lemon Grass", category: "Raw Materials", quantity: 40, minStock: 30, unit: "kg", costPerUnit: 5.0, supplier: "Herb Garden Supply", severity: "warning" },
-  { id: 22, name: "pH Testing Strips", category: "Chemicals", quantity: 200, minStock: 100, unit: "pieces", costPerUnit: 0.3, supplier: "LabSupply Co.", severity: "warning" },
-  { id: 33, name: "Coffee Flavoring Oil", category: "Chemicals", quantity: 12, minStock: 8, unit: "liters", costPerUnit: 15.0, supplier: "AromaPure Ltd.", severity: "warning" },
-  { id: 35, name: "Jasmine Flowers", category: "Raw Materials", quantity: 18, minStock: 15, unit: "kg", costPerUnit: 20.0, supplier: "Floral Harvest Co.", severity: "warning" },
-];
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { inventorySeed } from "../../firebase/seedData";
 
 const fadeIn = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const staggerContainer = { visible: { transition: { staggerChildren: 0.06 } } };
@@ -29,14 +19,24 @@ function LowStockAlerts() {
   const toast = useToast();
   const [reorderModal, setReorderModal] = useState({ open: false, item: null });
   const [filterSeverity, setFilterSeverity] = useState("all");
+  const { data: itemsList } = useRealtimeCollection("inventory", inventorySeed);
+
+  const lowStockItems = useMemo(() => {
+    return (itemsList || [])
+      .filter((i) => i.quantity <= i.minStock)
+      .map((i) => ({
+        ...i,
+        severity: i.quantity <= i.minStock / 2 || i.quantity <= 0 ? "critical" : "warning",
+      }));
+  }, [itemsList]);
 
   const alerts = useMemo(() => {
-    if (filterSeverity === "all") return MOCK_LOW_STOCK;
-    return MOCK_LOW_STOCK.filter((i) => i.severity === filterSeverity);
-  }, [filterSeverity]);
+    if (filterSeverity === "all") return lowStockItems;
+    return lowStockItems.filter((i) => i.severity === filterSeverity);
+  }, [filterSeverity, lowStockItems]);
 
-  const criticalCount = MOCK_LOW_STOCK.filter((i) => i.severity === "critical").length;
-  const warningCount = MOCK_LOW_STOCK.filter((i) => i.severity === "warning").length;
+  const criticalCount = lowStockItems.filter((i) => i.severity === "critical").length;
+  const warningCount = lowStockItems.filter((i) => i.severity === "warning").length;
 
   function handleReorder(item) {
     setReorderModal({ open: true, item });
@@ -71,7 +71,7 @@ function LowStockAlerts() {
               </div>
               <div>
                 <p className="text-sm text-text-secondary">Total Alerts</p>
-                <p className="text-2xl font-bold text-text-primary">{MOCK_LOW_STOCK.length}</p>
+                <p className="text-2xl font-bold text-text-primary">{lowStockItems.length}</p>
               </div>
             </div>
           </Card>
@@ -105,13 +105,12 @@ function LowStockAlerts() {
             <button
               key={sev}
               onClick={() => setFilterSeverity(sev)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors cursor-pointer ${
-                filterSeverity === sev
-                  ? sev === "critical" ? "bg-danger text-white" : sev === "warning" ? "bg-warning text-white" : "bg-primary text-white"
-                  : "bg-gray-100 text-text-secondary hover:bg-gray-200"
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors cursor-pointer ${filterSeverity === sev
+                ? sev === "critical" ? "bg-danger text-white" : sev === "warning" ? "bg-warning text-white" : "bg-primary text-white"
+                : "bg-gray-100 text-text-secondary hover:bg-gray-200"
+                }`}
             >
-              {sev === "all" ? `All (${MOCK_LOW_STOCK.length})` : `${sev} (${sev === "critical" ? criticalCount : warningCount})`}
+              {sev === "all" ? `All (${lowStockItems.length})` : `${sev} (${sev === "critical" ? criticalCount : warningCount})`}
             </button>
           ))}
         </motion.div>
@@ -138,9 +137,8 @@ function LowStockAlerts() {
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                          isCritical ? "bg-danger/10" : "bg-warning/10"
-                        }`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isCritical ? "bg-danger/10" : "bg-warning/10"
+                          }`}>
                           {isCritical ? (
                             <AlertCircle size={20} className="text-danger" />
                           ) : (
@@ -291,7 +289,7 @@ function ReorderModal({ isOpen, item, onClose, onSubmit }) {
             { value: "normal", label: "Normal - Within a week" },
           ]}
           value="normal"
-          onChange={(val) => {}}
+          onChange={(val) => { }}
         />
 
         <div>

@@ -44,10 +44,14 @@ const PAYMENT_METHOD_OPTIONS = PAYMENT_METHODS.map((m) => ({
 
 const fadeIn = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { paymentsSeed } from "../../firebase/seedData";
+
 export default function PaymentFormPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const [successModal, setSuccessModal] = useState({ open: false, payment: null });
+  const { addItem } = useRealtimeCollection("payments", paymentsSeed);
 
   const {
     register,
@@ -72,8 +76,9 @@ export default function PaymentFormPage() {
 
   const calculatedAmount = (Number(watchedWeight) || 0) * (COFFEE_PRICE_PER_KG[watchedGrade] || 0);
 
-  function onSubmit(data) {
+  async function onSubmit(data) {
     const payment = {
+      id: `PAY-${Date.now()}`,
       paymentNumber: `PAY-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
       farmer: data.farmer,
       grade: data.grade,
@@ -81,12 +86,13 @@ export default function PaymentFormPage() {
       pricePerKg: COFFEE_PRICE_PER_KG[data.grade] || 0,
       totalAmount: calculatedAmount,
       paymentMethod: data.paymentMethod,
-      collectionRef: data.collectionRef,
-      notes: data.notes,
+      collectionRef: data.collectionRef || `COL-${Math.floor(Math.random() * 9000) + 1000}`,
+      notes: data.notes || "",
       date: new Date().toISOString().split("T")[0],
       status: "Pending",
     };
-    console.log("Payment created:", payment);
+
+    await addItem(payment);
     setSuccessModal({ open: true, payment });
   }
 

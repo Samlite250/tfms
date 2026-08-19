@@ -19,11 +19,8 @@ import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import { formatCurrency } from "../../utils/helpers";
 
-const MOCK_PAYMENTS = [
-  { id: "PAY-0001", paymentNumber: "PAY-202607-0001", date: "2026-07-14", farmer: "Jean-Paul Habimana", collectionRef: "COL-0001", grade: "AA", weight: 120, pricePerKg: 1200, totalAmount: 144000, status: "Paid", paymentMethod: "Bank Transfer", approvedBy: "Admin User", approvedDate: "2026-07-14", notes: "Regular payment for coffee delivery" },
-  { id: "PAY-0002", paymentNumber: "PAY-202607-0002", date: "2026-07-13", farmer: "Marie Claire Uwimana", collectionRef: "COL-0002", grade: "AB", weight: 85, pricePerKg: 1000, totalAmount: 85000, status: "Pending", paymentMethod: "Mobile Money", approvedBy: "", approvedDate: "", notes: "" },
-  { id: "PAY-0003", paymentNumber: "PAY-202607-0003", date: "2026-07-12", farmer: "Emmanuel Ndayisaba", collectionRef: "COL-0003", grade: "PB", weight: 150, pricePerKg: 1100, totalAmount: 165000, status: "Approved", paymentMethod: "Cash", approvedBy: "Admin User", approvedDate: "2026-07-12", notes: "Premium peaberry batch" },
-];
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { paymentsSeed } from "../../firebase/seedData";
 
 const STATUS_VARIANT = {
   Pending: "warning",
@@ -32,12 +29,39 @@ const STATUS_VARIANT = {
   Rejected: "danger",
 };
 
+const DEFAULT_PAYMENT = {
+  id: "PAY-0001",
+  paymentNumber: "PAY-202607-0001",
+  date: "2026-07-14",
+  farmer: "Jean-Paul Habimana",
+  collectionRef: "COL-0001",
+  grade: "AA",
+  weight: 120,
+  pricePerKg: 1200,
+  totalAmount: 144000,
+  status: "Paid",
+  paymentMethod: "Bank Transfer",
+  approvedBy: "Admin User",
+  approvedDate: "2026-07-14",
+  notes: "Regular payment for coffee delivery",
+};
+
 const fadeIn = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 
 export default function PaymentDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const payment = MOCK_PAYMENTS.find((p) => p.id === id) || MOCK_PAYMENTS[0];
+  const { data: paymentsList } = useRealtimeCollection("payments", paymentsSeed);
+
+  const foundItem = (paymentsList || []).find(
+    (p) => String(p.id) === String(id) || p.paymentNumber === id || p.id === id
+  );
+
+  const payment = foundItem || {
+    ...DEFAULT_PAYMENT,
+    id: id || "PAY-0001",
+    paymentNumber: String(id || "PAY-202607-0001").startsWith("PAY") ? id : `PAY-${id}`,
+  };
 
   function formatDate(dateStr) {
     if (!dateStr) return "N/A";

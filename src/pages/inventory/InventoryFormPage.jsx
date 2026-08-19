@@ -9,6 +9,9 @@ import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import { useToast } from "../../components/ui/Toast";
 
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { inventorySeed } from "../../firebase/seedData";
+
 const CATEGORY_OPTIONS = [
   { value: "Coffee Stock", label: "Coffee Stock" },
   { value: "Raw Materials", label: "Raw Materials" },
@@ -26,14 +29,6 @@ const UNIT_OPTIONS = [
   { value: "boxes", label: "Boxes" },
 ];
 
-const MOCK_ITEMS = {
-  1: { name: "Green Coffee Beans (Premium)", category: "Coffee Stock", description: "Premium grade green coffee beans from highland farms", quantity: 2450, unit: "kg", minStock: 500, costPerUnit: 12.5, supplier: "Highland Coffee Estates", location: "Warehouse A", reorderPoint: 600 },
-  2: { name: "Green Coffee Beans (Standard)", category: "Coffee Stock", description: "Standard grade green coffee beans", quantity: 1800, unit: "kg", minStock: 400, costPerUnit: 8.75, supplier: "Valley Plantations", location: "Warehouse A", reorderPoint: 500 },
-  3: { name: "Arabica Coffee Beans", category: "Coffee Stock", description: "Premium arabica coffee beans", quantity: 320, unit: "kg", minStock: 200, costPerUnit: 15.0, supplier: "Mountain View Estate", location: "Warehouse A", reorderPoint: 250 },
-  4: { name: "Robusta Coffee Beans", category: "Coffee Stock", description: "Robusta coffee beans for blend", quantity: 85, unit: "kg", minStock: 100, costPerUnit: 22.0, supplier: "Silver Tip Farms", location: "Warehouse A", reorderPoint: 120 },
-  5: { name: "Coffee Grade C", category: "Coffee Stock", description: "Coffee Grade C powder for processing", quantity: 45, unit: "kg", minStock: 50, costPerUnit: 35.0, supplier: "ShadeGrown Co.", location: "Warehouse B", reorderPoint: 60 },
-};
-
 const fadeIn = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 
 function InventoryFormPage() {
@@ -41,6 +36,11 @@ function InventoryFormPage() {
   const { id } = useParams();
   const toast = useToast();
   const isEditing = Boolean(id);
+  const { data: inventoryList, addItem, updateItem } = useRealtimeCollection("inventory", inventorySeed);
+
+  const existingItem = isEditing
+    ? (inventoryList || []).find((i) => String(i.id) === String(id) || i.name === id)
+    : null;
 
   const {
     register,
@@ -52,10 +52,10 @@ function InventoryFormPage() {
   } = useForm({
     defaultValues: {
       name: "",
-      category: null,
+      category: "Coffee Stock",
       description: "",
       quantity: "",
-      unit: null,
+      unit: "kg",
       minStock: "",
       costPerUnit: "",
       supplier: "",
@@ -68,33 +68,44 @@ function InventoryFormPage() {
   const selectedUnit = watch("unit");
 
   useEffect(() => {
-    if (isEditing && MOCK_ITEMS[id]) {
-      const item = MOCK_ITEMS[id];
+    if (existingItem) {
       reset({
-        name: item.name,
-        category: item.category,
-        description: item.description,
-        quantity: String(item.quantity),
-        unit: item.unit,
-        minStock: String(item.minStock),
-        costPerUnit: String(item.costPerUnit),
-        supplier: item.supplier,
-        location: item.location,
-        reorderPoint: String(item.reorderPoint),
+        name: existingItem.name || "",
+        category: existingItem.category || "Coffee Stock",
+        description: existingItem.description || "",
+        quantity: String(existingItem.quantity || 0),
+        unit: existingItem.unit || "kg",
+        minStock: String(existingItem.minStock || 0),
+        costPerUnit: String(existingItem.costPerUnit || 0),
+        supplier: existingItem.supplier || "",
+        location: existingItem.location || "",
+        reorderPoint: String(existingItem.reorderPoint || 0),
       });
     }
-  }, [id, isEditing, reset]);
+  }, [existingItem, reset]);
 
-  function onSubmit(data) {
-    const parsed = {
-      ...data,
-      quantity: Number(data.quantity),
-      minStock: Number(data.minStock),
-      costPerUnit: Number(data.costPerUnit),
-      reorderPoint: Number(data.reorderPoint),
+  async function onSubmit(data) {
+    const payload = {
+      name: data.name,
+      category: data.category || "Coffee Stock",
+      description: data.description || "",
+      quantity: Number(data.quantity) || 0,
+      unit: data.unit || "kg",
+      minStock: Number(data.minStock) || 0,
+      costPerUnit: Number(data.costPerUnit) || 0,
+      supplier: data.supplier || "",
+      location: data.location || "",
+      reorderPoint: Number(data.reorderPoint) || 0,
+      lastUpdated: new Date().toISOString().split("T")[0],
     };
-    console.log("Saved:", parsed);
-    toast.success(isEditing ? "Item updated successfully!" : "Item created successfully!");
+
+    if (isEditing && existingItem) {
+      await updateItem(existingItem.id, payload);
+      toast.success("Item updated successfully!");
+    } else {
+      await addItem({ id: `ITEM-${Date.now()}`, ...payload });
+      toast.success("Item created successfully!");
+    }
     navigate("/inventory");
   }
 

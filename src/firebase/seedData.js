@@ -128,3 +128,11 @@ export const employeesSeed = [
   { id: "EMP-011", firstName: "Dieudonné", lastName: "Hakizimana", email: "d.hakizimana@mahembe-coffee.rw", phone: "+250 788 100 0011", department: "Warehouse", position: "Warehouse Assistant", status: "Active", joinDate: "2024-06-01", salary: 95000 },
   { id: "EMP-012", firstName: "Françoise", lastName: "Uwiragiye", email: "f.uwiragiye@mahembe-coffee.rw", phone: "+250 788 100 0012", department: "Human Resources", position: "HR Officer", status: "Active", joinDate: "2023-07-20", salary: 155000 },
 ];
+
+export const paymentsSeed = [
+  { id: "PAY-0001", paymentNumber: "PAY-202607-0001", date: "2026-07-14", farmer: "Jean-Paul Habimana", collectionRef: "COL-0001", grade: "AA", weight: 120, pricePerKg: 1200, totalAmount: 144000, status: "Paid", paymentMethod: "Bank Transfer", approvedBy: "Admin User", approvedDate: "2026-07-14", notes: "Regular payment for coffee delivery" },
+  { id: "PAY-0002", paymentNumber: "PAY-202607-0002", date: "2026-07-13", farmer: "Marie Claire Uwimana", collectionRef: "COL-0002", grade: "AB", weight: 85, pricePerKg: 1000, totalAmount: 85000, status: "Pending", paymentMethod: "Mobile Money", approvedBy: "", approvedDate: "", notes: "" },
+  { id: "PAY-0003", paymentNumber: "PAY-202607-0003", date: "2026-07-12", farmer: "Emmanuel Ndayisaba", collectionRef: "COL-0003", grade: "PB", weight: 150, pricePerKg: 1100, totalAmount: 165000, status: "Approved", paymentMethod: "Cash", approvedBy: "Admin User", approvedDate: "2026-07-12", notes: "Premium peaberry batch" },
+  { id: "PAY-0004", paymentNumber: "PAY-202607-0004", date: "2026-07-11", farmer: "Claudine Mukamana", collectionRef: "COL-0004", grade: "C", weight: 90, pricePerKg: 800, totalAmount: 72000, status: "Paid", paymentMethod: "Mobile Money", approvedBy: "Admin User", approvedDate: "2026-07-11", notes: "Prompt payout" },
+  { id: "PAY-0005", paymentNumber: "PAY-202607-0005", date: "2026-07-10", farmer: "Jean Mugabo", collectionRef: "COL-0005", grade: "TT", weight: 200, pricePerKg: 700, totalAmount: 140000, status: "Pending", paymentMethod: "Bank Transfer", approvedBy: "", approvedDate: "", notes: "" },
+];

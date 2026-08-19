@@ -24,67 +24,32 @@ import Badge from "../../components/ui/Badge";
 import Modal from "../../components/ui/Modal";
 import { useState } from "react";
 
-const gradeBadgeVariant = {
-  PF1: "success",
-  PF2: "info",
-  PF3: "warning",
-  PD: "default",
-  Dust: "danger",
-  Fannings: "info",
-};
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { collectionsSeed } from "../../firebase/seedData";
 
-const MOCK_COLLECTIONS = {
-  "COL-0001": {
-    id: "COL-0001",
-    receiptNumber: "REC-202607-0001",
-    date: "2026-07-14",
-    farmer: "James Kamau",
-    farmerId: "F001",
-    farmerPhone: "0712345678",
-    farmerAddress: "Nandi Hills, Nandi County",
-    center: "Kericho Central Collection Center",
-    weight: 45.5,
-    grade: "PF1",
-    pricePerKg: 850,
-    amount: 38675,
-    collectedBy: "Michael Otieno",
-    qualityNotes: "Excellent cherry quality with fine beans. Well processed, good moisture content at 12%. Uniform bean size indicating careful picking during optimal harvest period.",
-    status: "Verified",
-  },
-  "COL-0002": {
-    id: "COL-0002",
-    receiptNumber: "REC-202607-0002",
-    date: "2026-07-13",
-    farmer: "Grace Wanjiku",
-    farmerId: "F002",
-    farmerPhone: "0723456789",
-    farmerAddress: "Kericho Town, Kericho County",
-    center: "Nandi Hills Collection Center",
-    weight: 62.0,
-    grade: "PF2",
-    pricePerKg: 750,
-    amount: 46500,
-    collectedBy: "Patricia Wambui",
-    qualityNotes: "Good quality washed coffee. Consistent bean size. Moisture content within acceptable range.",
-    status: "Pending",
-  },
+const gradeBadgeVariant = {
+  AA: "success",
+  AB: "info",
+  PB: "warning",
+  C: "default",
+  TT: "danger",
 };
 
 const DEFAULT_COLLECTION = {
   id: "COL-0001",
   receiptNumber: "REC-202607-0001",
   date: "2026-07-14",
-  farmer: "James Kamau",
+  farmer: "Jean-Paul Habimana",
   farmerId: "F001",
-  farmerPhone: "0712345678",
-  farmerAddress: "Nandi Hills, Nandi County",
-  center: "Kericho Central Collection Center",
+  farmerPhone: "+250 788 123 456",
+  farmerAddress: "Mahembe Sector, Nyamasheke",
+  center: "Mahembe Central Collection Center",
   weight: 45.5,
-  grade: "PF1",
-  pricePerKg: 850,
-  amount: 38675,
-  collectedBy: "Michael Otieno",
-  qualityNotes: "Excellent cherry quality with fine beans. Well processed, good moisture content at 12%. Uniform bean size indicating careful picking during optimal harvest period.",
+  grade: "AA",
+  pricePerKg: 1200,
+  amount: 54600,
+  collectedBy: "Eric Nshimiyimana",
+  qualityNotes: "Excellent cherry quality with fine beans. Well processed, good moisture content at 12%. Uniform bean size indicating careful picking.",
   status: "Verified",
 };
 
@@ -115,8 +80,17 @@ function CollectionDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [deleteModal, setDeleteModal] = useState(false);
+  const { data: collectionsList, deleteItem } = useRealtimeCollection("collections", collectionsSeed);
 
-  const collection = MOCK_COLLECTIONS[id] || { ...DEFAULT_COLLECTION, id, receiptNumber: `REC-202607-${String(id).replace("COL-", "")}` };
+  const foundItem = (collectionsList || []).find(
+    (c) => String(c.id) === String(id) || c.receiptNumber === id || c.id === id
+  );
+
+  const collection = foundItem || {
+    ...DEFAULT_COLLECTION,
+    id: id || "COL-0001",
+    receiptNumber: String(id || "REC-202607-0001").startsWith("REC") ? id : `REC-${id}`,
+  };
 
   function handlePrint() {
     window.print();

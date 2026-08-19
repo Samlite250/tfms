@@ -71,22 +71,20 @@ function FarmerProfilePage() {
   const { success, error } = useToast();
   const { userProfile } = useAuth();
   const [deleteModal, setDeleteModal] = useState(false);
-  const { data: farmersList, remove: removeFarmer } = useRealtimeCollection("farmers", {
-    seedData: farmersSeed,
-  });
+  const { data: farmersList, remove: removeFarmer } = useRealtimeCollection("farmers", farmersSeed);
   const canEdit = userProfile?.role !== "farmer";
 
   const farmer = useMemo(() => {
-    return farmersList.find((f) => f.id === id) || farmers.find((f) => f.id === id) || farmers[0];
+    return (farmersList || []).find((f) => String(f.id) === String(id) || f.id === id) || farmers.find((f) => String(f.id) === String(id)) || farmers[0];
   }, [id, farmersList]);
 
   const stats = useMemo(() => ({
-    totalDeliveries: farmer.totalDeliveries,
-    totalWeight: farmer.totalWeight,
+    totalDeliveries: farmer.totalDeliveries || 0,
+    totalWeight: farmer.totalWeight || 0,
     avgWeight: farmer.totalDeliveries > 0 ? (farmer.totalWeight / farmer.totalDeliveries).toFixed(1) : 0,
   }), [farmer]);
 
-  const initials = farmer.name.split(" ").map((n) => n[0]).join("");
+  const initials = (farmer.name || "Farmer").split(" ").map((n) => n[0]).join("");
 
   async function handleDelete() {
     try {
@@ -115,7 +113,7 @@ function FarmerProfilePage() {
     { header: "Weight (kg)", accessor: "weight", render: (row) => <span className="font-semibold">{row.weight}</span> },
     { header: "Grade", accessor: "grade", render: (row) => <Badge variant={gradeColorMap[row.grade] || "default"}>{row.grade}</Badge> },
     { header: "Receipt #", accessor: "receiptNo", render: (row) => <span className="font-mono text-xs">{row.receiptNo}</span> },
-    { header: "Amount (UGX)", accessor: "amount", render: (row) => <span className="font-semibold">{row.amount.toLocaleString()}</span> },
+    { header: "Amount (RWF)", accessor: "amount", render: (row) => <span className="font-semibold">{row.amount.toLocaleString()}</span> },
   ];
 
   return (

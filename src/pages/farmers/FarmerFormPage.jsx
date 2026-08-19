@@ -72,7 +72,11 @@ function FarmerFormPage() {
   const navigate = useNavigate();
   const { success, error: toastError } = useToast();
   const isEdit = Boolean(id);
-  const { add, update } = useRealtimeCollection("farmers", { seedData: farmersSeed });
+  const { data: farmersList, add, update } = useRealtimeCollection("farmers", farmersSeed);
+
+  const existingFarmer = isEdit
+    ? (farmersList || []).find((f) => String(f.id) === String(id) || f.id === id)
+    : null;
 
   const {
     register,
@@ -99,10 +103,24 @@ function FarmerFormPage() {
   });
 
   useEffect(() => {
-    if (isEdit) {
-      reset(mockFarmer);
+    if (existingFarmer) {
+      reset({
+        name: existingFarmer.name || "",
+        phone: existingFarmer.phone || "",
+        email: existingFarmer.email || "",
+        dateOfBirth: existingFarmer.dateOfBirth || "",
+        gender: existingFarmer.gender || "Male",
+        village: existingFarmer.village || "",
+        district: existingFarmer.district || "",
+        province: existingFarmer.province || "Southern Province",
+        country: existingFarmer.country || "Rwanda",
+        farmSize: String(existingFarmer.farmSize || ""),
+        coffeeVariety: existingFarmer.coffeeVariety || "Red Bourbon",
+        collectionCenter: existingFarmer.collectionCenter || "Mahembe CC",
+        status: existingFarmer.status || "Active",
+      });
     }
-  }, [isEdit, reset]);
+  }, [existingFarmer, reset]);
 
   async function onSubmit(data) {
     try {

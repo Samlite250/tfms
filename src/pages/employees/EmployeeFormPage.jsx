@@ -21,6 +21,9 @@ import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import { useToast } from "../../components/ui/Toast";
 
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { employeesSeed } from "../../firebase/seedData";
+
 const DEPARTMENTS = [
   { value: "Production", label: "Production" },
   { value: "Collection", label: "Collection" },
@@ -41,26 +44,6 @@ const GENDER_OPTIONS = [
   { value: "Other", label: "Other" },
 ];
 
-const mockEditData = {
-  firstName: "Kamal",
-  lastName: "Perera",
-  phone: "0771234567",
-  email: "kamal.p@coms.com",
-  dateOfBirth: "1985-06-15",
-  gender: "Male",
-  nationalId: "851234567V",
-  department: "Production",
-  position: "Factory Supervisor",
-  employmentType: "Full-time",
-  joinDate: "2020-03-15",
-  address: "45 Temple Road, Kandy",
-  emergencyName: "Sunethra Perera",
-  emergencyPhone: "0771234568",
-  emergencyRelationship: "Spouse",
-  basicSalary: "85000",
-  allowances: "15000",
-};
-
 function SectionHeader({ icon: Icon, title }) {
   return (
     <div className="flex items-center gap-2 mb-4">
@@ -77,6 +60,11 @@ export default function EmployeeFormPage() {
   const navigate = useNavigate();
   const { success } = useToast();
   const isEdit = Boolean(id);
+  const { data: employeesList, addItem, updateItem } = useRealtimeCollection("employees", employeesSeed);
+
+  const existingEmp = isEdit
+    ? (employeesList || []).find((e) => String(e.id) === String(id) || e.id === id)
+    : null;
 
   const {
     register,
@@ -84,16 +72,17 @@ export default function EmployeeFormPage() {
     formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm({
-    defaultValues: isEdit ? mockEditData : {
+    defaultValues: {
       firstName: "",
       lastName: "",
       phone: "",
       email: "",
       dateOfBirth: "",
-      gender: "",
+      gender: "Male",
       nationalId: "",
-      department: "",
+      department: "Production",
       position: "",
       employmentType: "Full-time",
       joinDate: "",
@@ -106,12 +95,49 @@ export default function EmployeeFormPage() {
     },
   });
 
+  useEffect(() => {
+    if (existingEmp) {
+      reset({
+        firstName: existingEmp.firstName || "",
+        lastName: existingEmp.lastName || "",
+        phone: existingEmp.phone || "",
+        email: existingEmp.email || "",
+        dateOfBirth: existingEmp.dateOfBirth || "",
+        gender: existingEmp.gender || "Male",
+        nationalId: existingEmp.nationalId || "",
+        department: existingEmp.department || "Production",
+        position: existingEmp.position || "",
+        employmentType: existingEmp.employmentType || "Full-time",
+        joinDate: existingEmp.joinDate || "",
+        address: existingEmp.address || "",
+        emergencyName: existingEmp.emergencyName || "",
+        emergencyPhone: existingEmp.emergencyPhone || "",
+        emergencyRelationship: existingEmp.emergencyRelationship || "",
+        basicSalary: String(existingEmp.basicSalary || ""),
+        allowances: String(existingEmp.allowances || ""),
+      });
+    }
+  }, [existingEmp, reset]);
+
   const deptValue = watch("department");
   const genderValue = watch("gender");
   const empTypeValue = watch("employmentType");
 
-  function onSubmit() {
-    success(isEdit ? "Employee updated successfully" : "Employee added successfully");
+  async function onSubmit(data) {
+    const payload = {
+      ...data,
+      basicSalary: Number(data.basicSalary) || 0,
+      allowances: Number(data.allowances) || 0,
+      status: existingEmp ? existingEmp.status : "Active",
+    };
+
+    if (isEdit && existingEmp) {
+      await updateItem(existingEmp.id, payload);
+      success("Employee updated successfully");
+    } else {
+      await addItem({ id: `EMP-${Date.now()}`, ...payload });
+      success("Employee added successfully");
+    }
     navigate("/employees");
   }
 

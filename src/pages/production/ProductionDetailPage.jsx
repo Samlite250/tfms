@@ -129,13 +129,25 @@ const tabContent = {
   },
 };
 
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { productionSeed } from "../../firebase/seedData";
+
 function ProductionDetailPage() {
   const navigate = useNavigate();
-  useParams();
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { data: productionList, deleteItem } = useRealtimeCollection("production", productionSeed);
 
-  const batch = mockBatch;
+  const foundItem = (productionList || []).find(
+    (p) => String(p.id) === String(id) || p.batchNumber === id || p.id === id
+  );
+
+  const batch = foundItem || {
+    ...mockBatch,
+    id: id || 25,
+    batchNumber: String(id || "BATCH-2026-025").startsWith("BATCH") ? id : `BATCH-${id}`,
+  };
 
   const statusBadge = (status) => {
     const map = {
@@ -270,10 +282,9 @@ function ProductionDetailPage() {
                 className={`
                   flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap
                   transition-all duration-200 cursor-pointer border-b-2
-                  ${
-                    activeTab === tab.id
-                      ? "border-primary text-primary bg-primary/5"
-                      : "border-transparent text-text-secondary hover:bg-gray-50"
+                  ${activeTab === tab.id
+                    ? "border-primary text-primary bg-primary/5"
+                    : "border-transparent text-text-secondary hover:bg-gray-50"
                   }
                 `}
               >
@@ -438,8 +449,8 @@ function ProductionDetailPage() {
                         {batch.qualityGrade === "A"
                           ? "Premium Quality"
                           : batch.qualityGrade === "B"
-                          ? "Standard Quality"
-                          : "Economy Quality"}
+                            ? "Standard Quality"
+                            : "Economy Quality"}
                       </p>
                     </div>
                   </Card>
@@ -449,21 +460,20 @@ function ProductionDetailPage() {
                         <TrendingUp size={28} className="text-primary" />
                       </div>
                       <p className="text-sm text-text-secondary">Yield Efficiency</p>
-                      <p className={`text-3xl font-bold mt-1 ${
-                        batch.yieldPercent >= 85
+                      <p className={`text-3xl font-bold mt-1 ${batch.yieldPercent >= 85
                           ? "text-success"
                           : batch.yieldPercent >= 75
-                          ? "text-warning"
-                          : "text-danger"
-                      }`}>
+                            ? "text-warning"
+                            : "text-danger"
+                        }`}>
                         {batch.yieldPercent}%
                       </p>
                       <p className="text-xs text-text-secondary mt-1">
                         {batch.yieldPercent >= 85
                           ? "Above target"
                           : batch.yieldPercent >= 75
-                          ? "Within target"
-                          : "Below target"}
+                            ? "Within target"
+                            : "Below target"}
                       </p>
                     </div>
                   </Card>
@@ -540,10 +550,9 @@ function ProductionDetailPage() {
                       <div
                         className={`
                           relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0
-                          ${
-                            event.status === "completed"
-                              ? "bg-primary text-white"
-                              : event.status === "active"
+                          ${event.status === "completed"
+                            ? "bg-primary text-white"
+                            : event.status === "active"
                               ? "bg-accent text-white"
                               : "bg-gray-200 text-text-secondary"
                           }
