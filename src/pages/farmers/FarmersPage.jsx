@@ -33,6 +33,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import useRealtimeCollection from "../../hooks/useRealtimeCollection";
 import { farmersSeed } from "../../firebase/seedData";
 import { ROLES } from "../../utils/constants";
+import { supabase } from "../../firebase/config";
 
 const collectionCenterOptions = [
   { value: null, label: "All Centers" },
@@ -91,7 +92,6 @@ function FarmersPage() {
     let channel;
     async function subscribeToPendingFarmers() {
       try {
-        const { supabase } = await import("../../firebase/config");
         const { data: rows } = await supabase
           .from("pending_farmers")
           .select("*")

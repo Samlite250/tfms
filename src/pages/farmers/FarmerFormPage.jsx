@@ -1,3 +1,13 @@
+import { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { motion } from "framer-motion";
+import { ArrowLeft, Save, X, User, MapPin, Leaf, Building2 } from "lucide-react";
+import Button from "../../components/ui/Button";
+import Card from "../../components/ui/Card";
+import Input from "../../components/ui/Input";
+import Select from "../../components/ui/Select";
+import { useToast } from "../../components/ui/Toast";
 import useRealtimeCollection from "../../hooks/useRealtimeCollection";
 import { farmersSeed } from "../../firebase/seedData";
 
