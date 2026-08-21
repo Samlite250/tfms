@@ -7,6 +7,7 @@ import {
     sendAccountRejected,
     sendAdminAlert
 } from './email.js';
+import { sendSMS } from './sms.js';
 
 // Vite reads .env itself, while this standalone Node server does not.
 // Load it only for local development; Vercel injects production variables.
@@ -42,6 +43,17 @@ app.post('/api/email', async (req, res) => {
     } catch (error) {
         console.error('Failed to send email:', error);
         return res.status(500).json({ error: error.message || 'Failed to send email' });
+    }
+});
+
+app.post('/api/sms', async (req, res) => {
+    console.log(`Received SMS request: type=${req.body?.type}, to=${req.body?.to}`);
+    try {
+        const result = await sendSMS(req.body);
+        return res.json(result);
+    } catch (error) {
+        console.error('Failed to send SMS:', error);
+        return res.status(500).json({ error: error.message || 'Failed to send SMS' });
     }
 });
 

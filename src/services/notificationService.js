@@ -1,4 +1,5 @@
 import { triggerEmail, sendMessageNotification } from './emailService';
+import { triggerSMS } from './smsService';
 import { addDocToCollection } from '../firebase/firestoreService';
 
 const NOTIFICATION_TYPES = {
@@ -21,13 +22,14 @@ const NOTIFICATION_LABELS = {
   [NOTIFICATION_TYPES.REMINDER]: 'Reminder',
 };
 
-async function createNotification({ type, userId, farmerId, farmerName, farmerEmail, data }) {
+async function createNotification({ type, userId, farmerId, farmerName, farmerEmail, farmerPhone, data }) {
   const notification = {
     type,
     userId: userId || null,
     farmerId: farmerId || null,
     farmerName: farmerName || null,
     farmerEmail: farmerEmail || null,
+    farmerPhone: farmerPhone || null,
     title: NOTIFICATION_LABELS[type] || type,
     message: generateMessage(type, data),
     data: data || {},
@@ -65,31 +67,56 @@ function generateMessage(type, data) {
   }
 }
 
-export async function notifyCoffeeReceived({ farmerId, farmerName, farmerEmail, weight, grade, center, receiptNumber }) {
-  const data = { weight, grade, center, receiptNumber };
+export async function notifyCoffeeReceived({ farmerId, farmerName, farmerEmail, farmerPhone, weight, grade, center, receiptNumber, pricePerKg, totalPrice }) {
+  const data = { weight, grade, center, receiptNumber, pricePerKg, totalPrice };
 
   await createNotification({
     type: NOTIFICATION_TYPES.COFFEE_RECEIVED,
     farmerId,
     farmerName,
     farmerEmail,
+    farmerPhone,
     data,
   });
 
   if (farmerEmail) {
-    await triggerEmail({
-      type: 'coffee_received',
-      to: farmerEmail,
-      name: farmerName,
-      weight,
-      grade,
-      center,
-      receiptNumber,
-    });
+    try {
+      await triggerEmail({
+        type: 'coffee_received',
+        to: farmerEmail,
+        name: farmerName,
+        weight,
+        grade,
+        center,
+        receiptNumber,
+        pricePerKg,
+        totalPrice,
+      });
+    } catch (err) {
+      console.warn('Email trigger failed:', err);
+    }
+  }
+
+  if (farmerPhone) {
+    try {
+      await triggerSMS({
+        type: 'coffee_received',
+        to: farmerPhone,
+        name: farmerName,
+        weight,
+        grade,
+        center,
+        receiptNumber,
+        pricePerKg,
+        totalPrice,
+      });
+    } catch (err) {
+      console.warn('SMS trigger failed:', err);
+    }
   }
 }
 
-export async function notifyCoffeeAccepted({ farmerId, farmerName, farmerEmail, weight, grade, receiptNumber }) {
+export async function notifyCoffeeAccepted({ farmerId, farmerName, farmerEmail, farmerPhone, weight, grade, receiptNumber }) {
   const data = { weight, grade, receiptNumber };
 
   await createNotification({
@@ -97,22 +124,42 @@ export async function notifyCoffeeAccepted({ farmerId, farmerName, farmerEmail, 
     farmerId,
     farmerName,
     farmerEmail,
+    farmerPhone,
     data,
   });
 
   if (farmerEmail) {
-    await triggerEmail({
-      type: 'coffee_accepted',
-      to: farmerEmail,
-      name: farmerName,
-      weight,
-      grade,
-      receiptNumber,
-    });
+    try {
+      await triggerEmail({
+        type: 'coffee_accepted',
+        to: farmerEmail,
+        name: farmerName,
+        weight,
+        grade,
+        receiptNumber,
+      });
+    } catch (err) {
+      console.warn('Email trigger failed:', err);
+    }
+  }
+
+  if (farmerPhone) {
+    try {
+      await triggerSMS({
+        type: 'coffee_accepted',
+        to: farmerPhone,
+        name: farmerName,
+        weight,
+        grade,
+        receiptNumber,
+      });
+    } catch (err) {
+      console.warn('SMS trigger failed:', err);
+    }
   }
 }
 
-export async function notifyPaymentReady({ farmerId, farmerName, farmerEmail, amount, receiptNumber, paymentMethod }) {
+export async function notifyPaymentReady({ farmerId, farmerName, farmerEmail, farmerPhone, amount, receiptNumber, paymentMethod }) {
   const data = { amount, receiptNumber, paymentMethod };
 
   await createNotification({
@@ -120,22 +167,42 @@ export async function notifyPaymentReady({ farmerId, farmerName, farmerEmail, am
     farmerId,
     farmerName,
     farmerEmail,
+    farmerPhone,
     data,
   });
 
   if (farmerEmail) {
-    await triggerEmail({
-      type: 'payment_ready',
-      to: farmerEmail,
-      name: farmerName,
-      amount,
-      receiptNumber,
-      paymentMethod,
-    });
+    try {
+      await triggerEmail({
+        type: 'payment_ready',
+        to: farmerEmail,
+        name: farmerName,
+        amount,
+        receiptNumber,
+        paymentMethod,
+      });
+    } catch (err) {
+      console.warn('Email trigger failed:', err);
+    }
+  }
+
+  if (farmerPhone) {
+    try {
+      await triggerSMS({
+        type: 'payment_ready',
+        to: farmerPhone,
+        name: farmerName,
+        amount,
+        receiptNumber,
+        paymentMethod,
+      });
+    } catch (err) {
+      console.warn('SMS trigger failed:', err);
+    }
   }
 }
 
-export async function notifyPaymentCompleted({ farmerId, farmerName, farmerEmail, amount, receiptNumber }) {
+export async function notifyPaymentCompleted({ farmerId, farmerName, farmerEmail, farmerPhone, amount, receiptNumber }) {
   const data = { amount, receiptNumber };
 
   await createNotification({
@@ -143,17 +210,36 @@ export async function notifyPaymentCompleted({ farmerId, farmerName, farmerEmail
     farmerId,
     farmerName,
     farmerEmail,
+    farmerPhone,
     data,
   });
 
   if (farmerEmail) {
-    await triggerEmail({
-      type: 'payment_completed',
-      to: farmerEmail,
-      name: farmerName,
-      amount,
-      receiptNumber,
-    });
+    try {
+      await triggerEmail({
+        type: 'payment_completed',
+        to: farmerEmail,
+        name: farmerName,
+        amount,
+        receiptNumber,
+      });
+    } catch (err) {
+      console.warn('Email trigger failed:', err);
+    }
+  }
+
+  if (farmerPhone) {
+    try {
+      await triggerSMS({
+        type: 'payment_completed',
+        to: farmerPhone,
+        name: farmerName,
+        amount,
+        receiptNumber,
+      });
+    } catch (err) {
+      console.warn('SMS trigger failed:', err);
+    }
   }
 }
 
@@ -177,18 +263,30 @@ export async function notifyImportantNotice({ message, targetUsers }) {
   if (targetUsers && targetUsers.length > 0) {
     for (const user of targetUsers) {
       if (user.email) {
-        await triggerEmail({
-          type: 'important_notice',
-          to: user.email,
-          name: user.name,
-          message,
-        });
+        try {
+          await triggerEmail({
+            type: 'important_notice',
+            to: user.email,
+            name: user.name,
+            message,
+          });
+        } catch (err) { }
+      }
+      if (user.phone) {
+        try {
+          await triggerSMS({
+            type: 'important_notice',
+            to: user.phone,
+            name: user.name,
+            message,
+          });
+        } catch (err) { }
       }
     }
   }
 }
 
-export async function sendFarmerReminder({ farmerId, farmerName, farmerEmail, message }) {
+export async function sendFarmerReminder({ farmerId, farmerName, farmerEmail, farmerPhone, message }) {
   const data = { message };
 
   await createNotification({
@@ -196,16 +294,30 @@ export async function sendFarmerReminder({ farmerId, farmerName, farmerEmail, me
     farmerId,
     farmerName,
     farmerEmail,
+    farmerPhone,
     data,
   });
 
   if (farmerEmail) {
-    await triggerEmail({
-      type: 'reminder',
-      to: farmerEmail,
-      name: farmerName,
-      message,
-    });
+    try {
+      await triggerEmail({
+        type: 'reminder',
+        to: farmerEmail,
+        name: farmerName,
+        message,
+      });
+    } catch (err) { }
+  }
+
+  if (farmerPhone) {
+    try {
+      await triggerSMS({
+        type: 'reminder',
+        to: farmerPhone,
+        name: farmerName,
+        message,
+      });
+    } catch (err) { }
   }
 }
 

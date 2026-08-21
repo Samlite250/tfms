@@ -27,6 +27,9 @@ import {
   ChevronRight,
   Shield,
   Palette,
+  Send,
+  Smartphone,
+  MessageSquare,
 } from "lucide-react";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
@@ -36,6 +39,7 @@ import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROLE_SETTINGS_TABS } from "../../utils/constants";
+import { triggerSMS } from "../../services/smsService";
 
 const allTabs = [
   { id: "profile", label: "Profile", icon: User },
@@ -101,6 +105,9 @@ const initialCenters = [
 
 const initialNotifications = {
   emailNotifications: true,
+  smsNotifications: true,
+  smsCollectionReceipts: true,
+  smsPaymentAlerts: true,
   lowStockAlerts: true,
   dailyReports: false,
   paymentReminders: true,
@@ -897,6 +904,10 @@ function NotificationsSection() {
   const { toast } = useToast();
   const [prefs, setPrefs] = useState(initialNotifications);
   const [saving, setSaving] = useState(false);
+  const [testPhone, setTestPhone] = useState("");
+  const [testType, setTestType] = useState("coffee_received");
+  const [testSending, setTestSending] = useState(false);
+  const [lastSmsResult, setLastSmsResult] = useState(null);
 
   const toggle = useCallback((key) => {
     setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -910,8 +921,44 @@ function NotificationsSection() {
     }, 1000);
   };
 
+  const handleSendTestSMS = async () => {
+    if (!testPhone.trim()) {
+      toast.error("Please enter a valid recipient phone number");
+      return;
+    }
+    setTestSending(true);
+    setLastSmsResult(null);
+
+    const testPayload = {
+      type: testType,
+      to: testPhone.trim(),
+      name: "Test Farmer",
+      weight: 150,
+      grade: "AA",
+      center: "Mahembe Central",
+      receiptNumber: "REC-TEST-2026",
+      amount: 180000,
+      paymentMethod: "Mobile Money",
+      role: "farmer",
+      message: "This is a test notification from COMS SMS gateway simulator.",
+    };
+
+    const res = await triggerSMS(testPayload);
+    setTestSending(false);
+
+    if (res.success) {
+      setLastSmsResult(res);
+      toast.success(`Test SMS dispatched to ${testPhone.trim()} (${res.provider || 'simulated'})`);
+    } else {
+      toast.error(res.error || "Failed to send test SMS");
+    }
+  };
+
   const notificationOptions = [
     { key: "emailNotifications", label: "Email Notifications", description: "Receive email updates for important system events and activities" },
+    { key: "smsNotifications", label: "SMS Alerts", description: "Send automated SMS notifications to users and farmers on key actions" },
+    { key: "smsCollectionReceipts", label: "SMS Collection Receipts", description: "Instantly SMS farmers a digital receipt when coffee cherries are delivered" },
+    { key: "smsPaymentAlerts", label: "SMS Payment Alerts", description: "Send SMS when farmer payments are ready or completed" },
     { key: "lowStockAlerts", label: "Low Stock Alerts", description: "Get notified when inventory items fall below minimum thresholds" },
     { key: "dailyReports", label: "Daily Reports", description: "Receive automated daily production and collection summary reports" },
     { key: "paymentReminders", label: "Payment Reminders", description: "Alerts for upcoming and overdue farmer and supplier payments" },
@@ -923,7 +970,9 @@ function NotificationsSection() {
     <motion.div variants={tabContentVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
       <Card header={
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-text-primary">Notification Preferences</h3>
+          <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
+            <Bell size={18} /> Notification Preferences
+          </h3>
           <Badge variant="info">{Object.values(prefs).filter(Boolean).length} active</Badge>
         </div>
       }>
@@ -940,6 +989,70 @@ function NotificationsSection() {
         </div>
         <div className="flex justify-end mt-6 pt-4 border-t border-border">
           <Button onClick={handleSave} loading={saving} icon={Save}>Save Preferences</Button>
+        </div>
+      </Card>
+
+      <Card header={
+        <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
+          <Smartphone size={18} className="text-primary" /> Test SMS Gateway
+        </h3>
+      }>
+        <div className="space-y-4">
+          <p className="text-xs text-text-secondary">
+            Use this tool to test SMS confirmation messages sent to registered farmers or system users.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Input
+              label="Recipient Phone"
+              placeholder="+250 780 123 456"
+              icon={Phone}
+              value={testPhone}
+              onChange={(e) => setTestPhone(e.target.value)}
+            />
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1">Notification Type</label>
+              <select
+                value={testType}
+                onChange={(e) => setTestType(e.target.value)}
+                className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                <option value="registration_confirmation">Registration Confirmation</option>
+                <option value="account_approved">Account Approved</option>
+                <option value="account_rejected">Account Rejected</option>
+                <option value="coffee_received">Coffee Receipt Received</option>
+                <option value="coffee_accepted">Coffee Delivery Accepted</option>
+                <option value="payment_ready">Payment Ready Alert</option>
+                <option value="payment_completed">Payment Completed</option>
+                <option value="important_notice">Important Notice</option>
+                <option value="reminder">System Reminder</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <Button
+                onClick={handleSendTestSMS}
+                loading={testSending}
+                icon={Send}
+                className="w-full"
+              >
+                Send Test SMS
+              </Button>
+            </div>
+          </div>
+
+          {lastSmsResult && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1">
+              <div className="flex items-center justify-between text-emerald-800 font-semibold">
+                <span>SMS Status: Dispatched ({lastSmsResult.provider || 'simulated'})</span>
+                <span>{new Date().toLocaleTimeString()}</span>
+              </div>
+              <p className="text-emerald-700">
+                <strong>Recipient:</strong> {lastSmsResult.to}
+              </p>
+              <p className="text-emerald-900 font-mono bg-white/70 p-2 rounded border border-emerald-100">
+                "{lastSmsResult.message}"
+              </p>
+            </div>
+          )}
         </div>
       </Card>
     </motion.div>

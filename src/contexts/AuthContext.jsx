@@ -6,6 +6,11 @@ import {
   sendAccountApproved,
   sendAccountRejected
 } from '../services/emailService';
+import {
+  sendRegistrationConfirmationSMS,
+  sendAccountApprovedSMS,
+  sendAccountRejectedSMS
+} from '../services/smsService';
 
 const AuthContext = createContext(null);
 
@@ -155,7 +160,10 @@ export function AuthProvider({ children }) {
         pendingFarmers.push(farmerProfile);
         localStorage.setItem('coms_pending_farmers', JSON.stringify(pendingFarmers));
       }
-      try { await sendRegistrationConfirmation(email, profileData.displayName); } catch { }
+      try {
+        await sendRegistrationConfirmation(email, profileData.displayName);
+        if (profileData.phone) await sendRegistrationConfirmationSMS(profileData.phone, profileData.displayName);
+      } catch { }
       try { await sendAdminAlert({ displayName: profileData.displayName, email, role: profileData.role, phone: profileData.phone }); } catch { }
       return localProfile;
     }
@@ -205,9 +213,10 @@ export function AuthProvider({ children }) {
 
       try {
         await sendRegistrationConfirmation(sbUser.email, profileData.displayName);
+        if (profileData.phone) await sendRegistrationConfirmationSMS(profileData.phone, profileData.displayName);
         await sendAdminAlert({ displayName: profileData.displayName, email: sbUser.email, role: profileData.role, phone: profileData.phone });
       } catch (err) {
-        console.warn("Registration email notification failed:", err);
+        console.warn("Registration email/SMS notification failed:", err);
       }
 
       await supabase.auth.signOut();
@@ -239,7 +248,10 @@ export function AuthProvider({ children }) {
             localStorage.setItem('coms_pending_farmers', JSON.stringify(pendingFarmers.filter((f) => f.userId !== uid && f.id !== uid)));
           }
         }
-        try { await sendAccountApproved(approved.email, approved.displayName, approved.role); } catch { }
+        try {
+          await sendAccountApproved(approved.email, approved.displayName, approved.role);
+          if (approved.phone) await sendAccountApprovedSMS(approved.phone, approved.displayName, approved.role);
+        } catch { }
       }
       return;
     }
@@ -247,7 +259,10 @@ export function AuthProvider({ children }) {
     try {
       const { data: userData } = await supabase.from('users').select('*').eq('id', uid).single();
       if (userData) {
-        try { await sendAccountApproved(userData.email, userData.display_name, userData.role); } catch { }
+        try {
+          await sendAccountApproved(userData.email, userData.display_name, userData.role);
+          if (userData.phone) await sendAccountApprovedSMS(userData.phone, userData.display_name, userData.role);
+        } catch { }
       }
     } catch { }
 
@@ -287,7 +302,10 @@ export function AuthProvider({ children }) {
       const pending = JSON.parse(localStorage.getItem('coms_pending_users') || '[]');
       const rejectedUser = pending.find((u) => u.uid === uid);
       if (rejectedUser) {
-        try { await sendAccountRejected(rejectedUser.email, rejectedUser.displayName); } catch { }
+        try {
+          await sendAccountRejected(rejectedUser.email, rejectedUser.displayName);
+          if (rejectedUser.phone) await sendAccountRejectedSMS(rejectedUser.phone, rejectedUser.displayName);
+        } catch { }
       }
       localStorage.setItem('coms_pending_users', JSON.stringify(pending.filter((u) => u.uid !== uid)));
       return;
@@ -296,7 +314,10 @@ export function AuthProvider({ children }) {
     try {
       const { data: userData } = await supabase.from('users').select('*').eq('id', uid).single();
       if (userData) {
-        try { await sendAccountRejected(userData.email, userData.display_name); } catch { }
+        try {
+          await sendAccountRejected(userData.email, userData.display_name);
+          if (userData.phone) await sendAccountRejectedSMS(userData.phone, userData.display_name);
+        } catch { }
       }
     } catch { }
 

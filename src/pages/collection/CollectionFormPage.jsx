@@ -21,6 +21,8 @@ import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import Modal from "../../components/ui/Modal";
 import { sendCoffeeReceivedEmail } from "../../services/emailService";
+import { sendCoffeeReceivedSMS } from "../../services/smsService";
+import { notifyCoffeeReceived } from "../../services/notificationService";
 import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
 import { farmersSeed, collectionsSeed } from "../../firebase/seedData";
 
@@ -150,22 +152,24 @@ function CollectionFormPage() {
     setSavedRecord(record);
     setShowSuccess(true);
 
-    // Send email notification to farmer
-    if (farmer?.email) {
-      try {
-        await sendCoffeeReceivedEmail(farmer.email, farmer.name, {
-          weight: parseFloat(data.weight),
-          grade: data.grade,
-          center: center?.label || data.center,
-          receiptNumber,
-          pricePerKg: finalPricePerKg,
-          totalPrice: totalAmount,
-        });
-        setEmailSent(true);
-      } catch (err) {
-        console.warn("Email notification failed:", err);
-        setEmailSent(false);
-      }
+    // Send email & SMS notifications to farmer
+    try {
+      await notifyCoffeeReceived({
+        farmerId: data.farmerId,
+        farmerName: farmer?.name || "Farmer",
+        farmerEmail: farmer?.email || "",
+        farmerPhone: farmer?.phone || "",
+        weight: parseFloat(data.weight),
+        grade: data.grade,
+        center: center?.label || data.center,
+        receiptNumber,
+        pricePerKg: finalPricePerKg,
+        totalPrice: totalAmount,
+      });
+      setEmailSent(true);
+    } catch (err) {
+      console.warn("Notification dispatch failed:", err);
+      setEmailSent(false);
     }
   }
 
