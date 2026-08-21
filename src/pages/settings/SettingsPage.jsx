@@ -39,7 +39,7 @@ import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROLE_SETTINGS_TABS } from "../../utils/constants";
-import { triggerSMS } from "../../services/smsService";
+import { triggerSMS, checkSMSProviderStatus } from "../../services/smsService";
 
 const allTabs = [
   { id: "profile", label: "Profile", icon: User },
@@ -905,9 +905,14 @@ function NotificationsSection() {
   const [prefs, setPrefs] = useState(initialNotifications);
   const [saving, setSaving] = useState(false);
   const [testPhone, setTestPhone] = useState("");
-  const [testType, setTestType] = useState("coffee_received");
+  const [testType, setTestType] = useState("registration_confirmation");
   const [testSending, setTestSending] = useState(false);
   const [lastSmsResult, setLastSmsResult] = useState(null);
+  const [providerInfo, setProviderInfo] = useState(null);
+
+  useEffect(() => {
+    checkSMSProviderStatus().then((info) => setProviderInfo(info));
+  }, []);
 
   const toggle = useCallback((key) => {
     setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -923,7 +928,7 @@ function NotificationsSection() {
 
   const handleSendTestSMS = async () => {
     if (!testPhone.trim()) {
-      toast.error("Please enter a valid recipient phone number");
+      toast.error("Please enter a valid recipient phone number (e.g. +250 780 123 456)");
       return;
     }
     setTestSending(true);
@@ -940,7 +945,7 @@ function NotificationsSection() {
       amount: 180000,
       paymentMethod: "Mobile Money",
       role: "farmer",
-      message: "This is a test notification from COMS SMS gateway simulator.",
+      message: "This is a test SMS notification from COMS Coffee System.",
     };
 
     const res = await triggerSMS(testPayload);
@@ -948,9 +953,13 @@ function NotificationsSection() {
 
     if (res.success) {
       setLastSmsResult(res);
-      toast.success(`Test SMS dispatched to ${testPhone.trim()} (${res.provider || 'simulated'})`);
+      if (res.isSimulated) {
+        toast.info(`SMS processed in SIMULATOR mode. (To receive real SMS on your phone, set AFRICASTALKING_API_KEY or TWILIO_ACCOUNT_SID in Vercel environment variables)`);
+      } else {
+        toast.success(`Real SMS dispatched via ${res.provider || 'Gateway'} to ${testPhone.trim()}`);
+      }
     } else {
-      toast.error(res.error || "Failed to send test SMS");
+      toast.error(res.error || "Failed to send SMS");
     }
   };
 
@@ -993,64 +1002,145 @@ function NotificationsSection() {
       </Card>
 
       <Card header={
-        <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
-          <Smartphone size={18} className="text-primary" /> Test SMS Gateway
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
+            <Smartphone size={18} className="text-primary" /> SMS Gateway & Real Delivery Setup
+          </h3>
+          {providerInfo?.hasRealProvider ? (
+            <Badge variant="success">Real Provider Active</Badge>
+          ) : (
+            <Badge variant="warning">Simulation / Key Required</Badge>
+          )}
+        </div>
       }>
-        <div className="space-y-4">
-          <p className="text-xs text-text-secondary">
-            Use this tool to test SMS confirmation messages sent to registered farmers or system users.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Input
-              label="Recipient Phone"
-              placeholder="+250 780 123 456"
-              icon={Phone}
-              value={testPhone}
-              onChange={(e) => setTestPhone(e.target.value)}
-            />
-            <div>
-              <label className="block text-xs font-medium text-text-secondary mb-1">Notification Type</label>
-              <select
-                value={testType}
-                onChange={(e) => setTestType(e.target.value)}
-                className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
-              >
-                <option value="registration_confirmation">Registration Confirmation</option>
-                <option value="account_approved">Account Approved</option>
-                <option value="account_rejected">Account Rejected</option>
-                <option value="coffee_received">Coffee Receipt Received</option>
-                <option value="coffee_accepted">Coffee Delivery Accepted</option>
-                <option value="payment_ready">Payment Ready Alert</option>
-                <option value="payment_completed">Payment Completed</option>
-                <option value="important_notice">Important Notice</option>
-                <option value="reminder">System Reminder</option>
-              </select>
+        <div className="space-y-5">
+          <div className="p-4 bg-gray-50 rounded-xl border border-border text-xs space-y-3">
+            <h4 className="font-semibold text-text-primary text-sm flex items-center gap-2">
+              <Shield size={16} className="text-primary" /> Supported Real SMS Providers
+            </h4>
+            <p className="text-text-secondary leading-relaxed">
+              Email is currently delivering live messages via Gmail SMTP. To deliver <strong>real SMS messages directly to mobile phones</strong> (e.g. Rwandan numbers <code className="bg-white px-1.5 py-0.5 rounded border border-gray-200 text-primary">+250 78X XXX XXX</code>), add one of the following SMS Provider credentials to your <strong>Vercel Project Environment Variables</strong>:
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              <div className="p-3 bg-white rounded-lg border border-border space-y-1">
+                <div className="flex items-center justify-between font-semibold text-text-primary">
+                  <span>1. Africa's Talking (Recommended for East Africa / Rwanda)</span>
+                  <Badge variant={providerInfo?.providers?.africastalking ? "success" : "default"}>
+                    {providerInfo?.providers?.africastalking ? "Connected" : "Not Set"}
+                  </Badge>
+                </div>
+                <p className="text-text-secondary text-[11px]">
+                  Env variables: <code className="text-primary">AFRICASTALKING_USERNAME</code> and <code className="text-primary">AFRICASTALKING_API_KEY</code>
+                </p>
+              </div>
+
+              <div className="p-3 bg-white rounded-lg border border-border space-y-1">
+                <div className="flex items-center justify-between font-semibold text-text-primary">
+                  <span>2. Twilio SMS</span>
+                  <Badge variant={providerInfo?.providers?.twilio ? "success" : "default"}>
+                    {providerInfo?.providers?.twilio ? "Connected" : "Not Set"}
+                  </Badge>
+                </div>
+                <p className="text-text-secondary text-[11px]">
+                  Env variables: <code className="text-primary">TWILIO_ACCOUNT_SID</code>, <code className="text-primary">TWILIO_AUTH_TOKEN</code>, <code className="text-primary">TWILIO_PHONE_NUMBER</code>
+                </p>
+              </div>
+
+              <div className="p-3 bg-white rounded-lg border border-border space-y-1">
+                <div className="flex items-center justify-between font-semibold text-text-primary">
+                  <span>3. Infobip SMS</span>
+                  <Badge variant={providerInfo?.providers?.infobip ? "success" : "default"}>
+                    {providerInfo?.providers?.infobip ? "Connected" : "Not Set"}
+                  </Badge>
+                </div>
+                <p className="text-text-secondary text-[11px]">
+                  Env variables: <code className="text-primary">INFOBIP_API_KEY</code> and <code className="text-primary">INFOBIP_BASE_URL</code>
+                </p>
+              </div>
+
+              <div className="p-3 bg-white rounded-lg border border-border space-y-1">
+                <div className="flex items-center justify-between font-semibold text-text-primary">
+                  <span>4. Generic SMS Webhook</span>
+                  <Badge variant={providerInfo?.providers?.generic_gateway ? "success" : "default"}>
+                    {providerInfo?.providers?.generic_gateway ? "Connected" : "Not Set"}
+                  </Badge>
+                </div>
+                <p className="text-text-secondary text-[11px]">
+                  Env variables: <code className="text-primary">SMS_GATEWAY_URL</code> and <code className="text-primary">SMS_API_KEY</code>
+                </p>
+              </div>
             </div>
-            <div className="flex items-end">
-              <Button
-                onClick={handleSendTestSMS}
-                loading={testSending}
-                icon={Send}
-                className="w-full"
-              >
-                Send Test SMS
-              </Button>
+          </div>
+
+          <div className="pt-2">
+            <h4 className="text-xs font-semibold text-text-primary mb-2">Test Live SMS Dispatch</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Input
+                label="Recipient Phone Number"
+                placeholder="0788123456 or +250788123456"
+                icon={Phone}
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value)}
+              />
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">Notification Type</label>
+                <select
+                  value={testType}
+                  onChange={(e) => setTestType(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
+                >
+                  <option value="registration_confirmation">Registration Confirmation</option>
+                  <option value="account_approved">Account Approved</option>
+                  <option value="account_rejected">Account Rejected</option>
+                  <option value="coffee_received">Coffee Receipt Received</option>
+                  <option value="coffee_accepted">Coffee Delivery Accepted</option>
+                  <option value="payment_ready">Payment Ready Alert</option>
+                  <option value="payment_completed">Payment Completed</option>
+                  <option value="important_notice">Important Notice</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <Button
+                  onClick={handleSendTestSMS}
+                  loading={testSending}
+                  icon={Send}
+                  className="w-full"
+                >
+                  Dispatch Test SMS
+                </Button>
+              </div>
             </div>
           </div>
 
           {lastSmsResult && (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1">
-              <div className="flex items-center justify-between text-emerald-800 font-semibold">
-                <span>SMS Status: Dispatched ({lastSmsResult.provider || 'simulated'})</span>
-                <span>{new Date().toLocaleTimeString()}</span>
+            <div className={`p-4 rounded-xl border text-xs space-y-2 ${lastSmsResult.isSimulated
+                ? "bg-amber-50 border-amber-200 text-amber-900"
+                : "bg-emerald-50 border-emerald-200 text-emerald-900"
+              }`}>
+              <div className="flex items-center justify-between font-semibold">
+                <span className="flex items-center gap-1.5">
+                  {lastSmsResult.isSimulated ? "⚠️ Simulation Mode (No Real SMS Sent)" : "✅ Real SMS Dispatched"}
+                </span>
+                <span className="text-[11px] font-mono opacity-75">{new Date().toLocaleTimeString()}</span>
               </div>
-              <p className="text-emerald-700">
-                <strong>Recipient:</strong> {lastSmsResult.to}
+
+              <p>
+                <strong>Formatted Recipient:</strong> <code className="bg-white/80 px-1.5 py-0.5 rounded">{lastSmsResult.to}</code>
               </p>
-              <p className="text-emerald-900 font-mono bg-white/70 p-2 rounded border border-emerald-100">
-                "{lastSmsResult.message}"
-              </p>
+
+              {lastSmsResult.notice && (
+                <div className="p-2.5 bg-amber-100/80 rounded-lg text-amber-950 font-medium leading-relaxed">
+                  💡 {lastSmsResult.notice}
+                </div>
+              )}
+
+              <div>
+                <strong>Message Content:</strong>
+                <p className="mt-1 font-mono bg-white/80 p-2.5 rounded-lg border border-amber-200/50 text-gray-800">
+                  "{lastSmsResult.message}"
+                </p>
+              </div>
             </div>
           )}
         </div>

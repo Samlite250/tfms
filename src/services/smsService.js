@@ -1,5 +1,16 @@
 const SMS_API_URL = import.meta.env.VITE_SMS_API_URL || '/api/sms';
 
+export async function checkSMSProviderStatus() {
+    try {
+        const response = await fetch(SMS_API_URL, { method: 'GET' });
+        if (!response.ok) return { success: false, hasRealProvider: false };
+        return await response.json();
+    } catch (err) {
+        console.warn('Failed to check SMS provider status:', err);
+        return { success: false, hasRealProvider: false, error: err.message };
+    }
+}
+
 export async function triggerSMS(payload) {
     if (!payload.to) {
         console.warn('SMS dispatch skipped: No recipient phone number provided');

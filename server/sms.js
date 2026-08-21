@@ -1,11 +1,53 @@
-import dotenv from 'dotenv';
-dotenv.config();
+function normalizePhoneNumber(phone) {
+    if (!phone) return '';
+    let cleaned = phone.replace(/[\s\-\(\)]/g, '');
 
-export async function sendSMS({ type, to, name, role, user, receiptNumber, weight, grade, center, amount, paymentMethod, prices, effectiveDate, message, senderName, body, pricePerKg, totalPrice }) {
-    if (!to) {
-        throw new Error('Recipient phone number (to) is required for SMS');
+    if (/^07\d{8}$/.test(cleaned)) {
+        return `+250${cleaned.substring(1)}`;
+    }
+    if (/^(07|01)\d{8}$/.test(cleaned)) {
+        return `+254${cleaned.substring(1)}`;
+    }
+    if (/^2507\d{8}$/.test(cleaned)) {
+        return `+${cleaned}`;
+    }
+    if (cleaned.startsWith('+')) {
+        return cleaned;
+    }
+    if (/^\d{10,15}$/.test(cleaned)) {
+        return `+${cleaned}`;
     }
 
+    return cleaned;
+}
+
+export async function sendSMS(payload) {
+    const {
+        type,
+        to,
+        name,
+        role,
+        user,
+        receiptNumber,
+        weight,
+        grade,
+        center,
+        amount,
+        paymentMethod,
+        prices,
+        effectiveDate,
+        message,
+        senderName,
+        body,
+        pricePerKg,
+        totalPrice
+    } = payload;
+
+    if (!to) {
+        throw new Error('Phone number recipient (to) is required for SMS');
+    }
+
+    const formattedPhone = normalizePhoneNumber(to);
     let textMessage = '';
 
     switch (type) {
@@ -62,44 +104,180 @@ export async function sendSMS({ type, to, name, role, user, receiptNumber, weigh
             break;
 
         default:
-            throw new Error(`Unknown SMS notification type: ${type}`);
+            textMessage = message || `COMS Notification for ${name || 'User'}`;
     }
 
-    const twilioSid = process.env.TWILIO_ACCOUNT_SID;
-    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-    const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+    const providerStatus = {
+        africastalking: Boolean(process.env.AFRICASTALKING_API_KEY && process.env.AFRICASTALKING_USERNAME),
+        twilio: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER),
+        infobip: Boolean(process.env.INFOBIP_API_KEY && process.env.INFOBIP_BASE_URL),
+        generic_gateway: Boolean(process.env.SMS_GATEWAY_URL),
+    };
 
-    if (twilioSid && twilioAuthToken && twilioPhone) {
-        const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuthToken}`).toString('base64');
-        const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
+    const errors = [];
 
-        const params = new URLSearchParams();
-        params.append('To', to);
-        params.append('From', twilioPhone);
-        params.append('Body', textMessage);
+    // Provider 1: Africa's Talking
+    if (providerStatus.africastalking) {
+        try {
+            const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
+            const apiKey = process.env.AFRICASTALKING_API_KEY;
+            const senderId = process.env.AFRICASTALKING_SENDER_ID || '';
 
-        const response = await fetch(twilioUrl, {
-            method: 'POST',
-            headers: {
-                'Authorization': authHeader,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params,
-        });
+            const atHost = username === 'sandbox' ? 'api.sandbox.africastalking.com' : 'api.africastalking.com';
+            const atUrl = `https://${atHost}/version1/messaging`;
 
-        const responseData = await response.json();
-        if (!response.ok) {
-            throw new Error(responseData.message || 'Twilio SMS send failed');
+            const params = new URLSearchParams();
+            params.append('username', username);
+            params.append('to', formattedPhone);
+            params.append('message', textMessage);
+            if (senderId) params.append('from', senderId);
+
+            const atRes = await fetch(atUrl, {
+                method: 'POST',
+                headers: {
+                    'apiKey': apiKey,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params,
+            });
+
+            const atData = await atRes.json();
+            if (!atRes.ok) {
+                throw new Error(atData.errorMessage || atData.message || 'Africa\'s Talking API request failed');
+            }
+
+            return {
+                success: true,
+                provider: 'africastalking',
+                to: formattedPhone,
+                message: textMessage,
+            };
+        } catch (err) {
+            console.error('Africa\'s Talking dispatch error:', err.message);
+            errors.push(`Africa's Talking: ${err.message}`);
         }
-        return { success: true, provider: 'twilio', sid: responseData.sid, to, message: textMessage };
     }
 
-    console.log(`[SMS SIMULATOR] Sent SMS to ${to}: "${textMessage}"`);
+    // Provider 2: Twilio
+    if (providerStatus.twilio) {
+        try {
+            const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+            const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+            const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+
+            const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuthToken}`).toString('base64');
+            const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
+
+            const params = new URLSearchParams();
+            params.append('To', formattedPhone);
+            params.append('From', twilioPhone);
+            params.append('Body', textMessage);
+
+            const twilioRes = await fetch(twilioUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': authHeader,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params,
+            });
+
+            const responseData = await twilioRes.json();
+            if (!twilioRes.ok) {
+                throw new Error(responseData.message || 'Twilio SMS send failed');
+            }
+
+            return { success: true, provider: 'twilio', sid: responseData.sid, to: formattedPhone, message: textMessage };
+        } catch (err) {
+            console.error('Twilio dispatch error:', err.message);
+            errors.push(`Twilio: ${err.message}`);
+        }
+    }
+
+    // Provider 3: Infobip
+    if (providerStatus.infobip) {
+        try {
+            const baseUrl = process.env.INFOBIP_BASE_URL.replace(/^https?:\/\//, '');
+            const apiKey = process.env.INFOBIP_API_KEY;
+            const senderId = process.env.INFOBIP_SENDER_ID || 'COMS';
+
+            const infobipRes = await fetch(`https://${baseUrl}/sms/2/text/single`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `App ${apiKey}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    from: senderId,
+                    to: formattedPhone,
+                    text: textMessage,
+                }),
+            });
+
+            const infobipData = await infobipRes.json();
+            if (!infobipRes.ok) {
+                throw new Error(infobipData.requestError?.serviceException?.text || 'Infobip SMS failed');
+            }
+
+            return {
+                success: true,
+                provider: 'infobip',
+                to: formattedPhone,
+                message: textMessage,
+            };
+        } catch (err) {
+            console.error('Infobip dispatch error:', err.message);
+            errors.push(`Infobip: ${err.message}`);
+        }
+    }
+
+    // Provider 4: Generic Gateway
+    if (providerStatus.generic_gateway) {
+        try {
+            const gatewayUrl = process.env.SMS_GATEWAY_URL;
+            const apiKey = process.env.SMS_API_KEY || '';
+
+            const gatewayRes = await fetch(gatewayUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {}),
+                },
+                body: JSON.stringify({
+                    to: formattedPhone,
+                    message: textMessage,
+                    sender: process.env.SMS_SENDER_ID || 'COMS',
+                }),
+            });
+
+            const gatewayData = await gatewayRes.json().catch(() => ({}));
+            if (!gatewayRes.ok) {
+                throw new Error(gatewayData.error || gatewayData.message || 'Generic Gateway error');
+            }
+
+            return {
+                success: true,
+                provider: 'generic_gateway',
+                to: formattedPhone,
+                message: textMessage,
+            };
+        } catch (err) {
+            console.error('Generic Gateway dispatch error:', err.message);
+            errors.push(`Generic Gateway: ${err.message}`);
+        }
+    }
+
+    // Default simulation mode
+    console.log(`[SMS NOTICE] Real SMS not sent to ${formattedPhone} because no SMS provider credentials exist in process.env`);
     return {
         success: true,
         provider: 'simulated',
-        to,
+        isSimulated: true,
+        to: formattedPhone,
         message: textMessage,
+        notice: 'REAL SMS NOT DELIVERED to phone because SMS Gateway credentials (e.g. AFRICASTALKING_API_KEY or TWILIO_ACCOUNT_SID) are not set in environment variables on server.',
         timestamp: new Date().toISOString(),
     };
 }

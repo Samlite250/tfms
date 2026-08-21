@@ -46,6 +46,24 @@ app.post('/api/email', async (req, res) => {
     }
 });
 
+app.get('/api/sms', (req, res) => {
+    const providers = {
+        africastalking: Boolean(process.env.AFRICASTALKING_API_KEY && process.env.AFRICASTALKING_USERNAME),
+        twilio: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER),
+        infobip: Boolean(process.env.INFOBIP_API_KEY && process.env.INFOBIP_BASE_URL),
+        generic_gateway: Boolean(process.env.SMS_GATEWAY_URL),
+    };
+    const hasAnyRealProvider = Object.values(providers).some(Boolean);
+    return res.json({
+        success: true,
+        hasRealProvider: hasAnyRealProvider,
+        providers,
+        message: hasAnyRealProvider
+            ? 'Real SMS Gateway provider is configured.'
+            : 'No real SMS provider credentials found in environment variables.',
+    });
+});
+
 app.post('/api/sms', async (req, res) => {
     console.log(`Received SMS request: type=${req.body?.type}, to=${req.body?.to}`);
     try {
