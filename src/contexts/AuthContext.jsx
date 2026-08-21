@@ -162,9 +162,21 @@ export function AuthProvider({ children }) {
       }
       try {
         await sendRegistrationConfirmation(email, profileData.displayName);
-        if (profileData.phone) await sendRegistrationConfirmationSMS(profileData.phone, profileData.displayName);
-      } catch { }
-      try { await sendAdminAlert({ displayName: profileData.displayName, email, role: profileData.role, phone: profileData.phone }); } catch { }
+      } catch (err) {
+        console.warn("Registration email notification failed:", err);
+      }
+      if (profileData.phone) {
+        try {
+          await sendRegistrationConfirmationSMS(profileData.phone, profileData.displayName);
+        } catch (err) {
+          console.warn("Registration SMS notification failed:", err);
+        }
+      }
+      try {
+        await sendAdminAlert({ displayName: profileData.displayName, email, role: profileData.role, phone: profileData.phone });
+      } catch (err) {
+        console.warn("Admin alert notification failed:", err);
+      }
       return localProfile;
     }
 
@@ -213,10 +225,20 @@ export function AuthProvider({ children }) {
 
       try {
         await sendRegistrationConfirmation(sbUser.email, profileData.displayName);
-        if (profileData.phone) await sendRegistrationConfirmationSMS(profileData.phone, profileData.displayName);
+      } catch (err) {
+        console.warn("Registration email notification failed:", err);
+      }
+      if (profileData.phone) {
+        try {
+          await sendRegistrationConfirmationSMS(profileData.phone, profileData.displayName);
+        } catch (err) {
+          console.warn("Registration SMS notification failed:", err);
+        }
+      }
+      try {
         await sendAdminAlert({ displayName: profileData.displayName, email: sbUser.email, role: profileData.role, phone: profileData.phone });
       } catch (err) {
-        console.warn("Registration email/SMS notification failed:", err);
+        console.warn("Admin alert notification failed:", err);
       }
 
       await supabase.auth.signOut();
