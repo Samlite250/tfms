@@ -223,9 +223,13 @@ export default async function handler(req, res) {
         body: params,
       });
 
-      const atData = await atRes.json();
+      // AT may return plain text on auth failures — parse safely
+      const atRaw = await atRes.text();
+      let atData = {};
+      try { atData = JSON.parse(atRaw); } catch { /* plain text response */ }
+
       if (!atRes.ok) {
-        throw new Error(atData.errorMessage || atData.message || 'Africa\'s Talking API request failed');
+        throw new Error(atData.errorMessage || atData.message || atRaw || 'Africa\'s Talking API request failed');
       }
 
       const recipients = atData?.SMSMessageData?.Recipients || [];

@@ -177,9 +177,12 @@ export async function sendSMS(payload) {
                 body: params,
             });
 
-            const atData = await atRes.json();
+            const atRaw = await atRes.text();
+            let atData = {};
+            try { atData = JSON.parse(atRaw); } catch { /* plain text response */ }
+
             if (!atRes.ok) {
-                throw new Error(atData.errorMessage || atData.message || 'Africa\'s Talking API request failed');
+                throw new Error(atData.errorMessage || atData.message || atRaw || 'Africa\'s Talking API request failed');
             }
 
             return {
