@@ -162,8 +162,7 @@ export default async function handler(req, res) {
       const apiKey = process.env.AFRICASTALKING_API_KEY;
       const senderId = process.env.AFRICASTALKING_SENDER_ID || '';
 
-      const atHost = username === 'sandbox' ? 'api.sandbox.africastalking.com' : 'api.africastalking.com';
-      const atUrl = `https://${atHost}/version1/messaging`;
+      const atUrl = 'https://api.africastalking.com/version1/messaging';
 
       const params = new URLSearchParams();
       params.append('username', username);
