@@ -155,7 +155,50 @@ export default async function handler(req, res) {
 
   const errors = [];
 
-  // Provider 1: Africa's Talking (Primary for East Africa / Rwanda)
+  // Provider 1: Twilio (Instant Live Delivery to Verified Numbers / Upgraded Accounts)
+  if (providerStatus.twilio) {
+    try {
+      const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+      const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+      const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+
+      const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuthToken}`).toString('base64');
+      const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
+
+      const params = new URLSearchParams();
+      params.append('To', formattedPhone);
+      params.append('From', twilioPhone);
+      params.append('Body', textMessage);
+
+      const twilioRes = await fetch(twilioUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params,
+      });
+
+      const twilioData = await twilioRes.json();
+      if (!twilioRes.ok) {
+        throw new Error(twilioData.message || 'Twilio SMS send failed');
+      }
+
+      console.log(`[SMS SUCCESS] Twilio delivered SMS to ${formattedPhone}, SID: ${twilioData.sid}`);
+      return res.status(200).json({
+        success: true,
+        provider: 'twilio',
+        sid: twilioData.sid,
+        to: formattedPhone,
+        message: textMessage,
+      });
+    } catch (err) {
+      console.error('Twilio dispatch error:', err.message);
+      errors.push(`Twilio: ${err.message}`);
+    }
+  }
+
+  // Provider 2: Africa's Talking
   if (providerStatus.africastalking) {
     try {
       const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
@@ -198,48 +241,6 @@ export default async function handler(req, res) {
     } catch (err) {
       console.error('Africa\'s Talking dispatch error:', err.message);
       errors.push(`Africa's Talking: ${err.message}`);
-    }
-  }
-
-  // Provider 2: Twilio
-  if (providerStatus.twilio) {
-    try {
-      const twilioSid = process.env.TWILIO_ACCOUNT_SID;
-      const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-      const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
-
-      const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuthToken}`).toString('base64');
-      const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
-
-      const params = new URLSearchParams();
-      params.append('To', formattedPhone);
-      params.append('From', twilioPhone);
-      params.append('Body', textMessage);
-
-      const twilioRes = await fetch(twilioUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': authHeader,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params,
-      });
-
-      const twilioData = await twilioRes.json();
-      if (!twilioRes.ok) {
-        throw new Error(twilioData.message || 'Twilio SMS send failed');
-      }
-
-      return res.status(200).json({
-        success: true,
-        provider: 'twilio',
-        sid: twilioData.sid,
-        to: formattedPhone,
-        message: textMessage,
-      });
-    } catch (err) {
-      console.error('Twilio dispatch error:', err.message);
-      errors.push(`Twilio: ${err.message}`);
     }
   }
 

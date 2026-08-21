@@ -116,7 +116,43 @@ export async function sendSMS(payload) {
 
     const errors = [];
 
-    // Provider 1: Africa's Talking
+    // Provider 1: Twilio
+    if (providerStatus.twilio) {
+        try {
+            const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+            const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+            const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+
+            const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuthToken}`).toString('base64');
+            const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
+
+            const params = new URLSearchParams();
+            params.append('To', formattedPhone);
+            params.append('From', twilioPhone);
+            params.append('Body', textMessage);
+
+            const twilioRes = await fetch(twilioUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': authHeader,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params,
+            });
+
+            const responseData = await twilioRes.json();
+            if (!twilioRes.ok) {
+                throw new Error(responseData.message || 'Twilio SMS send failed');
+            }
+
+            return { success: true, provider: 'twilio', sid: responseData.sid, to: formattedPhone, message: textMessage };
+        } catch (err) {
+            console.error('Twilio dispatch error:', err.message);
+            errors.push(`Twilio: ${err.message}`);
+        }
+    }
+
+    // Provider 2: Africa's Talking
     if (providerStatus.africastalking) {
         try {
             const username = process.env.AFRICASTALKING_USERNAME || 'sandbox';
@@ -155,42 +191,6 @@ export async function sendSMS(payload) {
         } catch (err) {
             console.error('Africa\'s Talking dispatch error:', err.message);
             errors.push(`Africa's Talking: ${err.message}`);
-        }
-    }
-
-    // Provider 2: Twilio
-    if (providerStatus.twilio) {
-        try {
-            const twilioSid = process.env.TWILIO_ACCOUNT_SID;
-            const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-            const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
-
-            const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuthToken}`).toString('base64');
-            const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
-
-            const params = new URLSearchParams();
-            params.append('To', formattedPhone);
-            params.append('From', twilioPhone);
-            params.append('Body', textMessage);
-
-            const twilioRes = await fetch(twilioUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': authHeader,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: params,
-            });
-
-            const responseData = await twilioRes.json();
-            if (!twilioRes.ok) {
-                throw new Error(responseData.message || 'Twilio SMS send failed');
-            }
-
-            return { success: true, provider: 'twilio', sid: responseData.sid, to: formattedPhone, message: textMessage };
-        } catch (err) {
-            console.error('Twilio dispatch error:', err.message);
-            errors.push(`Twilio: ${err.message}`);
         }
     }
 
