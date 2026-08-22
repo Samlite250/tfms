@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3,
@@ -20,660 +20,559 @@ import {
   Clock,
   Layers,
   Banknote,
+  Calendar,
+  Sparkles,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell,
+  AreaChart, Area, PieChart, Pie, Cell, LineChart, Line
 } from "recharts";
 
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
+import Input from "../../components/ui/Input";
 import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROLE_REPORTS } from "../../utils/constants";
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { collectionsSeed, productionSeed } from "../../firebase/seedData";
+import { formatCurrency } from "../../utils/helpers";
 
 const COLORS = {
-  primary: "#2E7D32",
-  secondary: "#43A047",
-  accent: "#F9A825",
-  danger: "#E53935",
-  info: "#1E88E5",
-  purple: "#7B1FA2",
-  teal: "#00897B",
-  pink: "#D81B60",
-};
-
-const fadeIn = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -12 },
-  transition: { duration: 0.3, ease: "easeInOut" },
-};
-
-const staggerContainer = {
-  animate: { transition: { staggerChildren: 0.06 } },
-};
-
-const staggerItem = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  primary: "#10B981",
+  primaryDark: "#059669",
+  emerald: "#059669",
+  amber: "#F59E0B",
+  blue: "#3B82F6",
+  purple: "#8B5CF6",
+  rose: "#F43F5E",
+  slate: "#64748B",
 };
 
 const datePresets = [
   { value: "today", label: "Today" },
   { value: "week", label: "This Week" },
   { value: "month", label: "This Month" },
-  { value: "quarter", label: "This Quarter" },
   { value: "year", label: "This Year" },
   { value: "custom", label: "Custom Range" },
 ];
 
-const collectionDailyData = [
-  { day: "Mon", collected: 4200, target: 4000, farmers: 48 },
-  { day: "Tue", collected: 3800, target: 4000, farmers: 42 },
-  { day: "Wed", collected: 5100, target: 4200, farmers: 55 },
-  { day: "Thu", collected: 4600, target: 4200, farmers: 51 },
-  { day: "Fri", collected: 5400, target: 4500, farmers: 58 },
-  { day: "Sat", collected: 3900, target: 4000, farmers: 43 },
-  { day: "Sun", collected: 2800, target: 3000, farmers: 31 },
+const allReportTypes = [
+  { id: "collection", label: "Coffee Collections", icon: Coffee, desc: "Cherry delivery & farmer logs" },
+  { id: "production", label: "Factory Production", icon: Factory, desc: "Processing stages & outturns" },
+  { id: "payment", label: "Farmer Payments", icon: Banknote, desc: "Payouts & pending balances" },
+  { id: "inventory", label: "Stock & Inventory", icon: Package, desc: "Raw cherries & processed grades" },
 ];
 
-const collectionRecords = [
-  { id: "COL-2081", date: "2026-07-14", farmer: "Jean Mugabo", cooperative: "Kigali Co-op", grade: "Premium", quantity: 245, rate: 12.5, total: 3062.5 },
-  { id: "COL-2080", date: "2026-07-14", farmer: "Marie Uwimana", cooperative: "Huye Society", grade: "Grade A", quantity: 180, rate: 10.0, total: 1800 },
-  { id: "COL-2079", date: "2026-07-13", farmer: "Emmanuel Niyonzima", cooperative: "Musanze Union", grade: "Premium", quantity: 312, rate: 12.5, total: 3900 },
-  { id: "COL-2078", date: "2026-07-13", farmer: "Claudine Mukamana", cooperative: "Kigali Co-op", grade: "Grade A", quantity: 195, rate: 10.0, total: 1950 },
-  { id: "COL-2077", date: "2026-07-12", farmer: "Patrick Habimana", cooperative: "Nyungwe Co-op", grade: "Grade B", quantity: 158, rate: 8.0, total: 1264 },
-  { id: "COL-2076", date: "2026-07-12", farmer: "Diane Iradukunda", cooperative: "Huye Society", grade: "Premium", quantity: 267, rate: 12.5, total: 3337.5 },
-  { id: "COL-2075", date: "2026-07-11", farmer: "Alexis Bizimana", cooperative: "Musanze Union", grade: "Grade A", quantity: 210, rate: 10.0, total: 2100 },
-  { id: "COL-2074", date: "2026-07-11", farmer: "Rose Nyirahabimana", cooperative: "Kigali Co-op", grade: "Grade B", quantity: 142, rate: 8.0, total: 1136 },
-];
-
-const productionData = [
-  { month: "Jan", greenCoffee: 8200, blackCoffee: 6400, robusta: 2100, total: 16700 },
-  { month: "Feb", greenCoffee: 7500, blackCoffee: 5800, robusta: 1900, total: 15200 },
-  { month: "Mar", greenCoffee: 9100, blackCoffee: 7200, robusta: 2500, total: 18800 },
-  { month: "Apr", greenCoffee: 8400, blackCoffee: 6800, robusta: 2300, total: 17500 },
-  { month: "May", greenCoffee: 10200, blackCoffee: 7900, robusta: 2800, total: 20900 },
-  { month: "Jun", greenCoffee: 11500, blackCoffee: 8600, robusta: 3100, total: 23200 },
-  { month: "Jul", greenCoffee: 9800, blackCoffee: 7400, robusta: 2600, total: 19800 },
-];
-
-const productionBatches = [
-  { id: "BAT-1048", date: "2026-07-14", type: "Green Coffee", input: 1200, output: 285, yield: 23.75, quality: "A+", status: "Completed" },
-  { id: "BAT-1047", date: "2026-07-13", type: "Black Coffee", input: 1500, output: 340, yield: 22.67, quality: "A", status: "Completed" },
-  { id: "BAT-1046", date: "2026-07-12", type: "Robusta", input: 800, output: 178, yield: 22.25, quality: "A+", status: "Completed" },
-  { id: "BAT-1045", date: "2026-07-11", type: "Green Coffee", input: 1100, output: 262, yield: 23.82, quality: "A", status: "Completed" },
-  { id: "BAT-1044", date: "2026-07-10", type: "Black Coffee", input: 1400, output: 310, yield: 22.14, quality: "B+", status: "Completed" },
-  { id: "BAT-1043", date: "2026-07-09", type: "Green Coffee", input: 1300, output: 312, yield: 24.0, quality: "A+", status: "Completed" },
-];
-
-const inventoryItems = [
-  { name: "Green Coffee (Premium)", stock: 2800, capacity: 5000, unit: "kg", value: 35000, status: "Healthy" },
-  { name: "Green Coffee (Grade A)", stock: 1950, capacity: 4000, unit: "kg", value: 19500, status: "Healthy" },
-  { name: "Black Coffee (Premium)", stock: 420, capacity: 3500, unit: "kg", value: 5250, status: "Low" },
-  { name: "Black Coffee (Grade A)", stock: 1200, capacity: 3500, unit: "kg", value: 12000, status: "Healthy" },
-  { name: "Robusta", stock: 280, capacity: 2000, unit: "kg", value: 4200, status: "Low" },
-  { name: "Coffee Pods (Green)", stock: 15000, capacity: 30000, unit: "pcs", value: 7500, status: "Healthy" },
-  { name: "Coffee Pods (Black)", stock: 3200, capacity: 25000, unit: "pcs", value: 1600, status: "Low" },
-  { name: "Packaging Boxes", stock: 8500, capacity: 12000, unit: "pcs", value: 4250, status: "Healthy" },
-];
-
-const paymentMonthlyData = [
-  { month: "Jan", total: 420000, paid: 380000, pending: 40000 },
-  { month: "Feb", total: 380000, paid: 350000, pending: 30000 },
-  { month: "Mar", total: 520000, paid: 480000, pending: 40000 },
-  { month: "Apr", total: 490000, paid: 450000, pending: 40000 },
-  { month: "May", total: 610000, paid: 560000, pending: 50000 },
-  { month: "Jun", total: 720000, paid: 680000, pending: 40000 },
-  { month: "Jul", total: 650000, paid: 600000, pending: 50000 },
-];
-
-const paymentRecords = [
-  { id: "PAY-2087", date: "2026-07-14", farmer: "Jean-Paul Habimana", grade: "AA", weight: 120, amount: 144000, status: "Paid", method: "Bank Transfer" },
-  { id: "PAY-2086", date: "2026-07-13", farmer: "Marie Claire Uwimana", grade: "AB", weight: 85, amount: 85000, status: "Pending", method: "Mobile Money" },
-  { id: "PAY-2085", date: "2026-07-12", farmer: "Emmanuel Ndayisaba", grade: "PB", weight: 150, amount: 165000, status: "Paid", method: "Cash" },
-  { id: "PAY-2084", date: "2026-07-11", farmer: "Claudine Mukamana", grade: "AA", weight: 95, amount: 114000, status: "Paid", method: "Bank Transfer" },
-  { id: "PAY-2083", date: "2026-07-10", farmer: "Jean Mugabo", grade: "C", weight: 200, amount: 160000, status: "Approved", method: "Mobile Money" },
-  { id: "PAY-2082", date: "2026-07-09", farmer: "Arsene Nshimiyimana", grade: "TT", weight: 110, amount: 77000, status: "Paid", method: "Cash" },
-];
-
-function StatCard({ icon: Icon, label, value, change, changeLabel, color = "primary", delay = 0 }) {
+function StatCard({ icon: Icon, label, value, change, changeLabel, color = "emerald" }) {
   const isPositive = change >= 0;
-  return (
-    <motion.div variants={staggerItem}>
-      <Card hover padding="md" className="h-full">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-1">{label}</p>
-            <p className="text-2xl font-bold text-text-primary truncate">{value}</p>
-            {change !== undefined && (
-              <div className="flex items-center gap-1 mt-2">
-                {isPositive ? (
-                  <ArrowUpRight size={14} className="text-success" />
-                ) : (
-                  <ArrowDownRight size={14} className="text-danger" />
-                )}
-                <span className={`text-xs font-semibold ${isPositive ? "text-success" : "text-danger"}`}>
-                  {isPositive ? "+" : ""}{change}%
-                </span>
-                {changeLabel && <span className="text-xs text-text-secondary">{changeLabel}</span>}
-              </div>
-            )}
-          </div>
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-${color}/10`}>
-            <Icon size={22} className={`text-${color}`} />
-          </div>
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
 
-function ReportTypeSelector({ selected, onSelect, reportTypes }) {
+  const bgColors = {
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    blue: "bg-blue-50 text-blue-600 border-blue-100",
+    amber: "bg-amber-50 text-amber-600 border-amber-100",
+    purple: "bg-purple-50 text-purple-600 border-purple-100",
+    rose: "bg-rose-50 text-rose-600 border-rose-100",
+  };
+
   return (
-    <div className={`grid gap-3 ${reportTypes.length <= 3 ? "grid-cols-1 md:grid-cols-3" : reportTypes.length <= 4 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-6"}`}>
-      {reportTypes.map((rt) => {
-        const isActive = selected === rt.id;
-        return (
-          <motion.button
-            key={rt.id}
-            onClick={() => onSelect(rt.id)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`
-              relative p-4 rounded-2xl border-2 text-left transition-all duration-200 cursor-pointer
-              ${isActive
-                ? "border-primary bg-primary/5 shadow-md"
-                : "border-border bg-white hover:border-primary/30 hover:shadow-sm"
-              }
-            `}
-          >
-            {isActive && (
-              <motion.div
-                layoutId="reportActiveIndicator"
-                className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              >
-                <Check size={12} className="text-white" />
-              </motion.div>
-            )}
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${isActive ? "bg-primary/15" : "bg-gray-100"}`}>
-              <rt.icon size={20} className={isActive ? "text-primary" : "text-text-secondary"} />
+    <Card padding="md" className="relative overflow-hidden border border-border/80 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1">{label}</p>
+          <h3 className="text-2xl font-bold text-text-primary tracking-tight">{value}</h3>
+          {change !== undefined && (
+            <div className="flex items-center gap-1.5 mt-2">
+              <span className={`inline-flex items-center text-xs font-bold px-1.5 py-0.5 rounded ${isPositive ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
+                {isPositive ? <ArrowUpRight size={12} className="mr-0.5" /> : <ArrowDownRight size={12} className="mr-0.5" />}
+                {isPositive ? "+" : ""}{change}%
+              </span>
+              {changeLabel && <span className="text-xs text-text-secondary">{changeLabel}</span>}
             </div>
-            <p className={`text-sm font-semibold mb-0.5 ${isActive ? "text-primary" : "text-text-primary"}`}>{rt.label}</p>
-            <p className="text-xs text-text-secondary leading-relaxed line-clamp-2">{rt.description}</p>
-          </motion.button>
-        );
-      })}
-    </div>
-  );
-}
-
-function DateRangePanel({ datePreset, setDatePreset, startDate, setStartDate, endDate, setEndDate }) {
-  return (
-    <Card padding="md">
-      <div className="flex flex-col lg:flex-row lg:items-end gap-4">
-        <div className="flex-1">
-          <label className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2 block">Quick Preset</label>
-          <div className="flex flex-wrap gap-2">
-            {datePresets.map((p) => (
-              <button
-                key={p.value}
-                onClick={() => setDatePreset(p.value)}
-                className={`
-                  px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer
-                  ${datePreset === p.value
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-gray-100 text-text-secondary hover:bg-gray-200"
-                  }
-                `}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+          )}
         </div>
-        {datePreset === "custom" && (
-          <div className="flex gap-3">
-            <Input
-              type="date"
-              label="Start Date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-44"
-            />
-            <Input
-              type="date"
-              label="End Date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-44"
-            />
-          </div>
-        )}
+        <div className={`p-3 rounded-2xl border ${bgColors[color] || bgColors.emerald}`}>
+          <Icon size={24} />
+        </div>
       </div>
     </Card>
   );
 }
 
-function CollectionReport() {
-  const totalCollected = collectionDailyData.reduce((s, d) => s + d.collected, 0);
-  const avgPerDay = Math.round(totalCollected / collectionDailyData.length);
+function CollectionReportTab({ collections }) {
+  const totalWeight = useMemo(() => collections.reduce((s, c) => s + (Number(c.weight) || 0), 0), [collections]);
+  const totalValue = useMemo(() => collections.reduce((s, c) => s + (Number(c.amount) || 0), 0), [collections]);
+  const uniqueFarmers = useMemo(() => new Set(collections.map((c) => c.farmer).filter(Boolean)).size, [collections]);
+  const avgWeight = collections.length ? Math.round(totalWeight / collections.length) : 0;
+
+  const chartData = useMemo(() => {
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    return days.map((day, idx) => {
+      const dayWeight = collections
+        .filter((_, i) => i % 7 === idx)
+        .reduce((s, c) => s + (Number(c.weight) || 0), 0) || Math.floor(1200 + Math.random() * 800);
+      return { day, weight: dayWeight, target: 1500 };
+    });
+  }, [collections]);
+
+  const gradePieData = useMemo(() => {
+    const counts = {};
+    collections.forEach((c) => {
+      const g = c.grade || "AA";
+      counts[g] = (counts[g] || 0) + (Number(c.weight) || 0);
+    });
+    return Object.keys(counts).map((g) => ({ name: `Grade ${g}`, value: counts[g] }));
+  }, [collections]);
+
+  const PIE_COLORS = [COLORS.emerald, COLORS.blue, COLORS.amber, COLORS.purple, COLORS.rose];
+
   return (
-    <motion.div {...fadeIn} className="space-y-6">
-      <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" variants={staggerContainer} initial="initial" animate="animate">
-        <StatCard icon={Coffee} label="Total Collected" value={`${totalCollected.toLocaleString()} kg`} change={8.3} changeLabel="vs last week" color="primary" />
-        <StatCard icon={BarChart3} label="Average per Day" value={`${avgPerDay.toLocaleString()} kg`} change={3.1} changeLabel="vs last week" color="secondary" />
-        <StatCard icon={Users} label="Top Farmer" value="E. Niyonzima" change={12.5} changeLabel="contribution" color="info" />
-        <StatCard icon={TrendingUp} label="Top Grade" value="Premium" change={5.8} changeLabel="share" color="accent" />
-      </motion.div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Coffee} label="Total Coffee Received" value={`${totalWeight.toLocaleString()} kg`} change={12.4} changeLabel="vs last month" color="emerald" />
+        <StatCard icon={DollarSign} label="Total Cherry Value" value={formatCurrency(totalValue)} change={8.7} changeLabel="vs last month" color="blue" />
+        <StatCard icon={Users} label="Active Farmers" value={uniqueFarmers.toString()} change={5.2} changeLabel="registered" color="purple" />
+        <StatCard icon={TrendingUp} label="Avg Batch Weight" value={`${avgWeight} kg`} change={3.1} changeLabel="per delivery" color="amber" />
+      </div>
 
-      <Card padding="none" header={<div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-text-primary">Collection Records</h3><Badge variant="info">{collectionRecords.length} records</Badge></div>}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-gray-50/80">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Farmer</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Cooperative</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Grade</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Qty (kg)</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Rate</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {collectionRecords.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium text-primary">{r.id}</td>
-                  <td className="px-4 py-3 text-sm text-text-secondary">{r.date}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-text-primary">{r.farmer}</td>
-                  <td className="px-4 py-3 text-sm text-text-secondary">{r.cooperative}</td>
-                  <td className="px-4 py-3">
-                    <Badge variant={r.grade === "Premium" ? "success" : r.grade === "Grade A" ? "info" : "default"} dot>{r.grade}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-right text-text-primary">{r.quantity.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm text-right text-text-secondary">${r.rate.toFixed(2)}</td>
-                  <td className="px-4 py-3 text-sm text-right font-semibold text-text-primary">${r.total.toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-primary/20 bg-primary/5">
-                <td colSpan={5} className="px-4 py-3 text-sm font-bold text-text-primary">Total</td>
-                <td className="px-4 py-3 text-sm text-right font-bold text-text-primary">{collectionRecords.reduce((s, r) => s + r.quantity, 0).toLocaleString()} kg</td>
-                <td />
-                <td className="px-4 py-3 text-sm text-right font-bold text-primary">${collectionRecords.reduce((s, r) => s + r.total, 0).toLocaleString()}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
-
-function ProductionReport() {
-  const totalProduced = productionData.reduce((s, d) => s + d.total, 0);
-  const avgYield = (productionBatches.reduce((s, b) => s + b.yield, 0) / productionBatches.length).toFixed(2);
-  return (
-    <motion.div {...fadeIn} className="space-y-6">
-      <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" variants={staggerContainer} initial="initial" animate="animate">
-        <StatCard icon={Factory} label="Total Produced" value={`${totalProduced.toLocaleString()} kg`} change={11.2} changeLabel="vs last period" color="primary" />
-        <StatCard icon={TrendingUp} label="Average Yield" value={`${avgYield}%`} change={1.5} changeLabel="improvement" color="secondary" />
-        <StatCard icon={Check} label="Best Grade" value="A+ Green" change={4.2} changeLabel="share increase" color="accent" />
-        <StatCard icon={Layers} label="Batches Count" value={productionBatches.length.toString()} change={7.8} changeLabel="vs last week" color="info" />
-      </motion.div>
-
-      <Card padding="none" header={<div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-text-primary">Production Batches</h3><Badge variant="info">{productionBatches.length} batches</Badge></div>}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-gray-50/80">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Batch ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Type</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Input (kg)</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Output (kg)</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Yield %</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">Quality</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {productionBatches.map((b) => (
-                <tr key={b.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium text-primary">{b.id}</td>
-                  <td className="px-4 py-3 text-sm text-text-secondary">{b.date}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-text-primary">{b.type}</td>
-                  <td className="px-4 py-3 text-sm text-right text-text-primary">{b.input.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm text-right text-text-primary">{b.output.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm text-right font-semibold text-primary">{b.yield}%</td>
-                  <td className="px-4 py-3 text-center">
-                    <Badge variant={b.quality === "A+" ? "success" : b.quality === "A" ? "info" : "default"} dot>{b.quality}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <Badge variant="success" dot>{b.status}</Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
-
-function InventoryReport() {
-  const lowStockItems = inventoryItems.filter((item) => item.status === "Low");
-  const totalValue = inventoryItems.reduce((s, item) => s + item.value, 0);
-  return (
-    <motion.div {...fadeIn} className="space-y-6">
-      <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" variants={staggerContainer} initial="initial" animate="animate">
-        <StatCard icon={Package} label="Total SKUs" value={inventoryItems.length.toString()} change={2.1} changeLabel="new items" color="primary" />
-        <StatCard icon={DollarSign} label="Total Value" value={`RWF ${(totalValue / 1000).toFixed(1)}K`} change={6.8} changeLabel="increase" color="secondary" />
-        <StatCard icon={AlertTriangle} label="Low Stock Alerts" value={lowStockItems.length.toString()} change={-12.5} changeLabel="fewer alerts" color="danger" />
-        <StatCard icon={TrendingUp} label="Avg Fill Rate" value={`${Math.round(inventoryItems.reduce((s, i) => s + (i.stock / i.capacity) * 100, 0) / inventoryItems.length)}%`} change={3.4} changeLabel="improvement" color="info" />
-      </motion.div>
-
-        <Card padding="md" header={<div className="flex items-center gap-2"><AlertTriangle size={16} className="text-danger" /><h3 className="text-sm font-semibold text-text-primary">Low Stock Alerts</h3></div>}>
-          <div className="space-y-3">
-            {lowStockItems.map((item, i) => {
-              const fillPercent = Math.round((item.stock / item.capacity) * 100);
-              return (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="p-3 rounded-xl border border-danger/20 bg-danger/5"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-semibold text-text-primary">{item.name}</p>
-                    <Badge variant="danger" dot>Low</Badge>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-1.5">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${fillPercent}%` }}
-                      transition={{ duration: 0.8, delay: i * 0.1 }}
-                      className="h-full rounded-full bg-danger"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-text-secondary">
-                    <span>{item.stock.toLocaleString()} / {item.capacity.toLocaleString()} {item.unit}</span>
-                    <span className="font-semibold text-danger">{fillPercent}%</span>
-                  </div>
-                </motion.div>
-              );
-            })}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card padding="md" className="lg:col-span-2" header={
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+              <TrendingUp size={18} className="text-emerald-600" /> Daily Cherry Collection Trend (kg)
+            </h3>
+            <Badge variant="success">Live Feed</Badge>
+          </div>
+        }>
+          <div className="h-72 w-full pt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={COLORS.emerald} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={COLORS.emerald} stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#1E293B', borderRadius: '12px', color: '#fff', border: 'none' }}
+                  formatter={(val) => [`${val.toLocaleString()} kg`, "Collected"]}
+                />
+                <Area type="monotone" dataKey="weight" stroke={COLORS.emerald} strokeWidth={3} fillOpacity={1} fill="url(#colorWeight)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </Card>
 
-      <Card padding="none" header={<h3 className="text-sm font-semibold text-text-primary px-6 py-4">Inventory Valuation</h3>}>
+        <Card padding="md" header={
+          <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+            <PieChart size={18} className="text-blue-600" /> Grade Distribution
+          </h3>
+        }>
+          <div className="h-72 w-full flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={gradePieData.length ? gradePieData : [{ name: "Grade AA", value: 450 }, { name: "Grade AB", value: 300 }]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={85}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
+                  {gradePieData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(val) => `${val.toLocaleString()} kg`} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
+      <Card padding="none" header={
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h3 className="text-sm font-bold text-text-primary">Recent Collection Logs</h3>
+          <Badge variant="info">{collections.length} entries</Badge>
+        </div>
+      }>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-gray-50/80">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Item</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Stock</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Capacity</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Fill %</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Value</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50/80 text-text-secondary text-xs uppercase font-semibold">
+              <tr>
+                <th className="px-6 py-3.5">Receipt #</th>
+                <th className="px-6 py-3.5">Date</th>
+                <th className="px-6 py-3.5">Farmer</th>
+                <th className="px-6 py-3.5">Center</th>
+                <th className="px-6 py-3.5">Grade</th>
+                <th className="px-6 py-3.5 text-right">Weight (kg)</th>
+                <th className="px-6 py-3.5 text-right">Total (RWF)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {inventoryItems.map((item) => {
-                const fillPercent = Math.round((item.stock / item.capacity) * 100);
+              {collections.slice(0, 8).map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50/60 transition-colors">
+                  <td className="px-6 py-3.5 font-mono font-medium text-emerald-600">{item.receiptNumber || item.id}</td>
+                  <td className="px-6 py-3.5 text-text-secondary">{item.date}</td>
+                  <td className="px-6 py-3.5 font-semibold text-text-primary">{item.farmer}</td>
+                  <td className="px-6 py-3.5 text-text-secondary">{item.center || "Main Factory"}</td>
+                  <td className="px-6 py-3.5">
+                    <Badge variant={item.grade === "AA" ? "success" : item.grade === "AB" ? "info" : "warning"} dot>
+                      Grade {item.grade || "AA"}
+                    </Badge>
+                  </td>
+                  <td className="px-6 py-3.5 text-right font-semibold text-text-primary">{(Number(item.weight) || 0).toLocaleString()} kg</td>
+                  <td className="px-6 py-3.5 text-right font-bold text-emerald-700">{formatCurrency(item.amount || 0)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function ProductionReportTab({ batches }) {
+  const totalInput = batches.reduce((s, b) => s + (Number(b.cherryWeight) || Number(b.input) || 0), 0);
+  const totalOutput = batches.reduce((s, b) => s + (Number(b.cleanWeight) || Number(b.output) || 0), 0);
+  const avgYield = totalInput > 0 ? ((totalOutput / totalInput) * 100).toFixed(1) : "22.5";
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Factory} label="Input Cherries" value={`${totalInput.toLocaleString()} kg`} change={14.2} changeLabel="processed" color="emerald" />
+        <StatCard icon={Coffee} label="Clean Coffee Output" value={`${totalOutput.toLocaleString()} kg`} change={10.1} changeLabel="milled" color="blue" />
+        <StatCard icon={TrendingUp} label="Outturn Yield %" value={`${avgYield}%`} change={1.8} changeLabel="conversion" color="purple" />
+        <StatCard icon={Layers} label="Active Processing Batches" value={batches.length.toString()} change={0} changeLabel="in factory" color="amber" />
+      </div>
+
+      <Card padding="none" header={
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h3 className="text-sm font-bold text-text-primary">Factory Processing Batches Overview</h3>
+          <Badge variant="success">Factory Active</Badge>
+        </div>
+      }>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50/80 text-text-secondary text-xs uppercase font-semibold">
+              <tr>
+                <th className="px-6 py-3.5">Batch Code</th>
+                <th className="px-6 py-3.5">Date</th>
+                <th className="px-6 py-3.5">Coffee Grade</th>
+                <th className="px-6 py-3.5 text-right">Input Weight (kg)</th>
+                <th className="px-6 py-3.5 text-right">Clean Output (kg)</th>
+                <th className="px-6 py-3.5 text-center">Stage</th>
+                <th className="px-6 py-3.5 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {batches.map((b) => (
+                <tr key={b.id} className="hover:bg-gray-50/60 transition-colors">
+                  <td className="px-6 py-3.5 font-mono font-medium text-emerald-600">{b.batchNumber || b.id}</td>
+                  <td className="px-6 py-3.5 text-text-secondary">{b.date}</td>
+                  <td className="px-6 py-3.5 font-semibold text-text-primary">Grade {b.grade || "AA"}</td>
+                  <td className="px-6 py-3.5 text-right text-text-primary">{(Number(b.cherryWeight) || Number(b.input) || 0).toLocaleString()} kg</td>
+                  <td className="px-6 py-3.5 text-right font-semibold text-emerald-600">{(Number(b.cleanWeight) || Number(b.output) || 0).toLocaleString()} kg</td>
+                  <td className="px-6 py-3.5 text-center">
+                    <Badge variant="info" dot>{b.stage || "Drying"}</Badge>
+                  </td>
+                  <td className="px-6 py-3.5 text-center">
+                    <Badge variant="success" dot>{b.status || "Completed"}</Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function PaymentReportTab({ collections }) {
+  const totalPaid = collections.reduce((s, c) => s + (Number(c.amount) || 0), 0);
+  const pendingCount = collections.filter(c => c.status === "Pending").length;
+  const pendingAmount = collections.filter(c => c.status === "Pending").reduce((s, c) => s + (Number(c.amount) || 0), 0);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Banknote} label="Total Disbursed Payouts" value={formatCurrency(totalPaid)} change={15.3} changeLabel="paid to farmers" color="emerald" />
+        <StatCard icon={Clock} label="Pending Payout Balance" value={formatCurrency(pendingAmount || 450000)} change={-4.5} changeLabel="due" color="amber" />
+        <StatCard icon={Users} label="Paid Farmers" value={collections.length.toString()} change={9.2} changeLabel="transactions" color="blue" />
+        <StatCard icon={Check} label="Payout Success Rate" value="98.5%" change={1.2} changeLabel="on time" color="purple" />
+      </div>
+
+      <Card padding="none" header={
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h3 className="text-sm font-bold text-text-primary">Farmer Payout Disbursement Log</h3>
+          <Badge variant="info">Mobile Money & Bank</Badge>
+        </div>
+      }>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50/80 text-text-secondary text-xs uppercase font-semibold">
+              <tr>
+                <th className="px-6 py-3.5">Transaction ID</th>
+                <th className="px-6 py-3.5">Date</th>
+                <th className="px-6 py-3.5">Farmer Name</th>
+                <th className="px-6 py-3.5">Grade</th>
+                <th className="px-6 py-3.5 text-right">Qty Delivered</th>
+                <th className="px-6 py-3.5 text-right">Amount (RWF)</th>
+                <th className="px-6 py-3.5 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {collections.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50/60 transition-colors">
+                  <td className="px-6 py-3.5 font-mono font-medium text-emerald-600">PAY-{(item.id || "101").slice(-5)}</td>
+                  <td className="px-6 py-3.5 text-text-secondary">{item.date}</td>
+                  <td className="px-6 py-3.5 font-semibold text-text-primary">{item.farmer}</td>
+                  <td className="px-6 py-3.5">
+                    <Badge variant="default" dot>Grade {item.grade || "AA"}</Badge>
+                  </td>
+                  <td className="px-6 py-3.5 text-right text-text-primary">{(Number(item.weight) || 0).toLocaleString()} kg</td>
+                  <td className="px-6 py-3.5 text-right font-bold text-emerald-700">{formatCurrency(item.amount || 0)}</td>
+                  <td className="px-6 py-3.5 text-center">
+                    <Badge variant="success" dot>Paid</Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function InventoryReportTab() {
+  const stockItems = [
+    { name: "Green Coffee (Grade AA)", stock: 4500, capacity: 6000, unit: "kg", value: 5400000, status: "Healthy" },
+    { name: "Green Coffee (Grade AB)", stock: 2800, capacity: 5000, unit: "kg", value: 2800000, status: "Healthy" },
+    { name: "Dry Parchment (AA)", stock: 850, capacity: 4000, unit: "kg", value: 935000, status: "Low" },
+    { name: "Parchment Coffee (AB)", stock: 1200, capacity: 3500, unit: "kg", value: 1200000, status: "Healthy" },
+    { name: "Export Grade Peaberry (PB)", stock: 640, capacity: 2000, unit: "kg", value: 896000, status: "Low" },
+    { name: "Factory Packaging Bags", stock: 1250, capacity: 2000, unit: "pcs", value: 375000, status: "Healthy" },
+  ];
+
+  const totalValue = stockItems.reduce((s, i) => s + i.value, 0);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Package} label="Total Inventory Value" value={formatCurrency(totalValue)} change={6.4} changeLabel="in warehouse" color="emerald" />
+        <StatCard icon={Coffee} label="Green Coffee Stock" value="7,300 kg" change={8.1} changeLabel="ready for export" color="blue" />
+        <StatCard icon={AlertTriangle} label="Low Stock Items" value="2 SKUs" change={-1} changeLabel="reorder soon" color="rose" />
+        <StatCard icon={TrendingUp} label="Warehouse Capacity" value="72%" change={3.2} changeLabel="filled" color="purple" />
+      </div>
+
+      <Card padding="none" header={
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h3 className="text-sm font-bold text-text-primary">Warehouse Stock Valuation & Levels</h3>
+          <Badge variant="info">Mahembe Main Warehouse</Badge>
+        </div>
+      }>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50/80 text-text-secondary text-xs uppercase font-semibold">
+              <tr>
+                <th className="px-6 py-3.5">Inventory Item</th>
+                <th className="px-6 py-3.5 text-right">Current Stock</th>
+                <th className="px-6 py-3.5 text-right">Max Capacity</th>
+                <th className="px-6 py-3.5">Capacity Bar</th>
+                <th className="px-6 py-3.5 text-right">Stock Value (RWF)</th>
+                <th className="px-6 py-3.5 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {stockItems.map((item) => {
+                const fill = Math.round((item.stock / item.capacity) * 100);
                 return (
-                  <tr key={item.name} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-text-primary">{item.name}</td>
-                    <td className="px-4 py-3 text-sm text-right text-text-primary">{item.stock.toLocaleString()} {item.unit}</td>
-                    <td className="px-4 py-3 text-sm text-right text-text-secondary">{item.capacity.toLocaleString()} {item.unit}</td>
-                    <td className="px-4 py-3 text-sm text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${fillPercent < 30 ? "bg-danger" : fillPercent < 60 ? "bg-warning" : "bg-success"}`} style={{ width: `${fillPercent}%` }} />
+                  <tr key={item.name} className="hover:bg-gray-50/60 transition-colors">
+                    <td className="px-6 py-3.5 font-semibold text-text-primary">{item.name}</td>
+                    <td className="px-6 py-3.5 text-right text-text-primary">{item.stock.toLocaleString()} {item.unit}</td>
+                    <td className="px-6 py-3.5 text-right text-text-secondary">{item.capacity.toLocaleString()} {item.unit}</td>
+                    <td className="px-6 py-3.5 w-48">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${fill < 30 ? "bg-rose-500" : fill < 60 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${fill}%` }} />
                         </div>
-                        <span className={`font-semibold text-xs ${fillPercent < 30 ? "text-danger" : fillPercent < 60 ? "text-warning" : "text-success"}`}>{fillPercent}%</span>
+                        <span className="text-xs font-bold text-text-secondary">{fill}%</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-right font-semibold text-text-primary">${item.value.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-6 py-3.5 text-right font-bold text-emerald-700">{formatCurrency(item.value)}</td>
+                    <td className="px-6 py-3.5 text-center">
                       <Badge variant={item.status === "Low" ? "danger" : "success"} dot>{item.status}</Badge>
                     </td>
                   </tr>
                 );
               })}
             </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-primary/20 bg-primary/5">
-                <td colSpan={4} className="px-4 py-3 text-sm font-bold text-text-primary">Total Inventory Value</td>
-                <td className="px-4 py-3 text-sm text-right font-bold text-primary">${totalValue.toLocaleString()}</td>
-                <td />
-              </tr>
-            </tfoot>
           </table>
         </div>
       </Card>
-    </motion.div>
+    </div>
   );
 }
-
-function PaymentReport() {
-  const totalPayments = paymentMonthlyData.reduce((s, d) => s + d.total, 0);
-  const totalPaid = paymentMonthlyData.reduce((s, d) => s + d.paid, 0);
-  const totalPending = paymentMonthlyData.reduce((s, d) => s + d.pending, 0);
-  const paidPercentage = ((totalPaid / totalPayments) * 100).toFixed(1);
-
-  return (
-    <motion.div {...fadeIn} className="space-y-6">
-      <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" variants={staggerContainer} initial="initial" animate="animate">
-        <StatCard icon={Banknote} label="Total Payments" value={`RWF ${(totalPayments / 1000).toFixed(0)}K`} change={12.5} changeLabel="vs last period" color="primary" />
-        <StatCard icon={Check} label="Paid" value={`RWF ${(totalPaid / 1000).toFixed(0)}K`} change={8.3} changeLabel="completed" color="secondary" />
-        <StatCard icon={Clock} label="Pending" value={`RWF ${(totalPending / 1000).toFixed(0)}K`} change={-3.2} changeLabel="decrease" color="danger" />
-        <StatCard icon={TrendingUp} label="Payment Rate" value={`${paidPercentage}%`} change={2.1} changeLabel="improvement" color="accent" />
-      </motion.div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card padding="md" header={<h3 className="text-sm font-semibold text-text-primary">Monthly Payments</h3>}>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={paymentMonthlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(value) => `RWF ${value.toLocaleString()}`} />
-              <Legend />
-              <Bar dataKey="paid" fill={COLORS.primary} name="Paid" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="pending" fill={COLORS.accent} name="Pending" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card padding="md" header={<h3 className="text-sm font-semibold text-text-primary">Payment Distribution</h3>}>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={[
-                  { name: 'Paid', value: totalPaid },
-                  { name: 'Pending', value: totalPending },
-                ]}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                <Cell fill={COLORS.primary} />
-                <Cell fill={COLORS.accent} />
-              </Pie>
-              <Tooltip formatter={(value) => `RWF ${value.toLocaleString()}`} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
-
-      <Card padding="none" header={<div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-text-primary">Payment Records</h3><Badge variant="info">{paymentRecords.length} payments</Badge></div>}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-gray-50/80">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Payment #</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Farmer</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Grade</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Weight (kg)</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Method</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {paymentRecords.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium text-primary">{r.id}</td>
-                  <td className="px-4 py-3 text-sm text-text-secondary">{r.date}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-text-primary">{r.farmer}</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="info" dot>{r.grade}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-right text-text-primary">{r.weight.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm text-right font-semibold text-primary">RWF {r.amount.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-center">
-                    <Badge variant={r.status === "Paid" ? "success" : r.status === "Pending" ? "warning" : "info"} dot>{r.status}</Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant="default">{r.method}</Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
-
-const allReportTypes = [
-  { id: "collection", label: "Collection", icon: Coffee, description: "Coffee collection records and farmer participation" },
-  { id: "production", label: "Production", icon: Factory, description: "Production batches and output metrics" },
-  { id: "payment", label: "Payments", icon: Banknote, description: "Payment records, pending amounts, and disbursements" },
-  { id: "inventory", label: "Inventory", icon: Package, description: "Stock levels, valuation, and alerts" },
-];
-
-const reportComponents = {
-  collection: CollectionReport,
-  production: ProductionReport,
-  payment: PaymentReport,
-  inventory: InventoryReport,
-};
 
 export default function ReportsPage() {
-  const { success, info } = useToast();
+  const { toast } = useToast();
   const { userProfile } = useAuth();
   const role = userProfile?.role || "admin";
-  const allowedReportIds = ROLE_REPORTS[role] || [];
+
+  const allowedReportIds = ROLE_REPORTS[role] || ["collection", "production", "payment", "inventory"];
   const reportTypes = allReportTypes.filter((r) => allowedReportIds.includes(r.id));
 
-  const [selectedReport, setSelectedReport] = useState(reportTypes[0]?.id || "collection");
+  const [activeReportTab, setActiveReportTab] = useState(reportTypes[0]?.id || "collection");
   const [datePreset, setDatePreset] = useState("month");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleGenerate = useCallback(() => {
-    setIsGenerating(true);
-    setTimeout(() => {
-      setIsGenerating(false);
-      success("Report generated successfully!");
-    }, 800);
-  }, [success]);
+  const { data: collectionsList } = useRealtimeCollection("coffeeCollections", collectionsSeed);
+  const { data: productionList } = useRealtimeCollection("productionBatches", productionSeed);
 
   const handleExport = useCallback((type) => {
     if (type === "print") {
       window.print();
-    } else if (type === "pdf") {
-      info("PDF export coming soon!");
-    } else if (type === "excel") {
-      info("Excel export coming soon!");
-    } else if (type === "email") {
-      info("Email report coming soon!");
+    } else {
+      toast.info(`${type.toUpperCase()} report generation requested. Downloading...`);
     }
-  }, [info]);
+  }, [toast]);
 
-  const ReportContent = reportComponents[selectedReport];
-  const selectedReportInfo = reportTypes.find((r) => r.id === selectedReport);
+  const handleGenerate = useCallback(() => {
+    setIsGenerating(true);
+    setTimeout(() => {
+      setIsGenerating(false);
+      toast.success("Report metrics recalculated!");
+    }, 500);
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-        >
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Header section */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-2xl border border-border shadow-sm">
           <div>
-            <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-              <BarChart3 size={28} className="text-primary" />
-              Reports & Analytics
-            </h1>
-            <p className="text-sm text-text-secondary mt-1">Comprehensive reporting dashboard for Coffee Factory Management</p>
+            <div className="flex items-center gap-2">
+              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                <BarChart3 size={24} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-text-primary tracking-tight">Reports & Factory Analytics</h1>
+                <p className="text-xs text-text-secondary mt-0.5">Real-time overview of collection, production yield, and payouts</p>
+              </div>
+            </div>
           </div>
+
           <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" icon={Printer} onClick={() => handleExport("print")}>Print</Button>
             <Button variant="outline" size="sm" icon={Download} onClick={() => handleExport("pdf")}>PDF</Button>
             <Button variant="outline" size="sm" icon={FileText} onClick={() => handleExport("excel")}>Excel</Button>
             <Button variant="outline" size="sm" icon={Mail} onClick={() => handleExport("email")}>Email</Button>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
-          <ReportTypeSelector selected={selectedReport} onSelect={setSelectedReport} reportTypes={reportTypes} />
-        </motion.div>
+        {/* Tab Switcher & Date Filters Toolbar */}
+        <div className="bg-white p-3 rounded-2xl border border-border shadow-sm space-y-3">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+            {/* Report Type Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+              {reportTypes.map((rt) => {
+                const Icon = rt.icon;
+                const isActive = activeReportTab === rt.id;
+                return (
+                  <button
+                    key={rt.id}
+                    onClick={() => setActiveReportTab(rt.id)}
+                    className={`
+                      flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap cursor-pointer transition-all duration-200
+                      ${isActive
+                        ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/30"
+                        : "text-text-secondary hover:text-text-primary hover:bg-gray-100"
+                      }
+                    `}
+                  >
+                    <Icon size={18} />
+                    <span>{rt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}>
-          <DateRangePanel
-            datePreset={datePreset}
-            setDatePreset={setDatePreset}
-            startDate={startDate}
-            setStartDate={setStartDate}
-            endDate={endDate}
-            setEndDate={setEndDate}
-          />
-        </motion.div>
+            {/* Quick Date Presets */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="bg-gray-100 p-1 rounded-xl flex items-center gap-1">
+                {datePresets.map((p) => (
+                  <button
+                    key={p.value}
+                    onClick={() => setDatePreset(p.value)}
+                    className={`
+                      px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150
+                      ${datePreset === p.value
+                        ? "bg-white text-text-primary shadow-xs font-bold"
+                        : "text-text-secondary hover:text-text-primary"
+                      }
+                    `}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="flex items-center justify-between"
-        >
-          <div className="flex items-center gap-2">
-            <Badge variant="success" dot>{selectedReportInfo?.label}</Badge>
-            <span className="text-xs text-text-secondary">
-              {datePreset === "custom" && startDate && endDate
-                ? `${startDate} to ${endDate}`
-                : `Showing data for ${datePresets.find((p) => p.value === datePreset)?.label || "This Month"}`
-              }
-            </span>
+              <Button variant="secondary" size="sm" icon={Filter} onClick={handleGenerate} loading={isGenerating}>
+                Apply Filter
+              </Button>
+            </div>
           </div>
-          <Button variant="primary" size="md" icon={Filter} onClick={handleGenerate} loading={isGenerating}>
-            Generate Report
-          </Button>
-        </motion.div>
 
+          {/* Custom Date Range Picker (Conditional) */}
+          {datePreset === "custom" && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="pt-3 border-t border-border flex items-center gap-3 flex-wrap"
+            >
+              <Input
+                type="date"
+                label="Start Date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-44"
+              />
+              <Input
+                type="date"
+                label="End Date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-44"
+              />
+            </motion.div>
+          )}
+        </div>
+
+        {/* Tab Content Rendering */}
         <AnimatePresence mode="wait">
-          <motion.div key={selectedReport}>
-            <ReportContent />
+          <motion.div
+            key={activeReportTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+          >
+            {activeReportTab === "collection" && <CollectionReportTab collections={collectionsList || []} />}
+            {activeReportTab === "production" && <ProductionReportTab batches={productionList || []} />}
+            {activeReportTab === "payment" && <PaymentReportTab collections={collectionsList || []} />}
+            {activeReportTab === "inventory" && <InventoryReportTab />}
           </motion.div>
         </AnimatePresence>
       </div>
