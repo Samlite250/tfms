@@ -1,26 +1,20 @@
 function normalizePhoneNumber(phone) {
   if (!phone) return '';
-  // Remove spaces, dashes, parentheses
-  let cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  let cleaned = String(phone).replace(/[\s\-\(\)]/g, '');
 
-  // If Rwanda local number like 07XXXXXXXX (10 digits starting with 07)
-  if (/^07\d{8}$/.test(cleaned)) {
+  if (/^7[2389]\d{7}$/.test(cleaned)) {
+    return `+250${cleaned}`;
+  }
+  if (/^0[71]\d{8}$/.test(cleaned)) {
     return `+250${cleaned.substring(1)}`;
   }
-  // If Kenya local number like 07XXXXXXXX or 01XXXXXXXX
-  if (/^(07|01)\d{8}$/.test(cleaned)) {
-    return `+254${cleaned.substring(1)}`;
-  }
-  // If starts with 2507XXXXXXXX (missing +)
-  if (/^2507\d{8}$/.test(cleaned)) {
+  if (/^250\d{9}$/.test(cleaned)) {
     return `+${cleaned}`;
   }
-  // If starts with + already
   if (cleaned.startsWith('+')) {
     return cleaned;
   }
-  // Default prefix + if digits only
-  if (/^\d{10,15}$/.test(cleaned)) {
+  if (/^\d{9,15}$/.test(cleaned)) {
     return `+${cleaned}`;
   }
 
@@ -98,55 +92,60 @@ export default async function handler(req, res) {
 
   switch (type) {
     case 'registration_confirmation':
-      textMessage = `COMS: Hello ${name || 'User'}, your registration has been received and is pending admin approval. You will receive an SMS when approved.`;
+      textMessage = `Mahembe Factory: Hello ${name || 'User'}, your registration has been received and is pending admin approval. You will receive an SMS when approved.`;
       break;
 
     case 'account_approved': {
       const formattedRole = role ? role.replace(/_/g, ' ').toUpperCase() : 'USER';
-      textMessage = `COMS: Great news ${name || ''}! Your account has been APPROVED with role [${formattedRole}]. You can now sign in at https://mahembefactory.vercel.app/login`;
+      textMessage = `Mahembe Factory: Great news ${name || ''}! Your account has been APPROVED with role [${formattedRole}]. You can now sign in at https://mahembefactory.vercel.app/login`;
       break;
     }
 
     case 'account_rejected':
-      textMessage = `COMS: Hello ${name || ''}, your account registration request for COMS has been rejected. Please contact factory management for assistance.`;
+      textMessage = `Mahembe Factory: Hello ${name || ''}, your account registration request for Mahembe Coffee Factory has been rejected. Please contact factory management for assistance.`;
       break;
 
-    case 'admin_alert':
-      textMessage = `COMS Admin Alert: New registration request from ${user?.displayName || name} (${user?.role || 'User'}). Review at https://mahembefactory.vercel.app/admin`;
+    case 'admin_alert': {
+      const applicantName = user?.displayName || user?.name || name || 'Applicant';
+      const rawRole = user?.role || role || 'User';
+      const formattedRole = rawRole.replace(/_/g, ' ').toUpperCase();
+      const phoneInfo = user?.phone || 'N/A';
+      textMessage = `[Mahembe Factory] Admin Alert: New registration request from ${applicantName} (${formattedRole}, Phone: ${phoneInfo}). Review at https://mahembefactory.vercel.app/admin`;
       break;
+    }
 
     case 'coffee_received': {
       const formattedTotal = totalPrice ? ` Total: RWF ${Number(totalPrice).toLocaleString()}.` : '';
-      textMessage = `COMS: Coffee delivery received! Receipt #${receiptNumber || 'N/A'}. Weight: ${weight}kg, Grade: ${grade || 'N/A'}, Center: ${center || 'Mahembe'}.${formattedTotal} Pending inspection.`;
+      textMessage = `Mahembe Factory: Coffee delivery received! Receipt #${receiptNumber || 'N/A'}. Weight: ${weight}kg, Grade: ${grade || 'N/A'}, Center: ${center || 'Mahembe'}.${formattedTotal} Pending inspection.`;
       break;
     }
 
     case 'coffee_accepted':
-      textMessage = `COMS: Coffee delivery #${receiptNumber} (${weight}kg, Grade ${grade}) has passed quality check and is ACCEPTED. Payment will be processed soon.`;
+      textMessage = `Mahembe Factory: Coffee delivery #${receiptNumber} (${weight}kg, Grade ${grade}) has passed quality check and is ACCEPTED. Payment will be processed soon.`;
       break;
 
     case 'payment_ready':
-      textMessage = `COMS: Payment of RWF ${Number(amount || 0).toLocaleString()} for Receipt #${receiptNumber} is READY for collection via ${paymentMethod || 'Office Cash/MoMo'}.`;
+      textMessage = `Mahembe Factory: Payment of RWF ${Number(amount || 0).toLocaleString()} for Receipt #${receiptNumber} is READY for collection via ${paymentMethod || 'Office Cash/MoMo'}.`;
       break;
 
     case 'payment_completed':
-      textMessage = `COMS: Payment of RWF ${Number(amount || 0).toLocaleString()} for Receipt #${receiptNumber} has been COMPLETED. Thank you!`;
+      textMessage = `Mahembe Factory: Payment of RWF ${Number(amount || 0).toLocaleString()} for Receipt #${receiptNumber} has been COMPLETED. Thank you!`;
       break;
 
     case 'price_announcement':
-      textMessage = `COMS: New coffee prices announced effective ${effectiveDate || 'immediately'}. Please check COMS portal for grade breakdown.`;
+      textMessage = `Mahembe Factory: New coffee prices announced effective ${effectiveDate || 'immediately'}. Please check Mahembe Factory portal for grade breakdown.`;
       break;
 
     case 'important_notice':
-      textMessage = `COMS Important Notice: ${message || 'Please check your COMS portal for urgent updates.'}`;
+      textMessage = `Mahembe Factory Notice: ${message || 'Please check your Mahembe Factory portal for urgent updates.'}`;
       break;
 
     case 'reminder':
-      textMessage = `COMS Reminder: ${message || 'Friendly reminder from Mahembe Coffee Factory.'}`;
+      textMessage = `Mahembe Factory Reminder: ${message || 'Friendly reminder from Mahembe Coffee Factory.'}`;
       break;
 
     case 'message_notification':
-      textMessage = `COMS Message from ${senderName || 'Staff'}: ${body ? (body.length > 100 ? body.substring(0, 97) + '...' : body) : 'You have a new message.'}`;
+      textMessage = `Mahembe Factory Message from ${senderName || 'Staff'}: ${body ? (body.length > 100 ? body.substring(0, 97) + '...' : body) : 'You have a new message.'}`;
       break;
 
     default:
@@ -205,7 +204,9 @@ export default async function handler(req, res) {
       const apiKey = process.env.AFRICASTALKING_API_KEY;
       const senderId = process.env.AFRICASTALKING_SENDER_ID || '';
 
-      const atUrl = 'https://api.africastalking.com/version1/messaging';
+      const atUrl = username === 'sandbox'
+        ? 'https://api.sandbox.africastalking.com/version1/messaging'
+        : 'https://api.africastalking.com/version1/messaging';
 
       const params = new URLSearchParams();
       params.append('username', username);
@@ -233,7 +234,15 @@ export default async function handler(req, res) {
       }
 
       const recipients = atData?.SMSMessageData?.Recipients || [];
-      const recipientStatus = recipients[0]?.status;
+      const recipient = recipients[0] || {};
+      const recipientStatus = recipient.status;
+      const statusCode = recipient.statusCode;
+
+      const isSuccess = recipientStatus === 'Success' || recipientStatus === 'Sent' || statusCode === 100 || statusCode === 101 || statusCode === 102;
+
+      if (recipients.length > 0 && !isSuccess) {
+        throw new Error(`Africa's Talking status: ${recipientStatus || 'Failed'} (Code ${statusCode || 'unknown'})`);
+      }
 
       return res.status(200).json({
         success: true,
@@ -241,6 +250,7 @@ export default async function handler(req, res) {
         to: formattedPhone,
         message: textMessage,
         details: recipientStatus || 'Message sent',
+        cost: recipient.cost || 'N/A',
       });
     } catch (err) {
       console.error('Africa\'s Talking dispatch error:', err.message);

@@ -1,4 +1,4 @@
-const SMS_API_URL = import.meta.env.VITE_SMS_API_URL || '/api/sms';
+const SMS_API_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SMS_API_URL) ? import.meta.env.VITE_SMS_API_URL : '/api/sms';
 
 export async function checkSMSProviderStatus() {
     try {
@@ -52,9 +52,18 @@ export async function sendAccountRejectedSMS(to, name) {
     return triggerSMS({ type: 'account_rejected', to, name });
 }
 
+export const ADMIN_PHONE_NUMBERS = (
+    typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_ADMIN_PHONE_NUMBERS
+        ? import.meta.env.VITE_ADMIN_PHONE_NUMBERS.split(',')
+        : ['0790268691', '0728927353']
+).map(p => p.trim());
+
 export async function sendAdminAlertSMS(user) {
-    if (!user?.phone) return { success: false, error: 'Admin phone number not configured' };
-    return triggerSMS({ type: 'admin_alert', to: user.phone, user });
+    const adminPhones = ADMIN_PHONE_NUMBERS;
+    const results = await Promise.allSettled(
+        adminPhones.map(phone => triggerSMS({ type: 'admin_alert', to: phone, user }))
+    );
+    return results;
 }
 
 export async function sendMessageNotificationSMS({ to, recipientName, senderName, subject, body }) {

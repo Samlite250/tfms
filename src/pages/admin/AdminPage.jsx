@@ -380,23 +380,41 @@ export default function AdminPage() {
     setDeleteUser(null);
   }
 
-  async function handleDeleteFarmer() {
+  async function handleDeleteFarmer(targetFarmer = deleteFarmer) {
+    const f = targetFarmer || deleteFarmer;
+    if (!f) return;
     try {
-      const farmerId = deleteFarmer.id;
-      await removeFarmer(farmerId);
+      const farmerId = f.id;
+      try {
+        await removeFarmer(farmerId);
+      } catch (err) {
+        console.warn("Remove farmer error:", err);
+      }
 
       try {
         const { supabase } = await import("../../firebase/config");
+        await supabase.from("pending_farmers").delete().eq("id", farmerId);
         await supabase.from("users").delete().eq("id", farmerId);
       } catch (err) {
         console.warn("Failed to delete corresponding user account:", err);
       }
 
-      success(`Farmer "${deleteFarmer.name}" deleted successfully`);
+      try {
+        const storedPending = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+        localStorage.setItem("coms_pending_farmers", JSON.stringify(storedPending.filter((item) => item.id !== farmerId && item.userId !== farmerId)));
+        const storedUsers = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
+        localStorage.setItem("coms_pending_users", JSON.stringify(storedUsers.filter((item) => item.id !== farmerId && item.uid !== farmerId)));
+      } catch { }
+
+      setPendingUsers((prev) => prev.filter((u) => u.id !== farmerId));
+      setUsers((prev) => prev.filter((u) => u.id !== farmerId));
+
+      success(`Farmer/User "${f.displayName || f.name || f.email}" deleted successfully`);
     } catch (err) {
-      toastError(`Failed to delete farmer "${deleteFarmer.name}". ${err.message}`);
+      toastError(`Failed to delete "${f.displayName || f.name}". ${err.message}`);
     }
     setDeleteFarmer(null);
+    setPendingViewUser(null);
   }
 
   function handleToggleStatus(user) {
@@ -1075,6 +1093,16 @@ export default function AdminPage() {
                           >
                             Reject
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            icon={Trash2}
+                            onClick={() => setDeleteFarmer(pendingUser)}
+                            className="text-danger hover:bg-danger/10 hover:text-danger cursor-pointer"
+                            title="Delete permanently"
+                          >
+                            Delete
+                          </Button>
                         </div>
                       </motion.div>
                     ))}
@@ -1430,6 +1458,13 @@ export default function AdminPage() {
               </Button>
               <Button
                 variant="danger"
+                icon={Trash2}
+                onClick={() => { setDeleteFarmer(pendingViewUser); }}
+              >
+                Delete
+              </Button>
+              <Button
+                variant="danger"
                 icon={UserX}
                 onClick={() => { handleRejectUser(pendingViewUser); setPendingViewUser(null); }}
               >
@@ -1585,6 +1620,35 @@ export default function AdminPage() {
           Are you sure you want to approve <span className="font-semibold text-text-primary">{pendingUsers.length} pending user{pendingUsers.length !== 1 ? "s" : ""}</span>?
           They will all be able to log in immediately.
         </p>
+      </Modal>
+
+      {/* Delete Farmer / Pending User Modal */}
+      <Modal
+        isOpen={!!deleteFarmer}
+        onClose={() => setDeleteFarmer(null)}
+        title="Delete Farmer / User"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setDeleteFarmer(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={() => handleDeleteFarmer(deleteFarmer)}>
+              Delete Permanently
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col items-center text-center py-2">
+          <div className="w-14 h-14 rounded-full bg-danger/10 flex items-center justify-center mb-4">
+            <Trash2 size={24} className="text-danger" />
+          </div>
+          <p className="text-text-primary font-medium mb-1">
+            Are you sure you want to delete this pending farmer / user?
+          </p>
+          <p className="text-sm text-text-secondary">
+            {deleteFarmer?.displayName || deleteFarmer?.name || deleteFarmer?.email} ({deleteFarmer?.id}) will be permanently removed. This action cannot be undone.
+          </p>
+        </div>
       </Modal>
 
     </motion.div>

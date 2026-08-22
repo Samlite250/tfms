@@ -26,6 +26,8 @@ import { useToast } from "../../components/ui/Toast";
 import { formatCurrency } from "../../utils/helpers";
 
 import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { notifyPaymentReady, notifyPaymentCompleted } from "../../services/notificationService";
+import { farmersSeed } from "../../firebase/seedData";
 
 const STATUSES = ["All", "Pending", "Approved", "Paid", "Rejected"];
 const STATUS_VARIANT = {
@@ -147,6 +149,20 @@ export default function PaymentsPage() {
       approvedBy: "Admin User",
       approvedDate: new Date().toISOString().split("T")[0],
     });
+    try {
+      const farmer = (farmersSeed || []).find((f) => f.name === payment.farmer);
+      await notifyPaymentReady({
+        farmerId: farmer?.id || payment.farmerId,
+        farmerName: payment.farmer,
+        farmerEmail: farmer?.email || "",
+        farmerPhone: farmer?.phone || payment.farmerPhone || "",
+        amount: payment.totalAmount,
+        receiptNumber: payment.collectionRef || payment.paymentNumber,
+        paymentMethod: payment.paymentMethod || "Mobile Money",
+      });
+    } catch (err) {
+      console.warn("SMS notification failed:", err);
+    }
     success(`Payment ${payment.paymentNumber} approved`);
   }
 
@@ -155,6 +171,19 @@ export default function PaymentsPage() {
       status: "Paid",
       approvedDate: new Date().toISOString().split("T")[0],
     });
+    try {
+      const farmer = (farmersSeed || []).find((f) => f.name === payment.farmer);
+      await notifyPaymentCompleted({
+        farmerId: farmer?.id || payment.farmerId,
+        farmerName: payment.farmer,
+        farmerEmail: farmer?.email || "",
+        farmerPhone: farmer?.phone || payment.farmerPhone || "",
+        amount: payment.totalAmount,
+        receiptNumber: payment.collectionRef || payment.paymentNumber,
+      });
+    } catch (err) {
+      console.warn("SMS notification failed:", err);
+    }
     success(`Payment ${payment.paymentNumber} marked as paid`);
   }
 

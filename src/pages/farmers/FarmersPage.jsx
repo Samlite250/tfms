@@ -182,22 +182,38 @@ function FarmersPage() {
   ];
 
   async function handleDelete() {
+    if (!deleteModal.farmer) return;
     try {
       const farmerId = deleteModal.farmer.id;
-      await remove(farmerId);
+      try {
+        await remove(farmerId);
+      } catch (err) {
+        console.warn("Remove realtime farmer error:", err);
+      }
 
       try {
         const { supabase } = await import("../../firebase/config");
+        await supabase.from("pending_farmers").delete().eq("id", farmerId);
         await supabase.from("users").delete().eq("id", farmerId);
       } catch (err) {
         console.warn("Failed to delete corresponding user account:", err);
       }
 
-      success(`Farmer ${deleteModal.farmer.name} has been removed.`);
+      setPendingFarmersList((prev) => prev.filter((f) => f.id !== farmerId));
+
+      try {
+        const storedPending = JSON.parse(localStorage.getItem("coms_pending_farmers") || "[]");
+        localStorage.setItem("coms_pending_farmers", JSON.stringify(storedPending.filter((f) => f.id !== farmerId && f.userId !== farmerId)));
+        const storedUsers = JSON.parse(localStorage.getItem("coms_pending_users") || "[]");
+        localStorage.setItem("coms_pending_users", JSON.stringify(storedUsers.filter((u) => u.id !== farmerId && u.uid !== farmerId)));
+      } catch { }
+
+      success(`Farmer "${deleteModal.farmer.name}" has been removed.`);
     } catch (err) {
       toastError(`Failed to delete farmer. ${err.message}`);
     }
     setDeleteModal({ open: false, farmer: null });
+    setViewFarmer(null);
   }
 
   async function handleApproveFarmer(farmer) {
@@ -343,23 +359,21 @@ function FarmersPage() {
                     <Eye size={16} />
                   </button>
                   {row.status !== "Pending" && (
-                    <>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/farmers/${row.id}/edit`); }}
-                        className="p-2 rounded-lg text-text-secondary hover:bg-info/10 hover:text-info transition-colors cursor-pointer"
-                        title="Edit"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setDeleteModal({ open: true, farmer: row }); }}
-                        className="p-2 rounded-lg text-text-secondary hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigate(`/farmers/${row.id}/edit`); }}
+                      className="p-2 rounded-lg text-text-secondary hover:bg-info/10 hover:text-info transition-colors cursor-pointer"
+                      title="Edit"
+                    >
+                      <Pencil size={16} />
+                    </button>
                   )}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setDeleteModal({ open: true, farmer: row }); }}
+                    className="p-2 rounded-lg text-text-secondary hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer"
+                    title="Delete"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </>
               )}
               emptyState={
@@ -409,25 +423,36 @@ function FarmersPage() {
         title="Farmer Registration Details"
         size="lg"
         footer={
-          viewFarmer && viewFarmer.status === "Pending" && (
+          viewFarmer && (
             <>
               <Button variant="ghost" onClick={() => setViewFarmer(null)}>
                 Close
               </Button>
               <Button
                 variant="danger"
-                icon={UserX}
-                onClick={() => handleRejectFarmer(viewFarmer)}
+                icon={Trash2}
+                onClick={() => setDeleteModal({ open: true, farmer: viewFarmer })}
               >
-                Reject
+                Delete Farmer
               </Button>
-              <Button
-                icon={UserCheck}
-                className="bg-success text-white hover:bg-success/90"
-                onClick={() => handleApproveFarmer(viewFarmer)}
-              >
-                Approve
-              </Button>
+              {viewFarmer.status === "Pending" && (
+                <>
+                  <Button
+                    variant="danger"
+                    icon={UserX}
+                    onClick={() => handleRejectFarmer(viewFarmer)}
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    icon={UserCheck}
+                    className="bg-success text-white hover:bg-success/90"
+                    onClick={() => handleApproveFarmer(viewFarmer)}
+                  >
+                    Approve
+                  </Button>
+                </>
+              )}
             </>
           )
         }

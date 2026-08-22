@@ -257,11 +257,10 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => switchRegType('farmer')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                regType === 'farmer'
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${regType === 'farmer'
                   ? 'bg-primary text-white shadow-sm'
                   : 'text-text-secondary hover:text-text-primary'
-              }`}
+                }`}
             >
               <Tractor size={16} />
               Farmer
@@ -269,11 +268,10 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => switchRegType('staff')}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                regType === 'staff'
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${regType === 'staff'
                   ? 'bg-primary text-white shadow-sm'
                   : 'text-text-secondary hover:text-text-primary'
-              }`}
+                }`}
             >
               <User size={16} />
               Staff
@@ -282,354 +280,340 @@ export default function RegisterPage() {
 
           <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
 
-          {authError && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-3 bg-danger/10 border border-danger/20 rounded-xl text-sm text-danger"
-            >
-              {authError}
-            </motion.div>
-          )}
+            {authError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-3 bg-danger/10 border border-danger/20 rounded-xl text-sm text-danger"
+              >
+                {authError}
+              </motion.div>
+            )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-text-primary mb-1.5 block">Full Name</label>
-              <div className="relative">
-                <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                <input
-                  type="text"
-                  placeholder="Enter your full name"
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                    errors.displayName
-                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                      : 'border-border focus:ring-primary/30 focus:border-primary'
-                  }`}
-                  {...register('displayName', { required: 'Name is required' })}
-                />
-              </div>
-              {errors.displayName && <p className="text-xs text-danger mt-1">{errors.displayName.message}</p>}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-text-primary mb-1.5 block">Email</label>
-              <div className="relative">
-                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                    errors.email
-                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                      : 'border-border focus:ring-primary/30 focus:border-primary'
-                  }`}
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' },
-                  })}
-                />
-              </div>
-              {errors.email && <p className="text-xs text-danger mt-1">{errors.email.message}</p>}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-text-primary mb-1.5 block">Password</label>
+                <label className="text-sm font-medium text-text-primary mb-1.5 block">Full Name</label>
                 <div className="relative">
-                  <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                  <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Min 6 characters"
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                      errors.password
+                    type="text"
+                    placeholder="Enter your full name"
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.displayName
                         ? 'border-danger focus:ring-danger/30 focus:border-danger'
                         : 'border-border focus:ring-primary/30 focus:border-primary'
-                    }`}
-                    {...register('password', {
-                      required: 'Required',
-                      minLength: { value: 6, message: 'Min 6 chars' },
+                      }`}
+                    {...register('displayName', { required: 'Name is required' })}
+                  />
+                </div>
+                {errors.displayName && <p className="text-xs text-danger mt-1">{errors.displayName.message}</p>}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-text-primary mb-1.5 block">Email</label>
+                <div className="relative">
+                  <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.email
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                      }`}
+                    {...register('email', {
+                      required: 'Email is required',
+                      pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' },
                     })}
                   />
                 </div>
-                {errors.password && <p className="text-xs text-danger mt-1">{errors.password.message}</p>}
+                {errors.email && <p className="text-xs text-danger mt-1">{errors.email.message}</p>}
               </div>
-              <div>
-                <label className="text-sm font-medium text-text-primary mb-1.5 block">Confirm</label>
-                <div className="relative">
-                  <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Repeat password"
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                      errors.confirmPassword
-                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                        : 'border-border focus:ring-primary/30 focus:border-primary'
-                    }`}
-                    {...register('confirmPassword', {
-                      required: 'Required',
-                      validate: (val) => val === password || 'Passwords do not match',
-                    })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                {errors.confirmPassword && <p className="text-xs text-danger mt-1">{errors.confirmPassword.message}</p>}
-              </div>
-            </div>
 
-            {regType === 'staff' && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-text-primary mb-1.5 block">Role</label>
-                  <select
-                    className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
-                      errors.role
-                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                        : 'border-border focus:ring-primary/30 focus:border-primary'
-                    }`}
-                    {...register('role', regType === 'staff' ? { required: 'Role is required' } : {})}
-                  >
-                    <option value="">Select role</option>
-                    {STAFF_ROLE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.role && <p className="text-xs text-danger mt-1">{errors.role.message}</p>}
+                  <label className="text-sm font-medium text-text-primary mb-1.5 block">Password</label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Min 6 characters"
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.password
+                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                          : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                      {...register('password', {
+                        required: 'Required',
+                        minLength: { value: 6, message: 'Min 6 chars' },
+                      })}
+                    />
+                  </div>
+                  {errors.password && <p className="text-xs text-danger mt-1">{errors.password.message}</p>}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-text-primary mb-1.5 block">Department</label>
-                  <select
-                    className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
-                      errors.department
-                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                        : 'border-border focus:ring-primary/30 focus:border-primary'
-                    }`}
-                    {...register('department', regType === 'staff' ? { required: 'Department is required' } : {})}
-                  >
-                    <option value="">Select dept</option>
-                    {DEPARTMENT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.department && <p className="text-xs text-danger mt-1">{errors.department.message}</p>}
+                  <label className="text-sm font-medium text-text-primary mb-1.5 block">Confirm</label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Repeat password"
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.confirmPassword
+                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                          : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                      {...register('confirmPassword', {
+                        required: 'Required',
+                        validate: (val) => val === password || 'Passwords do not match',
+                      })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <p className="text-xs text-danger mt-1">{errors.confirmPassword.message}</p>}
                 </div>
               </div>
-            )}
 
-            {regType === 'farmer' && (
-              <div className="space-y-3">
-                <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl">
-                  <p className="text-xs text-primary font-medium">Farm Details</p>
-                  <p className="text-xs text-text-secondary mt-0.5">Provide your farm information so we can register you at the correct collection center.</p>
-                </div>
+              {regType === 'staff' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium text-text-primary mb-1.5 block">District</label>
-                    <div className="relative">
-                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-                      <select
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none ${
-                          errors.district
-                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Role</label>
+                    <select
+                      className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${errors.role
+                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                          : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
-                        {...register('district', { required: 'District is required' })}
-                        onChange={(e) => {
-                          register('district').onChange(e);
-                          setValue('sector', '');
-                          setValue('cell', '');
-                          setValue('village', '');
-                        }}
-                      >
-                        <option value="">Select district</option>
-                        {DISTRICT_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {errors.district && <p className="text-xs text-danger mt-1">{errors.district.message}</p>}
+                      {...register('role', regType === 'staff' ? { required: 'Role is required' } : {})}
+                    >
+                      <option value="">Select role</option>
+                      {STAFF_ROLE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.role && <p className="text-xs text-danger mt-1">{errors.role.message}</p>}
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Sector</label>
-                    <div className="relative">
-                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-                      <select
-                        disabled={!selectedDistrict}
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${
-                          errors.sector
-                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                            : 'border-border focus:ring-primary/30 focus:border-primary'
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Department</label>
+                    <select
+                      className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${errors.department
+                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                          : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
-                        {...register('sector', { required: selectedDistrict ? 'Sector is required' : false })}
-                        onChange={(e) => {
-                          register('sector').onChange(e);
-                          setValue('cell', '');
-                          setValue('village', '');
-                        }}
-                      >
-                        <option value="">{selectedDistrict ? 'Select sector' : 'Select district first'}</option>
-                        {sectorOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {errors.sector && <p className="text-xs text-danger mt-1">{errors.sector.message}</p>}
+                      {...register('department', regType === 'staff' ? { required: 'Department is required' } : {})}
+                    >
+                      <option value="">Select dept</option>
+                      {DEPARTMENT_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.department && <p className="text-xs text-danger mt-1">{errors.department.message}</p>}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Cell</label>
-                    <div className="relative">
-                      <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-                      <select
-                        disabled={!selectedSector}
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${
-                          errors.cell
-                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                            : 'border-border focus:ring-primary/30 focus:border-primary'
-                        }`}
-                        {...register('cell', { required: selectedSector ? 'Cell is required' : false })}
-                        onChange={(e) => {
-                          register('cell').onChange(e);
-                          setValue('village', '');
-                        }}
-                      >
-                        <option value="">{selectedSector ? 'Select cell' : 'Select sector first'}</option>
-                        {cellOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {errors.cell && <p className="text-xs text-danger mt-1">{errors.cell.message}</p>}
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Village</label>
-                    <div className="relative">
-                      <Home size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-                      <select
-                        disabled={!selectedCell}
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${
-                          errors.village
-                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                            : 'border-border focus:ring-primary/30 focus:border-primary'
-                        }`}
-                        {...register('village', { required: selectedCell ? 'Village is required' : false })}
-                      >
-                        <option value="">{selectedCell ? 'Select village' : 'Select cell first'}</option>
-                        {villageOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {errors.village && <p className="text-xs text-danger mt-1">{errors.village.message}</p>}
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Farm Size (hectares)</label>
-                    <div className="relative">
-                      <Scale size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        placeholder="e.g. 2.5"
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                          errors.farmSize
-                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                            : 'border-border focus:ring-primary/30 focus:border-primary'
-                        }`}
-                        {...register('farmSize', { required: 'Farm size is required', min: { value: 0.1, message: 'Must be > 0' } })}
-                      />
-                    </div>
-                    {errors.farmSize && <p className="text-xs text-danger mt-1">{errors.farmSize.message}</p>}
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Coffee Variety</label>
-                    <div className="relative">
-                      <Coffee size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <select
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
-                          errors.coffeeVariety
-                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                            : 'border-border focus:ring-primary/30 focus:border-primary'
-                        }`}
-                        {...register('coffeeVariety', { required: 'Variety is required' })}
-                      >
-                        <option value="">Select variety</option>
-                        {COFFEE_VARIETY_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {errors.coffeeVariety && <p className="text-xs text-danger mt-1">{errors.coffeeVariety.message}</p>}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-text-primary mb-1.5 block">Collection Center</label>
-                  <select
-                    className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
-                      errors.collectionCenter
-                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                        : 'border-border focus:ring-primary/30 focus:border-primary'
-                    }`}
-                    {...register('collectionCenter', { required: 'Collection center is required' })}
-                  >
-                    <option value="">Select center</option>
-                    {COLLECTION_CENTER_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  {errors.collectionCenter && <p className="text-xs text-danger mt-1">{errors.collectionCenter.message}</p>}
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label className="text-sm font-medium text-text-primary mb-1.5 block">Phone Number</label>
-              <div className="relative">
-                <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                <input
-                  type="tel"
-                  placeholder="+254 7XX XXX XXX"
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                    errors.phone
-                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                      : 'border-border focus:ring-primary/30 focus:border-primary'
-                  }`}
-                  {...register('phone', { required: 'Phone number is required' })}
-                />
-              </div>
-              {errors.phone && <p className="text-xs text-danger mt-1">{errors.phone.message}</p>}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-dark hover:shadow-md active:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-2"
-            >
-              {isSubmitting ? (
-                <span className="inline-flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Creating Account...
-                </span>
-              ) : (
-                'Create Account'
               )}
-            </button>
-          </form>
+
+              {regType === 'farmer' && (
+                <div className="space-y-3">
+                  <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl">
+                    <p className="text-xs text-primary font-medium">Farm Details</p>
+                    <p className="text-xs text-text-secondary mt-0.5">Provide your farm information so we can register you at the correct collection center.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-text-primary mb-1.5 block">District</label>
+                      <div className="relative">
+                        <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                        <select
+                          className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none ${errors.district
+                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            }`}
+                          {...register('district', { required: 'District is required' })}
+                          onChange={(e) => {
+                            register('district').onChange(e);
+                            setValue('sector', '');
+                            setValue('cell', '');
+                            setValue('village', '');
+                          }}
+                        >
+                          <option value="">Select district</option>
+                          {DISTRICT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {errors.district && <p className="text-xs text-danger mt-1">{errors.district.message}</p>}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-text-primary mb-1.5 block">Sector</label>
+                      <div className="relative">
+                        <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                        <select
+                          disabled={!selectedDistrict}
+                          className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${errors.sector
+                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            }`}
+                          {...register('sector', { required: selectedDistrict ? 'Sector is required' : false })}
+                          onChange={(e) => {
+                            register('sector').onChange(e);
+                            setValue('cell', '');
+                            setValue('village', '');
+                          }}
+                        >
+                          <option value="">{selectedDistrict ? 'Select sector' : 'Select district first'}</option>
+                          {sectorOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {errors.sector && <p className="text-xs text-danger mt-1">{errors.sector.message}</p>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-text-primary mb-1.5 block">Cell</label>
+                      <div className="relative">
+                        <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                        <select
+                          disabled={!selectedSector}
+                          className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${errors.cell
+                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            }`}
+                          {...register('cell', { required: selectedSector ? 'Cell is required' : false })}
+                          onChange={(e) => {
+                            register('cell').onChange(e);
+                            setValue('village', '');
+                          }}
+                        >
+                          <option value="">{selectedSector ? 'Select cell' : 'Select sector first'}</option>
+                          {cellOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {errors.cell && <p className="text-xs text-danger mt-1">{errors.cell.message}</p>}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-text-primary mb-1.5 block">Village</label>
+                      <div className="relative">
+                        <Home size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+                        <select
+                          disabled={!selectedCell}
+                          className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${errors.village
+                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            }`}
+                          {...register('village', { required: selectedCell ? 'Village is required' : false })}
+                        >
+                          <option value="">{selectedCell ? 'Select village' : 'Select cell first'}</option>
+                          {villageOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {errors.village && <p className="text-xs text-danger mt-1">{errors.village.message}</p>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-text-primary mb-1.5 block">Farm Size (hectares)</label>
+                      <div className="relative">
+                        <Scale size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          placeholder="e.g. 2.5"
+                          className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.farmSize
+                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            }`}
+                          {...register('farmSize', { required: 'Farm size is required', min: { value: 0.1, message: 'Must be > 0' } })}
+                        />
+                      </div>
+                      {errors.farmSize && <p className="text-xs text-danger mt-1">{errors.farmSize.message}</p>}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-text-primary mb-1.5 block">Coffee Variety</label>
+                      <div className="relative">
+                        <Coffee size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <select
+                          className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${errors.coffeeVariety
+                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            }`}
+                          {...register('coffeeVariety', { required: 'Variety is required' })}
+                        >
+                          <option value="">Select variety</option>
+                          {COFFEE_VARIETY_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {errors.coffeeVariety && <p className="text-xs text-danger mt-1">{errors.coffeeVariety.message}</p>}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-text-primary mb-1.5 block">Collection Center</label>
+                    <select
+                      className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${errors.collectionCenter
+                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                          : 'border-border focus:ring-primary/30 focus:border-primary'
+                        }`}
+                      {...register('collectionCenter', { required: 'Collection center is required' })}
+                    >
+                      <option value="">Select center</option>
+                      {COLLECTION_CENTER_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                    {errors.collectionCenter && <p className="text-xs text-danger mt-1">{errors.collectionCenter.message}</p>}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="text-sm font-medium text-text-primary mb-1.5 block">Phone Number</label>
+                <div className="relative">
+                  <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                  <input
+                    type="tel"
+                    placeholder="+250 7XX XXX XXX"
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.phone
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                      }`}
+                    {...register('phone', { required: 'Phone number is required' })}
+                  />
+                </div>
+                {errors.phone && <p className="text-xs text-danger mt-1">{errors.phone.message}</p>}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-dark hover:shadow-md active:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-2"
+              >
+                {isSubmitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Creating Account...
+                  </span>
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+            </form>
 
           </div>
 

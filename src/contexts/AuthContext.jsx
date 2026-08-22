@@ -9,7 +9,8 @@ import {
 import {
   sendRegistrationConfirmationSMS,
   sendAccountApprovedSMS,
-  sendAccountRejectedSMS
+  sendAccountRejectedSMS,
+  sendAdminAlertSMS
 } from '../services/smsService';
 
 const AuthContext = createContext(null);
@@ -174,6 +175,7 @@ export function AuthProvider({ children }) {
       }
       try {
         await sendAdminAlert({ displayName: profileData.displayName, email, role: profileData.role, phone: profileData.phone });
+        await sendAdminAlertSMS({ displayName: profileData.displayName, email, role: profileData.role, phone: profileData.phone });
       } catch (err) {
         console.warn("Admin alert notification failed:", err);
       }
@@ -237,6 +239,7 @@ export function AuthProvider({ children }) {
       }
       try {
         await sendAdminAlert({ displayName: profileData.displayName, email: sbUser.email, role: profileData.role, phone: profileData.phone });
+        await sendAdminAlertSMS({ displayName: profileData.displayName, email: sbUser.email, role: profileData.role, phone: profileData.phone });
       } catch (err) {
         console.warn("Admin alert notification failed:", err);
       }
