@@ -20,13 +20,7 @@ import {
   Clock,
   Layers,
   Banknote,
-  Calendar,
-  Sparkles,
 } from "lucide-react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  AreaChart, Area, PieChart, Pie, Cell, LineChart, Line
-} from "recharts";
 
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
@@ -38,17 +32,6 @@ import { ROLE_REPORTS } from "../../utils/constants";
 import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
 import { collectionsSeed, productionSeed } from "../../firebase/seedData";
 import { formatCurrency } from "../../utils/helpers";
-
-const COLORS = {
-  primary: "#10B981",
-  primaryDark: "#059669",
-  emerald: "#059669",
-  amber: "#F59E0B",
-  blue: "#3B82F6",
-  purple: "#8B5CF6",
-  rose: "#F43F5E",
-  slate: "#64748B",
-};
 
 const datePresets = [
   { value: "today", label: "Today" },
@@ -106,27 +89,6 @@ function CollectionReportTab({ collections }) {
   const uniqueFarmers = useMemo(() => new Set(collections.map((c) => c.farmer).filter(Boolean)).size, [collections]);
   const avgWeight = collections.length ? Math.round(totalWeight / collections.length) : 0;
 
-  const chartData = useMemo(() => {
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return days.map((day, idx) => {
-      const dayWeight = collections
-        .filter((_, i) => i % 7 === idx)
-        .reduce((s, c) => s + (Number(c.weight) || 0), 0) || Math.floor(1200 + Math.random() * 800);
-      return { day, weight: dayWeight, target: 1500 };
-    });
-  }, [collections]);
-
-  const gradePieData = useMemo(() => {
-    const counts = {};
-    collections.forEach((c) => {
-      const g = c.grade || "AA";
-      counts[g] = (counts[g] || 0) + (Number(c.weight) || 0);
-    });
-    return Object.keys(counts).map((g) => ({ name: `Grade ${g}`, value: counts[g] }));
-  }, [collections]);
-
-  const PIE_COLORS = [COLORS.emerald, COLORS.blue, COLORS.amber, COLORS.purple, COLORS.rose];
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -134,66 +96,6 @@ function CollectionReportTab({ collections }) {
         <StatCard icon={DollarSign} label="Total Cherry Value" value={formatCurrency(totalValue)} change={8.7} changeLabel="vs last month" color="blue" />
         <StatCard icon={Users} label="Active Farmers" value={uniqueFarmers.toString()} change={5.2} changeLabel="registered" color="purple" />
         <StatCard icon={TrendingUp} label="Avg Batch Weight" value={`${avgWeight} kg`} change={3.1} changeLabel="per delivery" color="amber" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card padding="md" className="lg:col-span-2" header={
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-              <TrendingUp size={18} className="text-emerald-600" /> Daily Cherry Collection Trend (kg)
-            </h3>
-            <Badge variant="success">Live Feed</Badge>
-          </div>
-        }>
-          <div className="h-72 w-full pt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.emerald} stopOpacity={0.4} />
-                    <stop offset="95%" stopColor={COLORS.emerald} stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1E293B', borderRadius: '12px', color: '#fff', border: 'none' }}
-                  formatter={(val) => [`${val.toLocaleString()} kg`, "Collected"]}
-                />
-                <Area type="monotone" dataKey="weight" stroke={COLORS.emerald} strokeWidth={3} fillOpacity={1} fill="url(#colorWeight)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        <Card padding="md" header={
-          <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-            <PieChart size={18} className="text-blue-600" /> Grade Distribution
-          </h3>
-        }>
-          <div className="h-72 w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={gradePieData.length ? gradePieData : [{ name: "Grade AA", value: 450 }, { name: "Grade AB", value: 300 }]}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={85}
-                  paddingAngle={4}
-                  dataKey="value"
-                >
-                  {gradePieData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(val) => `${val.toLocaleString()} kg`} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
       </div>
 
       <Card padding="none" header={
@@ -216,7 +118,7 @@ function CollectionReportTab({ collections }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {collections.slice(0, 8).map((item) => (
+              {collections.slice(0, 10).map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/60 transition-colors">
                   <td className="px-6 py-3.5 font-mono font-medium text-emerald-600">{item.receiptNumber || item.id}</td>
                   <td className="px-6 py-3.5 text-text-secondary">{item.date}</td>
@@ -298,7 +200,6 @@ function ProductionReportTab({ batches }) {
 
 function PaymentReportTab({ collections }) {
   const totalPaid = collections.reduce((s, c) => s + (Number(c.amount) || 0), 0);
-  const pendingCount = collections.filter(c => c.status === "Pending").length;
   const pendingAmount = collections.filter(c => c.status === "Pending").reduce((s, c) => s + (Number(c.amount) || 0), 0);
 
   return (
