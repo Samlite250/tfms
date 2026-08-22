@@ -304,17 +304,8 @@ function ProductionPage() {
             <Factory className="text-primary h-7 w-7" /> Production Management
           </h1>
           <p className="text-sm text-text-secondary mt-1">
-            Control farmer deliveries, update processing stages, and manage factory batches.
+            Monitor farmer coffee deliveries, control processing stages, and dispatch SMS status updates.
           </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="primary"
-            icon={Plus}
-            onClick={() => navigate("/production/new")}
-          >
-            New Production Batch
-          </Button>
         </div>
       </motion.div>
 
