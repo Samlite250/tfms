@@ -110,7 +110,7 @@ export default async function handler(req, res) {
       const rawRole = user?.role || role || 'User';
       const formattedRole = rawRole.replace(/_/g, ' ').toUpperCase();
       const phoneInfo = user?.phone || 'N/A';
-      textMessage = `[Mahembe Factory] Admin Alert: New registration request from ${applicantName} (${formattedRole}, Phone: ${phoneInfo}). Review at https://mahembefactory.vercel.app/admin`;
+      textMessage = `Mahembe Factory Admin Alert: New registration request from ${applicantName} (${formattedRole}, Phone: ${phoneInfo}). Review at https://mahembefactory.vercel.app/admin`;
       break;
     }
 
