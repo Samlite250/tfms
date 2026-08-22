@@ -179,82 +179,90 @@ export default function useRealtimeCollection(collectionName, options = {}) {
 
   const add = useCallback(
     async (item) => {
+      const itemId = item.id || `rec-${Date.now()}`;
+      const newItem = { ...item, id: itemId };
+
+      // Optimistic instant state & local storage update
+      setData((prev) => {
+        const filtered = prev.filter((d) => d.id !== itemId);
+        const updated = [newItem, ...filtered];
+        saveToStorage(collectionName, updated);
+        return updated;
+      });
+
       const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
       const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
-      if (!url || !rawKey) {
-        const existing = loadSeedFromStorage(collectionName) || [];
-        const newItem = { id: item.id || `local-${Date.now()}`, ...item };
-        const updated = [newItem, ...existing];
-        saveToStorage(collectionName, updated);
-        setData(updated);
-        return newItem.id;
+      if (!url || !rawKey) return itemId;
+
+      try {
+        const snakeItem = {};
+        for (const [k, v] of Object.entries(item)) {
+          snakeItem[toSnake(k)] = v;
+        }
+        snakeItem.created_at = new Date().toISOString();
+        snakeItem.updated_at = new Date().toISOString();
+
+        await supabase.from(collectionName).insert(snakeItem);
+      } catch (err) {
+        console.warn(`Background sync warning on add for ${collectionName}:`, err);
       }
-
-      const snakeItem = {};
-      for (const [k, v] of Object.entries(item)) {
-        snakeItem[toSnake(k)] = v;
-      }
-      snakeItem.created_at = new Date().toISOString();
-      snakeItem.updated_at = new Date().toISOString();
-
-      const { data: result, error } = await supabase
-        .from(collectionName)
-        .insert(snakeItem)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return result.id;
+      return itemId;
     },
     [collectionName]
   );
 
   const update = useCallback(
     async (id, updates) => {
+      // Optimistic instant state & local storage update
+      setData((prev) => {
+        const updated = prev.map((d) => (d.id === id ? { ...d, ...updates } : d));
+        saveToStorage(collectionName, updated);
+        return updated;
+      });
+
       const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
       const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
-      if (!url || !rawKey) {
-        const existing = loadSeedFromStorage(collectionName) || [];
-        const updated = existing.map((d) => (d.id === id ? { ...d, ...updates } : d));
-        saveToStorage(collectionName, updated);
-        setData(updated);
-        return;
+      if (!url || !rawKey) return;
+
+      try {
+        const snakeUpdates = {};
+        for (const [k, v] of Object.entries(updates)) {
+          snakeUpdates[toSnake(k)] = v;
+        }
+        snakeUpdates.updated_at = new Date().toISOString();
+
+        await supabase
+          .from(collectionName)
+          .update(snakeUpdates)
+          .eq("id", id);
+      } catch (err) {
+        console.warn(`Background sync warning on update for ${collectionName}:`, err);
       }
-
-      const snakeUpdates = {};
-      for (const [k, v] of Object.entries(updates)) {
-        snakeUpdates[toSnake(k)] = v;
-      }
-      snakeUpdates.updated_at = new Date().toISOString();
-
-      const { error } = await supabase
-        .from(collectionName)
-        .update(snakeUpdates)
-        .eq("id", id);
-
-      if (error) throw error;
     },
     [collectionName]
   );
 
   const remove = useCallback(
     async (id) => {
+      // Optimistic instant state & local storage update
+      setData((prev) => {
+        const updated = prev.filter((d) => d.id !== id);
+        saveToStorage(collectionName, updated);
+        return updated;
+      });
+
       const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
       const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
-      if (!url || !rawKey) {
-        const existing = loadSeedFromStorage(collectionName) || [];
-        const updated = existing.filter((d) => d.id !== id);
-        saveToStorage(collectionName, updated);
-        setData(updated);
-        return;
+      if (!url || !rawKey) return;
+
+      try {
+        await supabase
+          .from(collectionName)
+          .delete()
+          .eq("id", id);
+      } catch (err) {
+        console.warn(`Background sync warning on delete for ${collectionName}:`, err);
       }
-
-      const { error } = await supabase
-        .from(collectionName)
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
     },
     [collectionName]
   );

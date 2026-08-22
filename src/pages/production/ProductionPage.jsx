@@ -182,43 +182,36 @@ function ProductionPage() {
 
   async function handleUpdateStage() {
     if (!controlModalItem) return;
-    setUpdatingStage(true);
 
     const updatedStage = selectedStage;
     const isCompleted = updatedStage === "Completed";
+    const receipt = controlModalItem.receiptNumber || controlModalItem.id;
+    const farmerName = controlModalItem.farmer || controlModalItem.farmerName || "Farmer";
+    const farmerPhone = controlModalItem.farmerPhone || "+250 788 123 456";
+    const weight = controlModalItem.weight || controlModalItem.quantity || 0;
+    const grade = controlModalItem.grade || "AA";
 
-    await updateCollection(controlModalItem.id, {
+    // 1. Instant UI update & close modal (0ms latency)
+    updateCollection(controlModalItem.id, {
       processingStage: updatedStage,
       status: updatedStage,
       paid: isCompleted ? true : controlModalItem.paid,
       lastUpdated: new Date().toISOString(),
     });
 
-    // Send instant SMS alert to farmer's phone
-    const farmerPhone = controlModalItem.farmerPhone || "+250 788 123 456";
-    const receipt = controlModalItem.receiptNumber || controlModalItem.id;
-    const weight = controlModalItem.weight || controlModalItem.quantity || 0;
-    const grade = controlModalItem.grade || "AA";
-    const farmerName = controlModalItem.farmer || controlModalItem.farmerName || "Farmer";
-
-    try {
-      if (farmerPhone) {
-        const smsMessage = `Mahembe Factory Notice: Coffee delivery ${receipt} (${weight}kg, Grade ${grade}) advanced to stage: ${updatedStage.toUpperCase()}. Thank you!`;
-        await sendCoffeeReceivedSMS(farmerPhone, {
-          farmerName,
-          receiptNumber: receipt,
-          weight,
-          grade,
-          totalPrice: controlModalItem.totalAmount || controlModalItem.amount || 0,
-        });
-      }
-    } catch (e) {
-      console.warn("SMS dispatch error:", e);
-    }
-
     success(`Stage updated to "${updatedStage}" for ${receipt}. SMS alert sent to ${farmerName}.`);
-    setUpdatingStage(false);
     setControlModalItem(null);
+
+    // 2. Dispatch SMS notification asynchronously in background
+    if (farmerPhone) {
+      sendCoffeeReceivedSMS(farmerPhone, {
+        farmerName,
+        receiptNumber: receipt,
+        weight,
+        grade,
+        totalPrice: controlModalItem.totalAmount || controlModalItem.amount || 0,
+      }).catch((e) => console.warn("SMS dispatch error:", e));
+    }
   }
 
   const columns = [
