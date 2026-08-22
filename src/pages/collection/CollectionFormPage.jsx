@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -14,14 +14,15 @@ import {
   Coffee,
   DollarSign,
   Mail,
+  UserCheck,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import Modal from "../../components/ui/Modal";
-import { sendCoffeeReceivedEmail } from "../../services/emailService";
-import { sendCoffeeReceivedSMS } from "../../services/smsService";
+import { useAuth } from "../../contexts/AuthContext";
+import { ROLES } from "../../utils/constants";
 import { notifyCoffeeReceived } from "../../services/notificationService";
 import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
 import { farmersSeed, collectionsSeed } from "../../firebase/seedData";
@@ -61,6 +62,9 @@ const sectionVariants = {
 
 function CollectionFormPage() {
   const navigate = useNavigate();
+  const { userProfile } = useAuth();
+  const isFarmer = userProfile?.role === ROLES.FARMER;
+
   const [receiptNumber] = useState(generateReceiptNumber);
   const [showSuccess, setShowSuccess] = useState(false);
   const [savedRecord, setSavedRecord] = useState(null);
@@ -93,14 +97,20 @@ function CollectionFormPage() {
   } = useForm({
     defaultValues: {
       date: new Date().toISOString().split("T")[0],
-      farmerId: "",
-      center: "",
+      farmerId: isFarmer ? (userProfile?.uid || userProfile?.id || "FRM-LOGGED-IN") : "",
+      center: "mahembe-cc",
       weight: "",
       grade: "",
       qualityNotes: "",
       pricePerKg: "",
     },
   });
+
+  useEffect(() => {
+    if (isFarmer) {
+      setValue("farmerId", userProfile?.uid || userProfile?.id || "FRM-LOGGED-IN");
+    }
+  }, [isFarmer, userProfile, setValue]);
 
   const selectedGrade = watch("grade");
   const weight = watch("weight");
@@ -114,7 +124,13 @@ function CollectionFormPage() {
     return Math.round(w * p * 100) / 100;
   }, [weight, pricePerKg, autoPrice]);
 
-  const selectedFarmer = (farmers || []).find((f) => f.id === watch("farmerId"));
+  const selectedFarmer = isFarmer
+    ? {
+      name: userProfile?.displayName || "Farmer Submitter",
+      phone: userProfile?.phone || "+250 780 000 000",
+      email: userProfile?.email || "farmer@mahembe.rw",
+    }
+    : (farmers || []).find((f) => f.id === watch("farmerId"));
 
   function onGradeChange(e) {
     const grade = e.target.value;
@@ -125,17 +141,33 @@ function CollectionFormPage() {
   }
 
   async function onSubmit(data) {
-    const farmer = (farmers || []).find((f) => f.id === data.farmerId);
+    let farmerName = "";
+    let farmerPhone = "";
+    let farmerEmail = "";
+    let farmerId = data.farmerId;
+
+    if (isFarmer) {
+      farmerName = userProfile?.displayName || "Farmer Submitter";
+      farmerPhone = userProfile?.phone || "";
+      farmerEmail = userProfile?.email || "";
+    } else {
+      const farmer = (farmers || []).find((f) => f.id === data.farmerId);
+      farmerName = farmer?.name || "Unknown Farmer";
+      farmerPhone = farmer?.phone || "";
+      farmerEmail = farmer?.email || "";
+    }
+
     const center = collectionCenters.find((c) => c.value === data.center);
     const finalPricePerKg = parseFloat(data.pricePerKg) || autoPrice;
     const record = {
       id: `COL-${Date.now()}`,
       receiptNumber,
       date: data.date,
-      farmer: farmer?.name || "Unknown Farmer",
-      farmerId: data.farmerId,
-      farmerPhone: farmer?.phone || "",
-      farmerEmail: farmer?.email || "",
+      farmer: farmerName,
+      farmerName,
+      farmerId,
+      farmerPhone,
+      farmerEmail,
       center: center?.label || data.center,
       weight: parseFloat(data.weight),
       grade: data.grade,
@@ -143,7 +175,9 @@ function CollectionFormPage() {
       amount: totalAmount,
       totalAmount,
       qualityNotes: data.qualityNotes || "",
-      collectedBy: "Collection Officer",
+      collectedBy: isFarmer ? `Farmer (${farmerName})` : "Collection Officer",
+      status: "Received",
+      processingStage: "Received",
     };
 
     // Add to real-time storage
@@ -155,10 +189,10 @@ function CollectionFormPage() {
     // Send email & SMS notifications to farmer
     try {
       await notifyCoffeeReceived({
-        farmerId: data.farmerId,
-        farmerName: farmer?.name || "Farmer",
-        farmerEmail: farmer?.email || "",
-        farmerPhone: farmer?.phone || "",
+        farmerId,
+        farmerName,
+        farmerEmail,
+        farmerPhone,
         weight: parseFloat(data.weight),
         grade: data.grade,
         center: center?.label || data.center,
@@ -179,8 +213,8 @@ function CollectionFormPage() {
     setEmailSent(false);
     reset({
       date: new Date().toISOString().split("T")[0],
-      farmerId: "",
-      center: "",
+      farmerId: isFarmer ? (userProfile?.uid || userProfile?.id || "FRM-LOGGED-IN") : "",
+      center: "mahembe-cc",
       weight: "",
       grade: "",
       qualityNotes: "",
@@ -196,19 +230,25 @@ function CollectionFormPage() {
         className="mb-8"
       >
         <button
-          onClick={() => navigate("/collections")}
+          onClick={() => navigate(isFarmer ? "/my-collections" : "/collections")}
           className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors mb-4 cursor-pointer"
         >
           <ArrowLeft size={16} />
-          Back to Collection List
+          {isFarmer ? "Back to My Deliveries" : "Back to Collection List"}
         </button>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <Leaf size={22} className="text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Record New Collection</h1>
-            <p className="text-sm text-gray-500">Fill in the details for a new coffee collection</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isFarmer ? "Deliver Coffee Cherries" : "Record New Collection"}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {isFarmer
+                ? "Submit harvest delivery record directly to Mahembe Factory"
+                : "Fill in the details for a new coffee collection"}
+            </p>
           </div>
         </div>
       </motion.div>
@@ -242,35 +282,63 @@ function CollectionFormPage() {
           <Card>
             <div className="flex items-center gap-2 mb-5">
               <User size={18} className="text-primary" />
-              <h2 className="text-base font-semibold text-gray-900">Farmer Information</h2>
+              <h2 className="text-base font-semibold text-gray-900">Submitter Farmer Information</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Select
-                label="Select Farmer"
-                options={farmerOptions}
-                placeholder="Choose a farmer..."
-                searchable
-                value={watch("farmerId")}
-                onChange={(val) => setValue("farmerId", val, { shouldValidate: true })}
-                error={errors.farmerId?.message}
-                className="sm:col-span-2"
-              />
-              {selectedFarmer && (
-                <div className="sm:col-span-2 rounded-xl bg-gray-50 border border-gray-100 p-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Name:</span>
-                      <p className="font-medium text-gray-900">{selectedFarmer.name}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Phone:</span>
-                      <p className="font-medium text-gray-900">{selectedFarmer.phone}</p>
-                    </div>
+
+            {isFarmer ? (
+              /* Simple auto-filled Submitter Card for logged-in Farmer */
+              <div className="rounded-xl bg-primary/5 border border-primary/20 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary text-white">
+                    <UserCheck size={13} /> Submitter Details (Pre-filled)
+                  </span>
+                  <span className="text-xs text-gray-500">Authenticated Farmer</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-xs text-gray-500 block">Farmer Name</span>
+                    <p className="font-bold text-gray-900">{selectedFarmer?.name}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 block">Phone Number</span>
+                    <p className="font-medium text-gray-900">{selectedFarmer?.phone || "—"}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 block">Email Address</span>
+                    <p className="font-medium text-gray-900">{selectedFarmer?.email || "—"}</p>
                   </div>
                 </div>
-              )}
-            </div>
-            <input type="hidden" {...register("farmerId", { required: "Please select a farmer" })} />
+              </div>
+            ) : (
+              /* Searchable dropdown for Admin/Manager */
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <Select
+                  label="Select Farmer"
+                  options={farmerOptions}
+                  placeholder="Choose a farmer..."
+                  searchable
+                  value={watch("farmerId")}
+                  onChange={(val) => setValue("farmerId", val, { shouldValidate: true })}
+                  error={errors.farmerId?.message}
+                  className="sm:col-span-2"
+                />
+                {selectedFarmer && (
+                  <div className="sm:col-span-2 rounded-xl bg-gray-50 border border-gray-100 p-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Name:</span>
+                        <p className="font-medium text-gray-900">{selectedFarmer.name}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Phone:</span>
+                        <p className="font-medium text-gray-900">{selectedFarmer.phone}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            <input type="hidden" {...register("farmerId")} />
           </Card>
         </motion.div>
 

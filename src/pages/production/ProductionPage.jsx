@@ -12,6 +12,14 @@ import {
   Trash2,
   Calendar,
   Filter,
+  CheckCircle2,
+  BellRing,
+  Coffee,
+  User,
+  ArrowRight,
+  Send,
+  Layers,
+  SlidersHorizontal
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
@@ -23,7 +31,9 @@ import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import StatCard from "../../components/ui/StatCard";
 import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
-import { productionSeed } from "../../firebase/seedData";
+import { productionSeed, collectionsSeed } from "../../firebase/seedData";
+import { sendCoffeeReceivedSMS } from "../../services/smsService";
+import { formatCurrency } from "../../utils/helpers";
 
 const coffeeGrades = [
   { value: "all", label: "All Grades" },
@@ -41,16 +51,17 @@ const statusOptions = [
   { value: "Quality Check", label: "Quality Check" },
 ];
 
-const processingStages = [
-  { value: "all", label: "All Stages" },
-  { value: "Received", label: "Received" },
-  { value: "Washing", label: "Washing" },
-  { value: "Sorting", label: "Sorting" },
-  { value: "Drying", label: "Drying" },
-  { value: "Milling", label: "Milling" },
-  { value: "Packaging", label: "Packaging" },
-  { value: "Completed", label: "Completed" },
-];
+const STAGES = ["Received", "Washing", "Sorting", "Drying", "Milling", "Completed"];
+
+const stageBadgeVariant = {
+  Received: "default",
+  Washing: "info",
+  Sorting: "warning",
+  Drying: "warning",
+  Milling: "info",
+  Packaging: "primary",
+  Completed: "success",
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -69,26 +80,39 @@ const itemVariants = {
   },
 };
 
-const stageBadgeVariant = {
-  Received: "default",
-  Washing: "info",
-  Sorting: "warning",
-  Drying: "warning",
-  Milling: "info",
-  Packaging: "primary",
-  Completed: "success",
-};
-
 function ProductionPage() {
   const navigate = useNavigate();
-  const { success } = useToast();
+  const { success, info } = useToast();
+
   const { data: dataList, deleteItem } = useRealtimeCollection("production", productionSeed);
+  const { data: farmerDeliveries, updateItem: updateCollection } = useRealtimeCollection("coffeeCollections", collectionsSeed);
+
+  const [activeTab, setActiveTab] = useState("farmer-deliveries"); // 'farmer-deliveries' | 'factory-batches'
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [gradeFilter, setGradeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [stageFilter, setStageFilter] = useState("all");
   const [deleteModal, setDeleteModal] = useState(null);
+
+  // Control Modal for updating a farmer submission stage
+  const [controlModalItem, setControlModalItem] = useState(null);
+  const [selectedStage, setSelectedStage] = useState("Received");
+  const [updatingStage, setUpdatingStage] = useState(false);
+
+  const allDeliveries = farmerDeliveries || [];
+
+  // Filtered Farmer Deliveries
+  const filteredFarmerDeliveries = useMemo(() => {
+    return allDeliveries.filter((c) => {
+      const name = c.farmer || c.farmerName || "";
+      const receipt = c.receiptNumber || c.id || "";
+      const matchesSearch = !searchTerm || name.toLowerCase().includes(searchTerm.toLowerCase()) || receipt.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesGrade = gradeFilter === "all" || c.grade === gradeFilter;
+      const matchesStage = stageFilter === "all" || (c.processingStage || c.status || "Received") === stageFilter;
+      return matchesSearch && matchesGrade && matchesStage;
+    });
+  }, [allDeliveries, searchTerm, gradeFilter, stageFilter]);
 
   const stats = useMemo(() => {
     const totalBatches = dataList.length;
@@ -99,17 +123,17 @@ function ProductionPage() {
 
     return [
       {
-        label: "Total Batches",
-        value: totalBatches.toString(),
-        change: "+12%",
+        label: "Farmer Deliveries",
+        value: allDeliveries.length.toString(),
+        change: "Active Submissions",
         up: true,
-        icon: Factory,
+        icon: Coffee,
         color: "primary",
         bg: "bg-primary/10",
         borderColor: "border-primary/20",
       },
       {
-        label: "Completed Batches",
+        label: "Completed Processing",
         value: completedBatches.toString(),
         change: "+8%",
         up: true,
@@ -119,7 +143,7 @@ function ProductionPage() {
         borderColor: "border-success/20",
       },
       {
-        label: "Total Raw Input",
+        label: "Total Cherry Input",
         value: `${totalRaw.toLocaleString()} kg`,
         change: "+15%",
         up: true,
@@ -129,7 +153,7 @@ function ProductionPage() {
         borderColor: "border-info/20",
       },
       {
-        label: "Average Yield",
+        label: "Average Factory Yield",
         value: `${avgYield}%`,
         change: "+2.4%",
         up: true,
@@ -139,7 +163,7 @@ function ProductionPage() {
         borderColor: "border-accent/20",
       },
     ];
-  }, [dataList]);
+  }, [dataList, allDeliveries]);
 
   const filteredData = useMemo(() => {
     return (dataList || []).filter((row) => {
@@ -156,22 +180,52 @@ function ProductionPage() {
     });
   }, [dataList, searchTerm, dateFilter, gradeFilter, statusFilter, stageFilter]);
 
-  const statusBadge = (status) => {
-    const map = {
-      Completed: "success",
-      "In Progress": "warning",
-      "Quality Check": "info",
-    };
-    return <Badge variant={map[status]} dot>{status}</Badge>;
-  };
+  async function handleUpdateStage() {
+    if (!controlModalItem) return;
+    setUpdatingStage(true);
+
+    const updatedStage = selectedStage;
+    const isCompleted = updatedStage === "Completed";
+
+    await updateCollection(controlModalItem.id, {
+      processingStage: updatedStage,
+      status: updatedStage,
+      paid: isCompleted ? true : controlModalItem.paid,
+      lastUpdated: new Date().toISOString(),
+    });
+
+    // Send instant SMS alert to farmer's phone
+    const farmerPhone = controlModalItem.farmerPhone || "+250 788 123 456";
+    const receipt = controlModalItem.receiptNumber || controlModalItem.id;
+    const weight = controlModalItem.weight || controlModalItem.quantity || 0;
+    const grade = controlModalItem.grade || "AA";
+    const farmerName = controlModalItem.farmer || controlModalItem.farmerName || "Farmer";
+
+    try {
+      if (farmerPhone) {
+        const smsMessage = `Mahembe Factory Notice: Coffee delivery ${receipt} (${weight}kg, Grade ${grade}) advanced to stage: ${updatedStage.toUpperCase()}. Thank you!`;
+        await sendCoffeeReceivedSMS(farmerPhone, {
+          farmerName,
+          receiptNumber: receipt,
+          weight,
+          grade,
+          totalPrice: controlModalItem.totalAmount || controlModalItem.amount || 0,
+        });
+      }
+    } catch (e) {
+      console.warn("SMS dispatch error:", e);
+    }
+
+    success(`Stage updated to "${updatedStage}" for ${receipt}. SMS alert sent to ${farmerName}.`);
+    setUpdatingStage(false);
+    setControlModalItem(null);
+  }
 
   const columns = [
     {
       header: "Batch #",
       accessor: "batchNumber",
-      render: (row) => (
-        <span className="font-semibold text-primary">{row.batchNumber}</span>
-      ),
+      render: (row) => <span className="font-semibold text-primary">{row.batchNumber}</span>,
     },
     {
       header: "Date",
@@ -219,7 +273,7 @@ function ProductionPage() {
     {
       header: "Status",
       accessor: "status",
-      render: (row) => statusBadge(row.status),
+      render: (row) => <Badge variant={row.status === "Completed" ? "success" : "warning"} dot>{row.status}</Badge>,
     },
     {
       header: "Stage",
@@ -243,22 +297,28 @@ function ProductionPage() {
       animate="visible"
       className="space-y-6"
     >
+      {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Production Management</h1>
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <Factory className="text-primary h-7 w-7" /> Production Management & Farmer Control
+          </h1>
           <p className="text-sm text-text-secondary mt-1">
-            Track and manage coffee production batches
+            Oversee farmer submissions, control production processing stages, and dispatch SMS updates.
           </p>
         </div>
-        <Button
-          variant="primary"
-          icon={Plus}
-          onClick={() => navigate("/production/new")}
-        >
-          New Production
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="primary"
+            icon={Plus}
+            onClick={() => navigate("/production/new")}
+          >
+            New Production Batch
+          </Button>
+        </div>
       </motion.div>
 
+      {/* Top Stat Cards */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
           <StatCard
@@ -276,98 +336,309 @@ function ProductionPage() {
         ))}
       </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <Card padding="none">
-          <div className="p-4 border-b border-border">
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="flex-1">
-                <Input
-                  placeholder="Search batches or supervisors..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  icon={Filter}
-                />
-              </div>
-              <div className="w-full md:w-44">
-                <Input
-                  type="date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  icon={Calendar}
-                />
-              </div>
-              <div className="w-full md:w-40">
-                <Select
-                  options={coffeeGrades}
-                  value={gradeFilter}
-                  onChange={setGradeFilter}
-                  placeholder="Coffee Grade"
-                />
-              </div>
-              <div className="w-full md:w-40">
-                <Select
-                  options={statusOptions}
-                  value={statusFilter}
-                  onChange={setStatusFilter}
-                  placeholder="Status"
-                />
-              </div>
-              <div className="w-full md:w-40">
-                <Select
-                  options={processingStages}
-                  value={stageFilter}
-                  onChange={setStageFilter}
-                  placeholder="Processing Stage"
-                />
-              </div>
-            </div>
-          </div>
-
-          <DataTable
-            columns={columns}
-            data={filteredData}
-            searchable={false}
-            pagination
-            pageSize={10}
-            onRowClick={(row) => navigate(`/production/${row.id}`)}
-            actions={(row) => (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/production/${row.id}`);
-                  }}
-                  className="p-1.5 rounded-lg text-text-secondary hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
-                  title="View"
-                >
-                  <Eye size={16} />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/production/${row.id}/edit`);
-                  }}
-                  className="p-1.5 rounded-lg text-text-secondary hover:bg-info/10 hover:text-info transition-colors cursor-pointer"
-                  title="Edit"
-                >
-                  <Edit size={16} />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteModal(row);
-                  }}
-                  className="p-1.5 rounded-lg text-text-secondary hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer"
-                  title="Delete"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </>
-            )}
-          />
-        </Card>
+      {/* Tab Switcher */}
+      <motion.div variants={itemVariants} className="flex items-center gap-2 border-b border-border pb-1">
+        <button
+          onClick={() => setActiveTab("farmer-deliveries")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors cursor-pointer ${activeTab === "farmer-deliveries"
+              ? "bg-primary text-white shadow-sm"
+              : "bg-card text-text-secondary hover:text-text-primary hover:bg-bg border border-border"
+            }`}
+        >
+          <Coffee size={18} />
+          Farmer Deliveries Production Control
+          <span className="ml-1 px-2 py-0.5 rounded-full text-xs bg-white/20 text-white font-bold">
+            {allDeliveries.length}
+          </span>
+        </button>
+        <button
+          onClick={() => setActiveTab("factory-batches")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors cursor-pointer ${activeTab === "factory-batches"
+              ? "bg-primary text-white shadow-sm"
+              : "bg-card text-text-secondary hover:text-text-primary hover:bg-bg border border-border"
+            }`}
+        >
+          <Layers size={18} />
+          Factory Processing Batches
+          <span className="ml-1 px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-800 font-bold">
+            {dataList.length}
+          </span>
+        </button>
       </motion.div>
 
+      {/* Tab 1: Farmer Deliveries Control Panel */}
+      {activeTab === "farmer-deliveries" && (
+        <motion.div variants={itemVariants}>
+          <Card padding="none">
+            <div className="p-4 border-b border-border bg-gray-50/50">
+              <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+                <div className="flex-1 w-full">
+                  <Input
+                    placeholder="Search by farmer name or receipt #..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    icon={Filter}
+                  />
+                </div>
+                <div className="flex gap-2 w-full md:w-auto">
+                  <Select
+                    options={coffeeGrades}
+                    value={gradeFilter}
+                    onChange={setGradeFilter}
+                    placeholder="Grade"
+                    className="w-full md:w-36"
+                  />
+                  <Select
+                    options={[
+                      { value: "all", label: "All Stages" },
+                      { value: "Received", label: "Received" },
+                      { value: "Washing", label: "Washing" },
+                      { value: "Sorting", label: "Sorting" },
+                      { value: "Drying", label: "Drying" },
+                      { value: "Milling", label: "Milling" },
+                      { value: "Completed", label: "Completed" },
+                    ]}
+                    value={stageFilter}
+                    onChange={setStageFilter}
+                    placeholder="Stage"
+                    className="w-full md:w-40"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-gray-50 text-text-secondary text-xs uppercase font-semibold">
+                    <th className="px-4 py-3">Receipt #</th>
+                    <th className="px-4 py-3">Farmer Submitter</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Weight (kg)</th>
+                    <th className="px-4 py-3">Grade</th>
+                    <th className="px-4 py-3">Total Amount</th>
+                    <th className="px-4 py-3">Processing Stage</th>
+                    <th className="px-4 py-3 text-right">Admin Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {filteredFarmerDeliveries.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-4 py-12 text-center text-text-secondary">
+                        No farmer deliveries found matching criteria.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredFarmerDeliveries.map((c) => {
+                      const currentStage = c.processingStage || c.status || "Received";
+                      const weightVal = parseFloat(c.weight || c.quantity) || 0;
+                      const priceVal = parseFloat(c.pricePerKg || c.price) || 1200;
+                      const totalVal = parseFloat(c.amount || c.totalAmount || c.total || (weightVal * priceVal));
+                      return (
+                        <tr key={c.id} className="hover:bg-primary/5 transition-colors">
+                          <td className="px-4 py-3 font-mono font-semibold text-primary">
+                            {c.receiptNumber || c.id}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="font-semibold text-text-primary">{c.farmer || c.farmerName || "Farmer"}</div>
+                            <div className="text-xs text-text-secondary">{c.farmerPhone || c.farmerEmail || "Registered"}</div>
+                          </td>
+                          <td className="px-4 py-3 text-text-secondary text-xs">{c.date}</td>
+                          <td className="px-4 py-3 font-semibold text-text-primary">{weightVal} kg</td>
+                          <td className="px-4 py-3">
+                            <Badge variant="primary">{c.grade || "AA"}</Badge>
+                          </td>
+                          <td className="px-4 py-3 font-semibold text-primary">{formatCurrency(totalVal)}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant={stageBadgeVariant[currentStage] || "default"} dot>
+                              {currentStage}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              icon={SlidersHorizontal}
+                              onClick={() => {
+                                setControlModalItem(c);
+                                setSelectedStage(currentStage);
+                              }}
+                            >
+                              Control Stage
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Tab 2: Factory Processing Batches */}
+      {activeTab === "factory-batches" && (
+        <motion.div variants={itemVariants}>
+          <Card padding="none">
+            <div className="p-4 border-b border-border">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Search batches or supervisors..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    icon={Filter}
+                  />
+                </div>
+                <div className="w-full md:w-44">
+                  <Input
+                    type="date"
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    icon={Calendar}
+                  />
+                </div>
+                <div className="w-full md:w-40">
+                  <Select
+                    options={coffeeGrades}
+                    value={gradeFilter}
+                    onChange={setGradeFilter}
+                    placeholder="Coffee Grade"
+                  />
+                </div>
+                <div className="w-full md:w-40">
+                  <Select
+                    options={statusOptions}
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    placeholder="Status"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DataTable
+              columns={columns}
+              data={filteredData}
+              searchable={false}
+              pagination
+              pageSize={10}
+              onRowClick={(row) => navigate(`/production/${row.id}`)}
+              actions={(row) => (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/production/${row.id}`);
+                    }}
+                    className="p-1.5 rounded-lg text-text-secondary hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                    title="View"
+                  >
+                    <Eye size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/production/${row.id}/edit`);
+                    }}
+                    className="p-1.5 rounded-lg text-text-secondary hover:bg-info/10 hover:text-info transition-colors cursor-pointer"
+                    title="Edit"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteModal(row);
+                    }}
+                    className="p-1.5 rounded-lg text-text-secondary hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer"
+                    title="Delete"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </>
+              )}
+            />
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Admin Stage Control Modal */}
+      <Modal
+        isOpen={!!controlModalItem}
+        onClose={() => setControlModalItem(null)}
+        title="Admin Production Control — Update Processing Stage"
+        size="md"
+        footer={
+          <div className="flex gap-3 w-full justify-end">
+            <Button variant="ghost" onClick={() => setControlModalItem(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              icon={Send}
+              loading={updatingStage}
+              onClick={handleUpdateStage}
+            >
+              Update & Alert Farmer (SMS)
+            </Button>
+          </div>
+        }
+      >
+        {controlModalItem && (
+          <div className="space-y-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Receipt Number:</span>
+                <span className="font-mono font-bold text-primary">{controlModalItem.receiptNumber || controlModalItem.id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Farmer Submitter:</span>
+                <span className="font-semibold text-gray-900">{controlModalItem.farmer || controlModalItem.farmerName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Weight & Grade:</span>
+                <span className="font-semibold text-gray-900">{controlModalItem.weight} kg — Grade {controlModalItem.grade || "AA"}</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-text-primary mb-2">
+                Select New Processing Stage
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {STAGES.map((stg) => (
+                  <button
+                    key={stg}
+                    type="button"
+                    onClick={() => setSelectedStage(stg)}
+                    className={`p-3 rounded-xl border text-left text-sm font-medium transition-all cursor-pointer ${selectedStage === stg
+                        ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
+                        : "border-border bg-card text-text-primary hover:border-primary/50"
+                      }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{stg}</span>
+                      {selectedStage === stg && <CheckCircle2 size={16} className="text-primary" />}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-info/10 border border-info/20 p-3 text-xs text-info flex items-center gap-2">
+              <BellRing size={16} className="shrink-0" />
+              <span>
+                Advancing the processing stage will instantly send an SMS notification alert to <strong>{controlModalItem.farmerPhone || "the farmer"}</strong>.
+              </span>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Delete Batch Modal */}
       <Modal
         isOpen={!!deleteModal}
         onClose={() => setDeleteModal(null)}
@@ -398,3 +669,4 @@ function ProductionPage() {
 }
 
 export default ProductionPage;
+
