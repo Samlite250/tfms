@@ -97,26 +97,26 @@ function CollectionFormPage() {
   } = useForm({
     defaultValues: {
       date: new Date().toISOString().split("T")[0],
-      farmerId: isFarmer ? (userProfile?.uid || userProfile?.id || "FRM-LOGGED-IN") : "",
+      farmerId: isFarmer ? (userProfile?.uid || userProfile?.id || userProfile?.email || "FRM-LOGGED-IN") : "",
       center: "mahembe-cc",
       weight: "",
-      grade: "",
+      grade: "AA",
       qualityNotes: "",
-      pricePerKg: "",
+      pricePerKg: 1200,
     },
   });
 
   useEffect(() => {
     if (isFarmer) {
-      setValue("farmerId", userProfile?.uid || userProfile?.id || "FRM-LOGGED-IN");
+      setValue("farmerId", userProfile?.uid || userProfile?.id || userProfile?.email || "FRM-LOGGED-IN");
     }
   }, [isFarmer, userProfile, setValue]);
 
-  const selectedGrade = watch("grade");
+  const selectedGrade = watch("grade") || "AA";
   const weight = watch("weight");
-  const pricePerKg = watch("pricePerKg");
+  const pricePerKg = watch("pricePerKg") || 1200;
 
-  const autoPrice = selectedGrade ? (GRADE_PRICES[selectedGrade] || 0) : 0;
+  const autoPrice = selectedGrade ? (GRADE_PRICES[selectedGrade] || 1200) : 1200;
 
   const totalAmount = useMemo(() => {
     const w = parseFloat(weight) || 0;
@@ -126,14 +126,14 @@ function CollectionFormPage() {
 
   const selectedFarmer = isFarmer
     ? {
-      name: userProfile?.displayName || "Farmer Submitter",
+      name: userProfile?.displayName || userProfile?.email?.split("@")[0] || "Farmer Submitter",
       phone: userProfile?.phone || "+250 780 000 000",
       email: userProfile?.email || "farmer@mahembe.rw",
     }
     : (farmers || []).find((f) => f.id === watch("farmerId"));
 
   function onGradeChange(e) {
-    const grade = e.target.value;
+    const grade = e.target.value || "AA";
     setValue("grade", grade, { shouldValidate: true });
     if (grade && GRADE_PRICES[grade]) {
       setValue("pricePerKg", GRADE_PRICES[grade], { shouldValidate: true });
@@ -147,9 +147,10 @@ function CollectionFormPage() {
     let farmerId = data.farmerId;
 
     if (isFarmer) {
-      farmerName = userProfile?.displayName || "Farmer Submitter";
+      farmerName = userProfile?.displayName || userProfile?.email?.split("@")[0] || "Farmer Submitter";
       farmerPhone = userProfile?.phone || "";
       farmerEmail = userProfile?.email || "";
+      farmerId = userProfile?.uid || userProfile?.id || userProfile?.email || "FRM-LOGGED-IN";
     } else {
       const farmer = (farmers || []).find((f) => f.id === data.farmerId);
       farmerName = farmer?.name || "Unknown Farmer";
@@ -157,27 +158,35 @@ function CollectionFormPage() {
       farmerEmail = farmer?.email || "";
     }
 
-    const center = collectionCenters.find((c) => c.value === data.center);
-    const finalPricePerKg = parseFloat(data.pricePerKg) || autoPrice;
+    const centerObj = collectionCenters.find((c) => c.value === data.center);
+    const finalGrade = data.grade || selectedGrade || "AA";
+    const finalPricePerKg = parseFloat(data.pricePerKg) || autoPrice || 1200;
+    const finalWeight = parseFloat(data.weight) || 0;
+    const computedTotal = Math.round(finalWeight * finalPricePerKg * 100) / 100;
+
     const record = {
       id: `COL-${Date.now()}`,
       receiptNumber,
-      date: data.date,
+      date: data.date || new Date().toISOString().split("T")[0],
       farmer: farmerName,
       farmerName,
       farmerId,
       farmerPhone,
       farmerEmail,
-      center: center?.label || data.center,
-      weight: parseFloat(data.weight),
-      grade: data.grade,
+      center: centerObj?.label || data.center || "Mahembe Central Collection Center",
+      weight: finalWeight,
+      quantity: finalWeight,
+      grade: finalGrade,
       pricePerKg: finalPricePerKg,
-      amount: totalAmount,
-      totalAmount,
+      price: finalPricePerKg,
+      amount: computedTotal,
+      totalAmount: computedTotal,
+      total: computedTotal,
       qualityNotes: data.qualityNotes || "",
       collectedBy: isFarmer ? `Farmer (${farmerName})` : "Collection Officer",
       status: "Received",
       processingStage: "Received",
+      createdAt: new Date().toISOString(),
     };
 
     // Add to real-time storage
@@ -193,12 +202,12 @@ function CollectionFormPage() {
         farmerName,
         farmerEmail,
         farmerPhone,
-        weight: parseFloat(data.weight),
-        grade: data.grade,
-        center: center?.label || data.center,
+        weight: finalWeight,
+        grade: finalGrade,
+        center: centerObj?.label || data.center || "Mahembe Central Collection Center",
         receiptNumber,
         pricePerKg: finalPricePerKg,
-        totalPrice: totalAmount,
+        totalPrice: computedTotal,
       });
       setEmailSent(true);
     } catch (err) {
@@ -213,12 +222,12 @@ function CollectionFormPage() {
     setEmailSent(false);
     reset({
       date: new Date().toISOString().split("T")[0],
-      farmerId: isFarmer ? (userProfile?.uid || userProfile?.id || "FRM-LOGGED-IN") : "",
+      farmerId: isFarmer ? (userProfile?.uid || userProfile?.id || userProfile?.email || "FRM-LOGGED-IN") : "",
       center: "mahembe-cc",
       weight: "",
-      grade: "",
+      grade: "AA",
       qualityNotes: "",
-      pricePerKg: "",
+      pricePerKg: 1200,
     });
   }
 
@@ -368,13 +377,13 @@ function CollectionFormPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <Input
-                label="Weight (kg)"
+                label="Weight (kg) *"
                 type="number"
                 step="0.1"
                 min="0.1"
                 placeholder="e.g. 45.5"
                 {...register("weight", {
-                  required: "Weight is required",
+                  required: "Weight in kg is required",
                   min: { value: 0.1, message: "Weight must be at least 0.1 kg" },
                 })}
                 error={errors.weight?.message}
@@ -382,17 +391,15 @@ function CollectionFormPage() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">Coffee Grade</label>
                 <select
-                  value={watch("grade")}
+                  value={watch("grade") || "AA"}
                   onChange={onGradeChange}
                   className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
                 >
-                  <option value="">Select grade...</option>
                   {gradeOptions.map((g) => (
                     <option key={g.value} value={g.value}>{g.label}</option>
                   ))}
                 </select>
-                {errors.grade && <p className="text-xs text-red-500">{errors.grade.message}</p>}
-                <input type="hidden" {...register("grade", { required: "Coffee grade is required" })} />
+                <input type="hidden" {...register("grade")} />
               </div>
               <div className="sm:col-span-2">
                 <label className="text-sm font-medium text-gray-700 block mb-1.5">Quality Notes</label>
@@ -419,12 +426,9 @@ function CollectionFormPage() {
                 type="number"
                 step="0.01"
                 min="0"
-                {...register("pricePerKg", {
-                  required: "Price per kg is required",
-                  min: { value: 0, message: "Price must be positive" },
-                })}
+                {...register("pricePerKg")}
                 error={errors.pricePerKg?.message}
-                helperText={autoPrice ? `Auto-set for ${selectedGrade}: RWF ${autoPrice.toLocaleString()}` : "Select a grade to auto-set price"}
+                helperText={`Auto-set for ${selectedGrade}: RWF ${autoPrice.toLocaleString()}`}
               />
               <div className="sm:col-span-2">
                 <label className="text-sm font-medium text-gray-700 block mb-1.5">Total Amount</label>
@@ -441,9 +445,15 @@ function CollectionFormPage() {
 
         <motion.div custom={5} variants={sectionVariants} initial="hidden" animate="visible">
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
-            <Link to="/collections" className="sm:order-1">
-              <Button variant="ghost" fullWidth>Cancel</Button>
-            </Link>
+            <Button
+              type="button"
+              variant="ghost"
+              fullWidth
+              onClick={() => navigate(isFarmer ? "/my-collections" : "/collections")}
+              className="sm:order-1"
+            >
+              Cancel
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -458,9 +468,10 @@ function CollectionFormPage() {
               type="submit"
               icon={Save}
               fullWidth
+              loading={isSubmitting}
               className="sm:order-3"
             >
-              Save Collection
+              Save Coffee Delivery
             </Button>
           </div>
         </motion.div>
@@ -469,18 +480,23 @@ function CollectionFormPage() {
       <Modal
         isOpen={showSuccess}
         onClose={() => setShowSuccess(false)}
-        title="Collection Recorded Successfully"
+        title="Delivery Recorded Successfully"
         size="md"
         footer={
           <div className="flex gap-3 w-full">
             <Button variant="ghost" onClick={handleRecordAnother} className="flex-1">
               Record Another
             </Button>
-            <Link to="/collections" className="flex-1">
-              <Button fullWidth onClick={() => setShowSuccess(false)}>
-                View All Collections
-              </Button>
-            </Link>
+            <Button
+              fullWidth
+              className="flex-1"
+              onClick={() => {
+                setShowSuccess(false);
+                navigate(isFarmer ? "/my-collections" : "/collections");
+              }}
+            >
+              View My Deliveries
+            </Button>
           </div>
         }
       >
@@ -494,12 +510,12 @@ function CollectionFormPage() {
             >
               <CheckCircle size={32} className="text-primary" />
             </motion.div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">Receipt Generated</h3>
-            <p className="text-sm text-gray-500 mb-2">Collection has been recorded successfully.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Receipt Generated & Saved</h3>
+            <p className="text-sm text-gray-500 mb-2">Delivery record saved & available in Factory Production.</p>
             {emailSent && (
               <div className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1 mb-4">
                 <Mail size={12} />
-                Email notification sent to farmer
+                SMS & Email notification sent to submitter
               </div>
             )}
 
@@ -509,7 +525,7 @@ function CollectionFormPage() {
                 <span className="font-mono font-semibold text-primary">{savedRecord.receiptNumber}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Farmer</span>
+                <span className="text-gray-500">Submitter Farmer</span>
                 <span className="font-medium text-gray-900">{savedRecord.farmerName}</span>
               </div>
               <div className="flex justify-between text-sm">

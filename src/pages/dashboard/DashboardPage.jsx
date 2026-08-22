@@ -60,19 +60,27 @@ export default function DashboardPage() {
   const userName = userProfile?.displayName?.toLowerCase() || "";
   const userPhone = userProfile?.phone ? userProfile.phone.replace(/\D/g, "") : "";
 
+  const userId = userProfile?.uid || userProfile?.id || "";
+
   const farmerCollections = useMemo(() => {
     if (!isFarmer) return allCollections;
 
-    const matched = allCollections.filter(c => {
-      const emailMatch = c.farmerEmail && c.farmerEmail.toLowerCase() === userEmail;
-      const nameMatch = c.farmer && userName && c.farmer.toLowerCase().includes(userName);
-      const phoneMatch = c.farmerPhone && userPhone && c.farmerPhone.replace(/\D/g, "").includes(userPhone);
-      return emailMatch || nameMatch || phoneMatch;
+    const matched = allCollections.filter((c) => {
+      const cEmail = (c.farmerEmail || "").toLowerCase();
+      const cName = (c.farmer || c.farmerName || "").toLowerCase();
+      const cPhone = c.farmerPhone ? c.farmerPhone.replace(/\D/g, "") : "";
+      const cId = c.farmerId || "";
+
+      const emailMatch = userEmail && cEmail && cEmail === userEmail;
+      const nameMatch = userName && cName && (cName.includes(userName) || userName.includes(cName));
+      const phoneMatch = userPhone && cPhone && cPhone.includes(userPhone);
+      const idMatch = userId && cId && cId === userId;
+
+      return emailMatch || nameMatch || phoneMatch || idMatch;
     });
 
-    // Fallback for demonstration if farmer hasn't recorded collections under their exact name yet
-    return matched.length > 0 ? matched : allCollections;
-  }, [allCollections, isFarmer, userEmail, userName, userPhone]);
+    return (matched.length > 0 || userEmail || userName || userPhone || userId) ? matched : allCollections;
+  }, [allCollections, isFarmer, userEmail, userName, userPhone, userId]);
 
   // Calculated Stats
   const todayStr = new Date().toISOString().split("T")[0];

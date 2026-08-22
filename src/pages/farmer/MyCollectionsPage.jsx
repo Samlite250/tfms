@@ -36,20 +36,29 @@ export default function MyCollectionsPage() {
   const userName = userProfile?.displayName?.toLowerCase() || "";
   const userPhone = userProfile?.phone ? userProfile.phone.replace(/\D/g, "") : "";
 
+  const userId = userProfile?.uid || userProfile?.id || "";
+
   const myCollections = useMemo(() => {
-    const matched = allCollections.filter(c => {
-      const emailMatch = c.farmerEmail && c.farmerEmail.toLowerCase() === userEmail;
-      const nameMatch = c.farmer && userName && c.farmer.toLowerCase().includes(userName);
-      const phoneMatch = c.farmerPhone && userPhone && c.farmerPhone.replace(/\D/g, "").includes(userPhone);
-      return emailMatch || nameMatch || phoneMatch;
+    const matched = allCollections.filter((c) => {
+      const cEmail = (c.farmerEmail || "").toLowerCase();
+      const cName = (c.farmer || c.farmerName || "").toLowerCase();
+      const cPhone = c.farmerPhone ? c.farmerPhone.replace(/\D/g, "") : "";
+      const cId = c.farmerId || "";
+
+      const emailMatch = userEmail && cEmail && cEmail === userEmail;
+      const nameMatch = userName && cName && (cName.includes(userName) || userName.includes(cName));
+      const phoneMatch = userPhone && cPhone && cPhone.includes(userPhone);
+      const idMatch = userId && cId && cId === userId;
+
+      return emailMatch || nameMatch || phoneMatch || idMatch;
     });
 
-    const items = matched.length > 0 ? matched : allCollections;
+    const items = (matched.length > 0 || userEmail || userName || userPhone || userId) ? matched : allCollections;
     if (filterMonth) {
       return items.filter((c) => c.date && c.date.startsWith(filterMonth));
     }
     return items;
-  }, [allCollections, userEmail, userName, userPhone, filterMonth]);
+  }, [allCollections, userEmail, userName, userPhone, userId, filterMonth]);
 
   const stats = useMemo(() => {
     const totalKg = myCollections.reduce((sum, c) => sum + (parseFloat(c.weight || c.quantity) || 0), 0);
