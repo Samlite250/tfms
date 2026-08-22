@@ -38,8 +38,7 @@ import Badge from "../../components/ui/Badge";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../contexts/AuthContext";
-import { ROLE_SETTINGS_TABS } from "../../utils/constants";
-import { triggerSMS, checkSMSProviderStatus } from "../../services/smsService";
+import { ROLE_SETTINGS_TABS, ROLE_LABELS } from "../../utils/constants";
 
 const allTabs = [
   { id: "profile", label: "Profile", icon: User },
@@ -47,18 +46,7 @@ const allTabs = [
   { id: "departments", label: "Departments", icon: Building2 },
   { id: "grades", label: "Coffee Grades", icon: Leaf },
   { id: "centers", label: "Collection Centers", icon: MapPin },
-  { id: "notifications", label: "Notifications", icon: Bell },
 ];
-
-const initialProfile = {
-  fullName: "Amara Nkemdirim",
-  email: "amara.nkemdirim@coms.com",
-  phone: "+234 801 234 5678",
-  department: "Administration",
-  role: "System Administrator",
-  joinDate: "2023-06-15",
-  initials: "AN",
-};
 
 const initialFactory = {
   factoryName: "Mahembe Coffee Factory",
@@ -103,57 +91,32 @@ const initialCenters = [
   { id: 5, name: "Western Hub", location: "Ibadan Farm Settlement", manager: "Adeola Olatunde", farmers: 73, status: "inactive" },
 ];
 
-const initialNotifications = {
-  emailNotifications: true,
-  smsNotifications: true,
-  smsCollectionReceipts: true,
-  smsPaymentAlerts: true,
-  lowStockAlerts: true,
-  dailyReports: false,
-  paymentReminders: true,
-  collectionUpdates: true,
-  qualityAlerts: true,
-};
-
 const tabContentVariants = {
   initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
   exit: { opacity: 0, y: -12, transition: { duration: 0.15 } },
 };
 
-function Toggle({ enabled, onToggle, label, description }) {
-  return (
-    <div className="flex items-center justify-between py-3">
-      <div className="flex-1">
-        <p className="text-sm font-medium text-text-primary">{label}</p>
-        {description && (
-          <p className="text-xs text-text-secondary mt-0.5">{description}</p>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={onToggle}
-        className={`
-          relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full
-          transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2
-          focus:ring-primary/40 focus:ring-offset-2
-          ${enabled ? "bg-primary" : "bg-gray-200"}
-        `}
-      >
-        <span
-          className={`
-            pointer-events-none inline-block h-5 w-5 transform rounded-full
-            bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out
-            ${enabled ? "translate-x-5.5" : "translate-x-0.5"} mt-0.5
-          `}
-        />
-      </button>
-    </div>
-  );
-}
-
 function ProfileSection() {
   const { toast } = useToast();
+  const { user, userProfile, updateUserProfile, resetPassword } = useAuth();
+
+  const realName = userProfile?.display_name || userProfile?.displayName || userProfile?.name || user?.displayName || "User";
+  const realEmail = userProfile?.email || user?.email || "";
+  const realPhone = userProfile?.phone || "";
+  const realDept = userProfile?.department || (userProfile?.role === "farmer" ? "Farmers Group" : "Operations");
+  const realRole = ROLE_LABELS[userProfile?.role || user?.role] || userProfile?.role || "Staff Member";
+  const realStatus = userProfile?.status || "active";
+  const rawDate = userProfile?.created_at || userProfile?.joined_date || userProfile?.joinedDate;
+  const realJoinDate = rawDate ? new Date(rawDate).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "Recent";
+
+  const initials = realName
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase() || "U";
+
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -164,34 +127,55 @@ function ProfileSection() {
     register: registerProfile,
     handleSubmit: handleProfileSubmit,
     formState: { errors: profileErrors },
-  } = useForm({ defaultValues: initialProfile });
+  } = useForm({
+    values: {
+      fullName: realName,
+      email: realEmail,
+      phone: realPhone,
+      department: realDept,
+    },
+  });
 
   const {
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     watch: watchPassword,
-    reset: resetPassword,
+    reset: resetPasswordForm,
     formState: { errors: passwordErrors },
   } = useForm();
 
   const newPassword = watchPassword("newPassword");
 
-  const onProfileSubmit = useCallback(() => {
+  const onProfileSubmit = async (data) => {
     setProfileSaving(true);
-    setTimeout(() => {
+    try {
+      await updateUserProfile({
+        fullName: data.fullName,
+        phone: data.phone,
+        department: data.department,
+      });
+      toast.success(`Profile settings saved! Messages will be sent to registered number: ${data.phone}`);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      toast.error("Failed to update profile settings.");
+    } finally {
       setProfileSaving(false);
-      toast.success("Profile updated successfully");
-    }, 1200);
-  }, [toast]);
+    }
+  };
 
-  const onPasswordSubmit = useCallback(() => {
+  const onPasswordSubmit = async (data) => {
     setPasswordSaving(true);
-    setTimeout(() => {
+    try {
+      await resetPassword(data.newPassword, realEmail);
+      resetPasswordForm();
+      toast.success("Password updated successfully");
+    } catch (err) {
+      console.error("Failed to update password:", err);
+      toast.error(err?.message || "Failed to change password");
+    } finally {
       setPasswordSaving(false);
-      resetPassword();
-      toast.success("Password changed successfully");
-    }, 1200);
-  }, [resetPassword, toast]);
+    }
+  };
 
   return (
     <motion.div variants={tabContentVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
@@ -199,18 +183,18 @@ function ProfileSection() {
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <div className="relative group">
             <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-3xl font-bold border-4 border-white shadow-md">
-              {initialProfile.initials}
+              {initials}
             </div>
             <button className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center cursor-pointer">
               <Camera size={20} className="text-white" />
             </button>
           </div>
           <div className="text-center sm:text-left">
-            <h3 className="text-lg font-semibold text-text-primary">{initialProfile.fullName}</h3>
-            <p className="text-sm text-text-secondary">{initialProfile.role}</p>
+            <h3 className="text-lg font-semibold text-text-primary">{realName}</h3>
+            <p className="text-sm text-text-secondary">{realRole}</p>
             <div className="flex items-center justify-center sm:justify-start gap-2 mt-2">
-              <Badge variant="success" dot>Active</Badge>
-              <span className="text-xs text-text-secondary">Joined {new Date(initialProfile.joinDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+              <Badge variant={realStatus === "active" ? "success" : "warning"} dot>{realStatus.toUpperCase()}</Badge>
+              <span className="text-xs text-text-secondary">Joined {realJoinDate}</span>
             </div>
           </div>
         </div>
@@ -233,7 +217,7 @@ function ProfileSection() {
               className="opacity-70"
             />
             <Input
-              label="Phone Number"
+              label="Phone Number (SMS / Alerts)"
               icon={Phone}
               {...registerProfile("phone", { required: "Phone number is required" })}
               error={profileErrors.phone?.message}
@@ -242,7 +226,6 @@ function ProfileSection() {
               label="Department"
               icon={Building2}
               {...registerProfile("department")}
-              disabled
             />
           </div>
           <div className="flex justify-end">
@@ -253,15 +236,6 @@ function ProfileSection() {
 
       <Card header={<h3 className="text-base font-semibold text-text-primary flex items-center gap-2"><Shield size={18} /> Change Password</h3>}>
         <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
-          <div className="max-w-md">
-            <Input
-              label="Current Password"
-              type={showCurrentPassword ? "text" : "password"}
-              icon={Shield}
-              {...registerPassword("currentPassword", { required: "Current password is required" })}
-              error={passwordErrors.currentPassword?.message}
-            />
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
             <div className="relative">
               <Input
@@ -899,256 +873,6 @@ function CentersSection() {
     </motion.div>
   );
 }
-
-function NotificationsSection() {
-  const { toast } = useToast();
-  const [prefs, setPrefs] = useState(initialNotifications);
-  const [saving, setSaving] = useState(false);
-  const [testPhone, setTestPhone] = useState("");
-  const [testType, setTestType] = useState("registration_confirmation");
-  const [testSending, setTestSending] = useState(false);
-  const [lastSmsResult, setLastSmsResult] = useState(null);
-  const [providerInfo, setProviderInfo] = useState(null);
-
-  useEffect(() => {
-    checkSMSProviderStatus().then((info) => setProviderInfo(info));
-  }, []);
-
-  const toggle = useCallback((key) => {
-    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
-
-  const handleSave = () => {
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      toast.success("Notification preferences saved");
-    }, 1000);
-  };
-
-  const handleSendTestSMS = async () => {
-    if (!testPhone.trim()) {
-      toast.error("Please enter a valid recipient phone number (e.g. +250 780 123 456)");
-      return;
-    }
-    setTestSending(true);
-    setLastSmsResult(null);
-
-    const testPayload = {
-      type: testType,
-      to: testPhone.trim(),
-      name: "Test Farmer",
-      weight: 150,
-      grade: "AA",
-      center: "Mahembe Central",
-      receiptNumber: "REC-TEST-2026",
-      amount: 180000,
-      paymentMethod: "Mobile Money",
-      role: "farmer",
-      message: "This is a test SMS notification from Mahembe Coffee Factory System.",
-    };
-
-    const res = await triggerSMS(testPayload);
-    setTestSending(false);
-
-    if (res.success) {
-      setLastSmsResult(res);
-      if (res.isSimulated) {
-        toast.info(`SMS processed in SIMULATOR mode. (To receive real SMS on your phone, set AFRICASTALKING_API_KEY or TWILIO_ACCOUNT_SID in Vercel environment variables)`);
-      } else {
-        toast.success(`Real SMS dispatched via ${res.provider || 'Gateway'} to ${testPhone.trim()}`);
-      }
-    } else {
-      toast.error(res.error || "Failed to send SMS");
-    }
-  };
-
-  const notificationOptions = [
-    { key: "emailNotifications", label: "Email Notifications", description: "Receive email updates for important system events and activities" },
-    { key: "smsNotifications", label: "SMS Alerts", description: "Send automated SMS notifications to users and farmers on key actions" },
-    { key: "smsCollectionReceipts", label: "SMS Collection Receipts", description: "Instantly SMS farmers a digital receipt when coffee cherries are delivered" },
-    { key: "smsPaymentAlerts", label: "SMS Payment Alerts", description: "Send SMS when farmer payments are ready or completed" },
-    { key: "lowStockAlerts", label: "Low Stock Alerts", description: "Get notified when inventory items fall below minimum thresholds" },
-    { key: "dailyReports", label: "Daily Reports", description: "Receive automated daily production and collection summary reports" },
-    { key: "paymentReminders", label: "Payment Reminders", description: "Alerts for upcoming and overdue farmer and supplier payments" },
-    { key: "collectionUpdates", label: "Collection Updates", description: "Real-time notifications when new coffee cherry collections are recorded" },
-    { key: "qualityAlerts", label: "Quality Alerts", description: "Immediate alerts when quality control tests fail or require attention" },
-  ];
-
-  return (
-    <motion.div variants={tabContentVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-      <Card header={
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
-            <Bell size={18} /> Notification Preferences
-          </h3>
-          <Badge variant="info">{Object.values(prefs).filter(Boolean).length} active</Badge>
-        </div>
-      }>
-        <div className="divide-y divide-border">
-          {notificationOptions.map((opt) => (
-            <Toggle
-              key={opt.key}
-              enabled={prefs[opt.key]}
-              onToggle={() => toggle(opt.key)}
-              label={opt.label}
-              description={opt.description}
-            />
-          ))}
-        </div>
-        <div className="flex justify-end mt-6 pt-4 border-t border-border">
-          <Button onClick={handleSave} loading={saving} icon={Save}>Save Preferences</Button>
-        </div>
-      </Card>
-
-      <Card header={
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
-            <Smartphone size={18} className="text-primary" /> SMS Gateway & Real Delivery Setup
-          </h3>
-          {providerInfo?.hasRealProvider ? (
-            <Badge variant="success">Real Provider Active</Badge>
-          ) : (
-            <Badge variant="warning">Simulation / Key Required</Badge>
-          )}
-        </div>
-      }>
-        <div className="space-y-5">
-          <div className="p-4 bg-gray-50 rounded-xl border border-border text-xs space-y-3">
-            <h4 className="font-semibold text-text-primary text-sm flex items-center gap-2">
-              <Shield size={16} className="text-primary" /> Supported Real SMS Providers
-            </h4>
-            <p className="text-text-secondary leading-relaxed">
-              Email is currently delivering live messages via Gmail SMTP. To deliver <strong>real SMS messages directly to mobile phones</strong> (e.g. Rwandan numbers <code className="bg-white px-1.5 py-0.5 rounded border border-gray-200 text-primary">+250 78X XXX XXX</code>), add one of the following SMS Provider credentials to your <strong>Vercel Project Environment Variables</strong>:
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-              <div className="p-3 bg-white rounded-lg border border-border space-y-1">
-                <div className="flex items-center justify-between font-semibold text-text-primary">
-                  <span>1. Africa's Talking (Recommended for East Africa / Rwanda)</span>
-                  <Badge variant={providerInfo?.providers?.africastalking ? "success" : "default"}>
-                    {providerInfo?.providers?.africastalking ? "Connected" : "Not Set"}
-                  </Badge>
-                </div>
-                <p className="text-text-secondary text-[11px]">
-                  Env variables: <code className="text-primary">AFRICASTALKING_USERNAME</code> and <code className="text-primary">AFRICASTALKING_API_KEY</code>
-                </p>
-              </div>
-
-              <div className="p-3 bg-white rounded-lg border border-border space-y-1">
-                <div className="flex items-center justify-between font-semibold text-text-primary">
-                  <span>2. Twilio SMS</span>
-                  <Badge variant={providerInfo?.providers?.twilio ? "success" : "default"}>
-                    {providerInfo?.providers?.twilio ? "Connected" : "Not Set"}
-                  </Badge>
-                </div>
-                <p className="text-text-secondary text-[11px]">
-                  Env variables: <code className="text-primary">TWILIO_ACCOUNT_SID</code>, <code className="text-primary">TWILIO_AUTH_TOKEN</code>, <code className="text-primary">TWILIO_PHONE_NUMBER</code>
-                </p>
-              </div>
-
-              <div className="p-3 bg-white rounded-lg border border-border space-y-1">
-                <div className="flex items-center justify-between font-semibold text-text-primary">
-                  <span>3. Infobip SMS</span>
-                  <Badge variant={providerInfo?.providers?.infobip ? "success" : "default"}>
-                    {providerInfo?.providers?.infobip ? "Connected" : "Not Set"}
-                  </Badge>
-                </div>
-                <p className="text-text-secondary text-[11px]">
-                  Env variables: <code className="text-primary">INFOBIP_API_KEY</code> and <code className="text-primary">INFOBIP_BASE_URL</code>
-                </p>
-              </div>
-
-              <div className="p-3 bg-white rounded-lg border border-border space-y-1">
-                <div className="flex items-center justify-between font-semibold text-text-primary">
-                  <span>4. Generic SMS Webhook</span>
-                  <Badge variant={providerInfo?.providers?.generic_gateway ? "success" : "default"}>
-                    {providerInfo?.providers?.generic_gateway ? "Connected" : "Not Set"}
-                  </Badge>
-                </div>
-                <p className="text-text-secondary text-[11px]">
-                  Env variables: <code className="text-primary">SMS_GATEWAY_URL</code> and <code className="text-primary">SMS_API_KEY</code>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <h4 className="text-xs font-semibold text-text-primary mb-2">Test Live SMS Dispatch</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Input
-                label="Recipient Phone Number"
-                placeholder="0788123456 or +250788123456"
-                icon={Phone}
-                value={testPhone}
-                onChange={(e) => setTestPhone(e.target.value)}
-              />
-              <div>
-                <label className="block text-xs font-medium text-text-secondary mb-1">Notification Type</label>
-                <select
-                  value={testType}
-                  onChange={(e) => setTestType(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
-                >
-                  <option value="registration_confirmation">Registration Confirmation</option>
-                  <option value="account_approved">Account Approved</option>
-                  <option value="account_rejected">Account Rejected</option>
-                  <option value="coffee_received">Coffee Receipt Received</option>
-                  <option value="coffee_accepted">Coffee Delivery Accepted</option>
-                  <option value="payment_ready">Payment Ready Alert</option>
-                  <option value="payment_completed">Payment Completed</option>
-                  <option value="important_notice">Important Notice</option>
-                </select>
-              </div>
-              <div className="flex items-end">
-                <Button
-                  onClick={handleSendTestSMS}
-                  loading={testSending}
-                  icon={Send}
-                  className="w-full"
-                >
-                  Dispatch Test SMS
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {lastSmsResult && (
-            <div className={`p-4 rounded-xl border text-xs space-y-2 ${lastSmsResult.isSimulated
-              ? "bg-amber-50 border-amber-200 text-amber-900"
-              : "bg-emerald-50 border-emerald-200 text-emerald-900"
-              }`}>
-              <div className="flex items-center justify-between font-semibold">
-                <span className="flex items-center gap-1.5">
-                  {lastSmsResult.isSimulated ? "⚠️ Simulation Mode (No Real SMS Sent)" : "✅ Real SMS Dispatched"}
-                </span>
-                <span className="text-[11px] font-mono opacity-75">{new Date().toLocaleTimeString()}</span>
-              </div>
-
-              <p>
-                <strong>Formatted Recipient:</strong> <code className="bg-white/80 px-1.5 py-0.5 rounded">{lastSmsResult.to}</code>
-              </p>
-
-              {lastSmsResult.notice && (
-                <div className="p-2.5 bg-amber-100/80 rounded-lg text-amber-950 font-medium leading-relaxed">
-                  💡 {lastSmsResult.notice}
-                </div>
-              )}
-
-              <div>
-                <strong>Message Content:</strong>
-                <p className="mt-1 font-mono bg-white/80 p-2.5 rounded-lg border border-amber-200/50 text-gray-800">
-                  "{lastSmsResult.message}"
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
-
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const { userProfile } = useAuth();
@@ -1163,7 +887,6 @@ function SettingsPage() {
       case "departments": return <DepartmentsSection />;
       case "grades": return <GradesSection />;
       case "centers": return <CentersSection />;
-      case "notifications": return <NotificationsSection />;
       default: return <ProfileSection />;
     }
   };

@@ -55,13 +55,13 @@ export const ROLE_REPORTS = {
 };
 
 export const ROLE_SETTINGS_TABS = {
-  [ROLES.ADMIN]: ['profile', 'factory', 'departments', 'grades', 'centers', 'notifications'],
-  [ROLES.FACTORY_MANAGER]: ['profile', 'factory', 'departments', 'grades', 'centers', 'notifications'],
-  [ROLES.COLLECTION_OFFICER]: ['profile', 'notifications'],
-  [ROLES.PRODUCTION_OFFICER]: ['profile', 'notifications'],
-  [ROLES.STORE_KEEPER]: ['profile', 'notifications'],
-  [ROLES.ACCOUNTANT]: ['profile', 'notifications'],
-  [ROLES.FARMER]: ['profile', 'notifications'],
+  [ROLES.ADMIN]: ['profile', 'factory', 'departments', 'grades', 'centers'],
+  [ROLES.FACTORY_MANAGER]: ['profile', 'factory', 'departments', 'grades', 'centers'],
+  [ROLES.COLLECTION_OFFICER]: ['profile'],
+  [ROLES.PRODUCTION_OFFICER]: ['profile'],
+  [ROLES.STORE_KEEPER]: ['profile'],
+  [ROLES.ACCOUNTANT]: ['profile'],
+  [ROLES.FARMER]: ['profile'],
 };
 
 export const COLLECTIONS = {

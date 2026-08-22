@@ -393,6 +393,81 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function updateUserProfile(updates) {
+    const userId = userProfile?.id || userProfile?.uid || user?.uid;
+    if (!userId) return;
+
+    const url = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+    const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+
+    const newDisplayName = updates.fullName || updates.displayName || updates.display_name || userProfile?.display_name || userProfile?.displayName || user?.displayName;
+    const newPhone = updates.phone !== undefined ? updates.phone : (userProfile?.phone || '');
+    const newDept = updates.department !== undefined ? updates.department : (userProfile?.department || '');
+
+    if (url && rawKey) {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          display_name: newDisplayName,
+          phone: newPhone,
+          department: newDept,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      if (error) console.warn('Supabase profile update warning:', error);
+
+      if (userProfile?.role === 'farmer' || userProfile?.role === 'FARMER') {
+        try {
+          await supabase
+            .from('farmers')
+            .update({
+              name: newDisplayName,
+              phone: newPhone,
+            })
+            .or(`id.eq.${userId},user_id.eq.${userId}`);
+        } catch (e) {
+          console.warn('Farmer profile sync warning:', e);
+        }
+      }
+
+      try {
+        await supabase.auth.updateUser({
+          data: { displayName: newDisplayName }
+        });
+      } catch (e) {
+        console.warn('Supabase auth metadata update warning:', e);
+      }
+    } else {
+      const approved = JSON.parse(localStorage.getItem('coms_approved_users') || '[]');
+      const foundIdx = approved.findIndex((u) => u.uid === userId || u.id === userId || u.email === user?.email);
+      if (foundIdx !== -1) {
+        approved[foundIdx].displayName = newDisplayName;
+        approved[foundIdx].display_name = newDisplayName;
+        approved[foundIdx].phone = newPhone;
+        approved[foundIdx].department = newDept;
+        localStorage.setItem('coms_approved_users', JSON.stringify(approved));
+      }
+
+      const activeFarmers = JSON.parse(localStorage.getItem('coms_collection_farmers') || '[]');
+      const farmerIdx = activeFarmers.findIndex((f) => f.userId === userId || f.id === userId || f.email === user?.email);
+      if (farmerIdx !== -1) {
+        activeFarmers[farmerIdx].name = newDisplayName;
+        activeFarmers[farmerIdx].phone = newPhone;
+        localStorage.setItem('coms_collection_farmers', JSON.stringify(activeFarmers));
+      }
+    }
+
+    setUser((prev) => (prev ? { ...prev, displayName: newDisplayName } : prev));
+    setUserProfile((prev) => (prev ? {
+      ...prev,
+      display_name: newDisplayName,
+      displayName: newDisplayName,
+      phone: newPhone,
+      department: newDept,
+    } : prev));
+  }
+
   const value = {
     user,
     userProfile,
@@ -405,6 +480,7 @@ export function AuthProvider({ children }) {
     deleteUserAccount,
     forgotPassword,
     resetPassword,
+    updateUserProfile,
   };
 
   return (
