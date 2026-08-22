@@ -217,7 +217,7 @@ export default async function handler(req, res) {
       const atRes = await fetch(atUrl, {
         method: 'POST',
         headers: {
-          'apiKey': apiKey,
+          'ApiKey': apiKey,
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
         },

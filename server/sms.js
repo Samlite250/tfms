@@ -180,7 +180,7 @@ export async function sendSMS(payload) {
             const atRes = await fetch(atUrl, {
                 method: 'POST',
                 headers: {
-                    'apiKey': apiKey,
+                    'ApiKey': apiKey,
                     'Accept': 'application/json',
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
