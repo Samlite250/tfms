@@ -301,10 +301,10 @@ function ProductionPage() {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-            <Factory className="text-primary h-7 w-7" /> Production Management & Farmer Control
+            <Factory className="text-primary h-7 w-7" /> Production Management
           </h1>
           <p className="text-sm text-text-secondary mt-1">
-            Oversee farmer submissions, control production processing stages, and dispatch SMS updates.
+            Control farmer deliveries, update processing stages, and manage factory batches.
           </p>
         </div>
         <div className="flex gap-2">
@@ -346,8 +346,9 @@ function ProductionPage() {
             }`}
         >
           <Coffee size={18} />
-          Farmer Deliveries Production Control
-          <span className="ml-1 px-2 py-0.5 rounded-full text-xs bg-white/20 text-white font-bold">
+          Farmer Deliveries
+          <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${activeTab === "farmer-deliveries" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-700"
+            }`}>
             {allDeliveries.length}
           </span>
         </button>
@@ -359,8 +360,9 @@ function ProductionPage() {
             }`}
         >
           <Layers size={18} />
-          Factory Processing Batches
-          <span className="ml-1 px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-800 font-bold">
+          Factory Batches
+          <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold ${activeTab === "factory-batches" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-700"
+            }`}>
             {dataList.length}
           </span>
         </button>
@@ -615,8 +617,8 @@ function ProductionPage() {
                     type="button"
                     onClick={() => setSelectedStage(stg)}
                     className={`p-3 rounded-xl border text-left text-sm font-medium transition-all cursor-pointer ${selectedStage === stg
-                        ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
-                        : "border-border bg-card text-text-primary hover:border-primary/50"
+                      ? "border-primary bg-primary/10 text-primary font-bold shadow-sm"
+                      : "border-border bg-card text-text-primary hover:border-primary/50"
                       }`}
                   >
                     <div className="flex items-center justify-between">
