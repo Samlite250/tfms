@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import {
   ArrowLeft,
   Save,
-  Hash,
   Calendar,
   Weight,
 } from "lucide-react";
@@ -23,12 +22,6 @@ const coffeeGradeOptions = [
   { value: "PB", label: "Grade PB (Peaberry)" },
   { value: "C", label: "Grade C (Low Grade)" },
   { value: "TT", label: "Grade TT (Triage)" },
-];
-
-const qualityGradeOptions = [
-  { value: "A", label: "Grade A - Excellent" },
-  { value: "B", label: "Grade B - Standard" },
-  { value: "C", label: "Grade C - Low" },
 ];
 
 function ProductionFormPage() {
@@ -54,16 +47,12 @@ function ProductionFormPage() {
         productionDate: existingRecord.date,
         coffeeGrade: existingRecord.teaGrade || "AA",
         weight: existingRecord.rawMaterial || 0,
-        qualityGrade: "A",
-        notes: existingRecord.qualityNotes || "",
       }
       : {
         recordId: `BATCH-2026-${String(Math.floor(Math.random() * 900) + 100).padStart(3, "0")}`,
         productionDate: new Date().toISOString().split("T")[0],
         coffeeGrade: "AA",
         weight: "",
-        qualityGrade: "A",
-        notes: "",
       },
   });
 
@@ -92,7 +81,7 @@ function ProductionFormPage() {
       status: "In Progress",
       processingStage: "Washing",
       supervisor: "Factory Manager",
-      qualityNotes: data.notes || "",
+      qualityNotes: "",
     };
 
     if (isEdit && existingRecord) {
@@ -122,7 +111,7 @@ function ProductionFormPage() {
         </h1>
         <p className="text-sm text-text-secondary mt-0.5">
           {isEdit
-            ? `Editing ${mockEditData.recordId}`
+            ? `Editing ${existingRecord?.batchNumber || ""}`
             : "Fill in this simple form to add a production record."}
         </p>
       </div>
@@ -134,7 +123,6 @@ function ProductionFormPage() {
               label="ID"
               value={watch("recordId")}
               disabled
-              icon={Hash}
               helperText="Auto-created"
             />
             <Input
@@ -166,26 +154,6 @@ function ProductionFormPage() {
                 valueAsNumber: true,
               })}
             />
-            <div className="sm:col-span-2">
-              <Select
-                label="Quality Grade"
-                options={qualityGradeOptions}
-                placeholder="Select quality grade"
-                value={watch("qualityGrade")}
-                onChange={(val) => setValue("qualityGrade", val)}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-text-primary block mb-1">
-              Notes (Optional)
-            </label>
-            <textarea
-              className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary min-h-[60px]"
-              placeholder="Add optional notes..."
-              {...register("notes")}
-            />
           </div>
 
           {/* Form Actions */}
@@ -213,3 +181,4 @@ function ProductionFormPage() {
 }
 
 export default ProductionFormPage;
+
