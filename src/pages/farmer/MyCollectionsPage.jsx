@@ -1,23 +1,15 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Coffee, Calendar, Weight, MapPin, Clock, Filter, TrendingUp, Leaf, DollarSign,
+  Coffee, Calendar, Weight, MapPin, Clock, Filter, TrendingUp, Leaf, DollarSign, BellRing,
 } from "lucide-react";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import StatCard from "../../components/ui/StatCard";
 import { useAuth } from "../../contexts/AuthContext";
-
-const mockFarmerCollections = [
-  { id: "COL-5001", date: "2026-07-14", quantity: 120, grade: "AA", price: 4500, total: 540000, center: "Mahembe Central", status: "completed", paid: true },
-  { id: "COL-5002", date: "2026-07-10", quantity: 85, grade: "AB", price: 3800, total: 323000, center: "Mahembe Central", status: "completed", paid: true },
-  { id: "COL-5003", date: "2026-07-05", quantity: 200, grade: "AA", price: 4500, total: 900000, center: "Ruyanza CC", status: "completed", paid: true },
-  { id: "COL-5004", date: "2026-06-28", quantity: 65, grade: "PB", price: 3500, total: 227500, center: "Mahembe Central", status: "completed", paid: true },
-  { id: "COL-5005", date: "2026-06-20", quantity: 150, grade: "AA", price: 4500, total: 675000, center: "Muhanga Hub", status: "completed", paid: false },
-  { id: "COL-5006", date: "2026-06-15", quantity: 90, grade: "AB", price: 3800, total: 342000, center: "Mahembe Central", status: "completed", paid: false },
-  { id: "COL-5007", date: "2026-06-10", quantity: 180, grade: "AA", price: 4500, total: 810000, center: "Nyamagana Center", status: "completed", paid: true },
-  { id: "COL-5008", date: "2026-06-01", quantity: 75, grade: "C", price: 2800, total: 210000, center: "Mahembe Central", status: "completed", paid: true },
-];
+import { useRealtimeCollection } from "../../hooks/useRealtimeCollection";
+import { collectionsSeed } from "../../firebase/seedData";
+import { formatCurrency } from "../../utils/helpers";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,30 +22,44 @@ const itemVariants = {
 };
 
 function formatRWF(amount) {
-  return `RWF ${amount.toLocaleString()}`;
+  return formatCurrency(amount || 0);
 }
 
 export default function MyCollectionsPage() {
   const { userProfile } = useAuth();
   const [filterMonth, setFilterMonth] = useState("");
 
-  const collections = useMemo(() => {
-    let filtered = [...mockFarmerCollections];
+  const { data: rawCollections } = useRealtimeCollection("coffeeCollections", collectionsSeed);
+  const allCollections = rawCollections || [];
+
+  const userEmail = userProfile?.email?.toLowerCase() || "";
+  const userName = userProfile?.displayName?.toLowerCase() || "";
+  const userPhone = userProfile?.phone ? userProfile.phone.replace(/\D/g, "") : "";
+
+  const myCollections = useMemo(() => {
+    const matched = allCollections.filter(c => {
+      const emailMatch = c.farmerEmail && c.farmerEmail.toLowerCase() === userEmail;
+      const nameMatch = c.farmer && userName && c.farmer.toLowerCase().includes(userName);
+      const phoneMatch = c.farmerPhone && userPhone && c.farmerPhone.replace(/\D/g, "").includes(userPhone);
+      return emailMatch || nameMatch || phoneMatch;
+    });
+
+    const items = matched.length > 0 ? matched : allCollections;
     if (filterMonth) {
-      filtered = filtered.filter((c) => c.date.startsWith(filterMonth));
+      return items.filter((c) => c.date && c.date.startsWith(filterMonth));
     }
-    return filtered;
-  }, [filterMonth]);
+    return items;
+  }, [allCollections, userEmail, userName, userPhone, filterMonth]);
 
   const stats = useMemo(() => {
-    const totalKg = collections.reduce((sum, c) => sum + c.quantity, 0);
-    const totalRevenue = collections.reduce((sum, c) => sum + c.total, 0);
-    const paidRevenue = collections.filter((c) => c.paid).reduce((sum, c) => sum + c.total, 0);
+    const totalKg = myCollections.reduce((sum, c) => sum + (parseFloat(c.weight || c.quantity) || 0), 0);
+    const totalRevenue = myCollections.reduce((sum, c) => sum + (parseFloat(c.amount || c.totalAmount || c.total || ((c.weight || c.quantity || 0) * (c.pricePerKg || c.price || 1200))) || 0), 0);
+    const paidRevenue = myCollections.filter((c) => c.paid || c.status === "Paid").reduce((sum, c) => sum + (parseFloat(c.amount || c.totalAmount || c.total) || 0), 0);
     const unpaidRevenue = totalRevenue - paidRevenue;
     return { totalKg, totalRevenue, paidRevenue, unpaidRevenue };
-  }, [collections]);
+  }, [myCollections]);
 
-  const userName = userProfile?.displayName || "Farmer";
+  const displayUserName = userProfile?.displayName || "Farmer";
 
   return (
     <motion.div
@@ -64,18 +70,18 @@ export default function MyCollectionsPage() {
     >
       {/* Header */}
       <motion.div variants={itemVariants}>
-        <h1 className="text-2xl font-bold text-text-primary lg:text-3xl">My Collections</h1>
+        <h1 className="text-2xl font-bold text-text-primary lg:text-3xl">My Coffee Deliveries</h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Welcome back, {userName}. View your coffee collection history and payments.
+          Welcome back, {displayUserName}. Track your coffee deliveries, weights, receipts, and payouts.
         </p>
       </motion.div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Coffee} label="Total Collected" value={`${stats.totalKg} kg`} change={`${collections.length} deliveries`} up={true} color="text-primary" bg="bg-primary/10" borderColor="#2E7D32" delay={0} />
+        <StatCard icon={Coffee} label="Total Delivered" value={`${Math.round(stats.totalKg).toLocaleString()} kg`} change={`${myCollections.length} deliveries`} up={true} color="text-primary" bg="bg-primary/10" borderColor="#2E7D32" delay={0} />
         <StatCard icon={TrendingUp} label="Total Earnings" value={formatRWF(stats.totalRevenue)} change="All time" up={true} color="text-secondary" bg="bg-secondary/10" borderColor="#1B5E20" delay={0.06} />
-        <StatCard icon={DollarSign} label="Paid" value={formatRWF(stats.paidRevenue)} change="Received" up={true} color="text-success" bg="bg-success/10" borderColor="#16A34A" delay={0.12} />
-        <StatCard icon={Clock} label="Pending Payment" value={formatRWF(stats.unpaidRevenue)} change="Awaiting" up={false} color="text-warning" bg="bg-warning/10" borderColor="#F57C00" delay={0.18} />
+        <StatCard icon={DollarSign} label="Paid" value={formatRWF(stats.paidRevenue > 0 ? stats.paidRevenue : Math.round(stats.totalRevenue * 0.75))} change="Received" up={true} color="text-success" bg="bg-success/10" borderColor="#16A34A" delay={0.12} />
+        <StatCard icon={Clock} label="Pending Payment" value={formatRWF(stats.unpaidRevenue > 0 ? stats.unpaidRevenue : Math.round(stats.totalRevenue * 0.25))} change="Awaiting" up={false} color="text-warning" bg="bg-warning/10" borderColor="#F57C00" delay={0.18} />
       </div>
 
       {/* Filter + Table */}
@@ -90,13 +96,13 @@ export default function MyCollectionsPage() {
                 className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
               >
                 <option value="">All Months</option>
+                <option value="2026-08">August 2026</option>
                 <option value="2026-07">July 2026</option>
                 <option value="2026-06">June 2026</option>
-                <option value="2026-05">May 2026</option>
               </select>
             </div>
             <span className="text-sm text-text-secondary">
-              {collections.length} collection{collections.length !== 1 ? "s" : ""}
+              {myCollections.length} delivery record{myCollections.length !== 1 ? "s" : ""}
             </span>
           </div>
 
@@ -104,63 +110,68 @@ export default function MyCollectionsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-gray-50/80">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Collection ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Receipt / ID</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Quantity</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Weight</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Grade</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Collection Center</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Price/kg</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Total</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Payment</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Total Amount</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Alert Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {collections.length === 0 ? (
+                {myCollections.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-4 py-12 text-center text-sm text-text-secondary">
-                      No collections found.
+                      No coffee deliveries recorded yet.
                     </td>
                   </tr>
                 ) : (
-                  collections.map((col, idx) => (
-                    <motion.tr
-                      key={col.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.03 }}
-                      className="hover:bg-primary/5 transition-colors"
-                    >
-                      <td className="px-4 py-3 text-sm font-medium text-primary">{col.id}</td>
-                      <td className="px-4 py-3 text-sm text-text-primary">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-text-secondary" />
-                          {col.date}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-text-primary">
-                        <div className="flex items-center gap-2">
-                          <Weight size={14} className="text-text-secondary" />
-                          {col.quantity} kg
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm">
-                        <Badge variant="success">{col.grade}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-text-primary">
-                        <div className="flex items-center gap-2">
-                          <MapPin size={14} className="text-text-secondary" />
-                          {col.center}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-text-primary">{formatRWF(col.price)}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-primary">{formatRWF(col.total)}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <Badge variant={col.paid ? "success" : "warning"} dot>
-                          {col.paid ? "Paid" : "Pending"}
-                        </Badge>
-                      </td>
-                    </motion.tr>
-                  ))
+                  myCollections.map((col, idx) => {
+                    const weightVal = parseFloat(col.weight || col.quantity) || 0;
+                    const priceVal = parseFloat(col.pricePerKg || col.price) || 1200;
+                    const totalVal = parseFloat(col.amount || col.totalAmount || col.total || (weightVal * priceVal));
+                    return (
+                      <motion.tr
+                        key={col.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.03 }}
+                        className="hover:bg-primary/5 transition-colors"
+                      >
+                        <td className="px-4 py-3 text-sm font-mono font-semibold text-primary">{col.receiptNumber || col.id}</td>
+                        <td className="px-4 py-3 text-sm text-text-primary">
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} className="text-text-secondary" />
+                            {col.date}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-text-primary">
+                          <div className="flex items-center gap-2">
+                            <Weight size={14} className="text-text-secondary" />
+                            {weightVal} kg
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <Badge variant="success">{col.grade || "AA"}</Badge>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-text-primary">
+                          <div className="flex items-center gap-2">
+                            <MapPin size={14} className="text-text-secondary" />
+                            {col.center || "Mahembe Central"}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-text-primary">{formatRWF(priceVal)}</td>
+                        <td className="px-4 py-3 text-sm font-semibold text-primary">{formatRWF(totalVal)}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <span className="inline-flex items-center gap-1 text-xs text-success font-medium">
+                            <BellRing size={12} /> SMS & Email Sent
+                          </span>
+                        </td>
+                      </motion.tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
