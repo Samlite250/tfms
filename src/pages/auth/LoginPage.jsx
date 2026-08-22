@@ -127,7 +127,7 @@ function LoginPage() {
             <div className="inline-flex items-center justify-center w-10 h-10 bg-primary rounded-xl">
               <Leaf className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-primary">COMS</span>
+            <span className="text-lg font-bold text-primary">Mahembe Factory</span>
           </div>
 
           <h2 className="text-3xl font-bold text-text-primary">Welcome Back</h2>
@@ -135,101 +135,99 @@ function LoginPage() {
 
           <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
 
-          {authError && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-3 bg-danger/10 border border-danger/20 rounded-xl text-sm text-danger"
-            >
-              {authError}
-            </motion.div>
-          )}
+            {authError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-3 bg-danger/10 border border-danger/20 rounded-xl text-sm text-danger"
+              >
+                {authError}
+              </motion.div>
+            )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div>
-              <label className="text-sm font-medium text-text-primary mb-1.5 block">Email</label>
-              <div className="relative">
-                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                    errors.email
-                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                      : 'border-border focus:ring-primary/30 focus:border-primary'
-                  }`}
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' },
-                  })}
-                />
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <div>
+                <label className="text-sm font-medium text-text-primary mb-1.5 block">Email</label>
+                <div className="relative">
+                  <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.email
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                      }`}
+                    {...register('email', {
+                      required: 'Email is required',
+                      pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' },
+                    })}
+                  />
+                </div>
+                {errors.email && <p className="text-xs text-danger mt-1">{errors.email.message}</p>}
               </div>
-              {errors.email && <p className="text-xs text-danger mt-1">{errors.email.message}</p>}
-            </div>
 
-            <div>
-              <label className="text-sm font-medium text-text-primary mb-1.5 block">Password</label>
-              <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  className={`w-full pl-10 pr-11 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                    errors.password
-                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                      : 'border-border focus:ring-primary/30 focus:border-primary'
-                  }`}
-                  {...register('password', {
-                    required: 'Password is required',
-                    minLength: { value: 6, message: 'Password must be at least 6 characters' },
-                  })}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+              <div>
+                <label className="text-sm font-medium text-text-primary mb-1.5 block">Password</label>
+                <div className="relative">
+                  <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    className={`w-full pl-10 pr-11 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.password
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                      }`}
+                    {...register('password', {
+                      required: 'Password is required',
+                      minLength: { value: 6, message: 'Password must be at least 6 characters' },
+                    })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-xs text-danger mt-1">{errors.password.message}</p>}
               </div>
-              {errors.password && <p className="text-xs text-danger mt-1">{errors.password.message}</p>}
-            </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary/30 cursor-pointer"
-                  {...register('rememberMe')}
-                />
-                <span className="text-sm text-text-secondary">Remember me</span>
-              </label>
-              <Link to="/forgot-password" className="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
-                Forgot Password?
-              </Link>
-            </div>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary/30 cursor-pointer"
+                    {...register('rememberMe')}
+                  />
+                  <span className="text-sm text-text-secondary">Remember me</span>
+                </label>
+                <Link to="/forgot-password" className="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
+                  Forgot Password?
+                </Link>
+              </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-dark hover:shadow-md active:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {isSubmitting ? (
-                <span className="inline-flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                <>
-                  <LogIn size={18} />
-                  Sign In
-                </>
-              )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-dark hover:shadow-md active:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {isSubmitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Signing in...
+                  </span>
+                ) : (
+                  <>
+                    <LogIn size={18} />
+                    Sign In
+                  </>
+                )}
+              </button>
+            </form>
 
           </div>
 

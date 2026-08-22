@@ -945,7 +945,7 @@ function NotificationsSection() {
       amount: 180000,
       paymentMethod: "Mobile Money",
       role: "farmer",
-      message: "This is a test SMS notification from COMS Coffee System.",
+      message: "This is a test SMS notification from Mahembe Coffee Factory System.",
     };
 
     const res = await triggerSMS(testPayload);
@@ -1115,8 +1115,8 @@ function NotificationsSection() {
 
           {lastSmsResult && (
             <div className={`p-4 rounded-xl border text-xs space-y-2 ${lastSmsResult.isSimulated
-                ? "bg-amber-50 border-amber-200 text-amber-900"
-                : "bg-emerald-50 border-emerald-200 text-emerald-900"
+              ? "bg-amber-50 border-amber-200 text-amber-900"
+              : "bg-emerald-50 border-emerald-200 text-emerald-900"
               }`}>
               <div className="flex items-center justify-between font-semibold">
                 <span className="flex items-center gap-1.5">

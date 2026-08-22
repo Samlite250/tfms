@@ -445,7 +445,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
             { label: "Record Collection", icon: Coffee, to: "/collections/new", color: "bg-primary" },
-            { label: "New Production", icon: Factory, to: "/production/new", color: "bg-secondary" },
+            { label: "Production", icon: Factory, to: "/production", color: "bg-secondary" },
             { label: "Add Farmer", icon: UserPlus, to: "/farmers/new", color: "bg-info" },
             { label: "Create Payment", icon: Banknote, to: "/payments/new", color: "bg-accent-dark" },
             { label: "View Reports", icon: ClipboardList, to: "/reports", color: "bg-purple-600" },

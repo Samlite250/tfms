@@ -68,10 +68,10 @@ export default function Sidebar({
 
   const initials = user?.displayName
     ? user.displayName
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
     : user?.email?.[0]?.toUpperCase() ?? 'U';
 
   const sidebarContent = (
@@ -91,7 +91,7 @@ export default function Sidebar({
                 transition={{ duration: 0.2 }}
                 className="text-xl font-bold text-white whitespace-nowrap overflow-hidden"
               >
-                COMS
+                Mahembe Factory
               </motion.span>
             )}
           </AnimatePresence>
@@ -117,10 +117,9 @@ export default function Sidebar({
                 className={`
                   relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-150
                   group cursor-pointer
-                  ${
-                    active
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/60 hover:bg-white/10 hover:text-white'
+                  ${active
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/60 hover:bg-white/10 hover:text-white'
                   }
                 `}
               >

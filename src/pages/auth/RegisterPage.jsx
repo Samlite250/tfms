@@ -197,10 +197,10 @@ export default function RegisterPage() {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/15 rounded-2xl backdrop-blur-sm mb-8">
               <Leaf className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-4xl font-bold mb-4 tracking-tight">Join COMS</h1>
+            <h1 className="text-4xl font-bold mb-4 tracking-tight">Join Mahembe Factory</h1>
             <div className="w-16 h-1 bg-accent rounded-full mx-auto mb-6" />
             <p className="text-lg text-white/80 max-w-sm leading-relaxed">
-              Create your account to access the Coffee Factory Operation Management System. Admin approval is required.
+              Create your account to access the Mahembe Coffee Factory Management System. Admin approval is required.
             </p>
           </motion.div>
 
@@ -238,7 +238,7 @@ export default function RegisterPage() {
             <div className="inline-flex items-center justify-center w-10 h-10 bg-primary rounded-xl">
               <Leaf className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-primary">COMS</span>
+            <span className="text-lg font-bold text-primary">Mahembe Factory</span>
           </div>
 
           <Link
@@ -258,8 +258,8 @@ export default function RegisterPage() {
               type="button"
               onClick={() => switchRegType('farmer')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${regType === 'farmer'
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-text-secondary hover:text-text-primary'
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-text-secondary hover:text-text-primary'
                 }`}
             >
               <Tractor size={16} />
@@ -269,8 +269,8 @@ export default function RegisterPage() {
               type="button"
               onClick={() => switchRegType('staff')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${regType === 'staff'
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-text-secondary hover:text-text-primary'
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-text-secondary hover:text-text-primary'
                 }`}
             >
               <User size={16} />
@@ -299,8 +299,8 @@ export default function RegisterPage() {
                     type="text"
                     placeholder="Enter your full name"
                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.displayName
-                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                      : 'border-border focus:ring-primary/30 focus:border-primary'
                       }`}
                     {...register('displayName', { required: 'Name is required' })}
                   />
@@ -316,8 +316,8 @@ export default function RegisterPage() {
                     type="email"
                     placeholder="you@example.com"
                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.email
-                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                      : 'border-border focus:ring-primary/30 focus:border-primary'
                       }`}
                     {...register('email', {
                       required: 'Email is required',
@@ -337,8 +337,8 @@ export default function RegisterPage() {
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Min 6 characters"
                       className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.password
-                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                          : 'border-border focus:ring-primary/30 focus:border-primary'
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
                       {...register('password', {
                         required: 'Required',
@@ -356,8 +356,8 @@ export default function RegisterPage() {
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Repeat password"
                       className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.confirmPassword
-                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                          : 'border-border focus:ring-primary/30 focus:border-primary'
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
                       {...register('confirmPassword', {
                         required: 'Required',
@@ -382,8 +382,8 @@ export default function RegisterPage() {
                     <label className="text-sm font-medium text-text-primary mb-1.5 block">Role</label>
                     <select
                       className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${errors.role
-                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                          : 'border-border focus:ring-primary/30 focus:border-primary'
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
                       {...register('role', regType === 'staff' ? { required: 'Role is required' } : {})}
                     >
@@ -400,8 +400,8 @@ export default function RegisterPage() {
                     <label className="text-sm font-medium text-text-primary mb-1.5 block">Department</label>
                     <select
                       className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${errors.department
-                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                          : 'border-border focus:ring-primary/30 focus:border-primary'
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
                       {...register('department', regType === 'staff' ? { required: 'Department is required' } : {})}
                     >
@@ -430,8 +430,8 @@ export default function RegisterPage() {
                         <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
                         <select
                           className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none ${errors.district
-                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
                             }`}
                           {...register('district', { required: 'District is required' })}
                           onChange={(e) => {
@@ -456,8 +456,8 @@ export default function RegisterPage() {
                         <select
                           disabled={!selectedDistrict}
                           className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${errors.sector
-                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
                             }`}
                           {...register('sector', { required: selectedDistrict ? 'Sector is required' : false })}
                           onChange={(e) => {
@@ -483,8 +483,8 @@ export default function RegisterPage() {
                         <select
                           disabled={!selectedSector}
                           className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${errors.cell
-                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
                             }`}
                           {...register('cell', { required: selectedSector ? 'Cell is required' : false })}
                           onChange={(e) => {
@@ -507,8 +507,8 @@ export default function RegisterPage() {
                         <select
                           disabled={!selectedCell}
                           className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${errors.village
-                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
                             }`}
                           {...register('village', { required: selectedCell ? 'Village is required' : false })}
                         >
@@ -532,8 +532,8 @@ export default function RegisterPage() {
                           min="0"
                           placeholder="e.g. 2.5"
                           className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.farmSize
-                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
                             }`}
                           {...register('farmSize', { required: 'Farm size is required', min: { value: 0.1, message: 'Must be > 0' } })}
                         />
@@ -546,8 +546,8 @@ export default function RegisterPage() {
                         <Coffee size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
                         <select
                           className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${errors.coffeeVariety
-                              ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                              : 'border-border focus:ring-primary/30 focus:border-primary'
+                            ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                            : 'border-border focus:ring-primary/30 focus:border-primary'
                             }`}
                           {...register('coffeeVariety', { required: 'Variety is required' })}
                         >
@@ -564,8 +564,8 @@ export default function RegisterPage() {
                     <label className="text-sm font-medium text-text-primary mb-1.5 block">Collection Center</label>
                     <select
                       className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${errors.collectionCenter
-                          ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                          : 'border-border focus:ring-primary/30 focus:border-primary'
+                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                        : 'border-border focus:ring-primary/30 focus:border-primary'
                         }`}
                       {...register('collectionCenter', { required: 'Collection center is required' })}
                     >
@@ -587,8 +587,8 @@ export default function RegisterPage() {
                     type="tel"
                     placeholder="+250 7XX XXX XXX"
                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-sm text-text-primary placeholder:text-text-secondary/60 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.phone
-                        ? 'border-danger focus:ring-danger/30 focus:border-danger'
-                        : 'border-border focus:ring-primary/30 focus:border-primary'
+                      ? 'border-danger focus:ring-danger/30 focus:border-danger'
+                      : 'border-border focus:ring-primary/30 focus:border-primary'
                       }`}
                     {...register('phone', { required: 'Phone number is required' })}
                   />

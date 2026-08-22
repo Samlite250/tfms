@@ -490,7 +490,7 @@ export default function LandingPage() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Leaf className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">COMS</span>
+              <span className="text-xl font-bold text-gray-900">Mahembe Factory</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-8">
@@ -701,7 +701,7 @@ export default function LandingPage() {
                           <Leaf className="w-4 h-4 text-accent" />
                         </div>
                         <div>
-                          <p className="text-white font-semibold text-sm leading-none">COMS Overview</p>
+                          <p className="text-white font-semibold text-sm leading-none">Mahembe Factory Overview</p>
                           <p className="text-white/50 text-[10px] mt-0.5">Live factory data</p>
                         </div>
                       </div>
@@ -845,7 +845,7 @@ export default function LandingPage() {
               Everything You Need to{" "}
               <span className="text-primary">Manage</span> Your Factory
             </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
               A complete suite of tools designed for modern coffee factory
               operations
             </p>
@@ -1060,13 +1060,13 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                quote: "COMS has completely transformed how we manage our daily coffee collections. The real-time tracking saves us hours of manual work every day.",
+                quote: "Mahembe Factory platform has completely transformed how we manage our daily coffee collections. The real-time tracking saves us hours of manual work every day.",
                 name: "Jean-Paul Habimana",
                 role: "Factory Manager, Mahembe Coffee Factory",
                 rating: 5,
               },
               {
-                quote: "The inventory management alone is worth it. We reduced waste by 30% in the first quarter of using COMS. Highly recommended.",
+                quote: "The inventory management alone is worth it. We reduced waste by 30% in the first quarter of using Mahembe Factory. Highly recommended.",
                 name: "Marie Claire Uwimana",
                 role: "Operations Director, Mahembe Coffee Factory",
                 rating: 5,
@@ -1132,7 +1132,7 @@ export default function LandingPage() {
               variants={fadeUp}
             >
               <span className="inline-block text-sm font-semibold text-primary uppercase tracking-wider mb-3">
-                Why COMS
+                Why Mahembe Factory
               </span>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
                 Why Digitize Your{" "}
@@ -1451,7 +1451,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center">
                   <Leaf className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">COMS</span>
+                <span className="text-xl font-bold">Mahembe Factory</span>
               </Link>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
                 Modern coffee factory management system designed to streamline
@@ -1516,7 +1516,7 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold text-white mb-4">Stay Updated</h4>
               <p className="text-sm text-gray-400 leading-relaxed mb-4">
-                Get the latest news and updates about COMS.
+                Get the latest news and updates about Mahembe Factory.
               </p>
               <form
                 onSubmit={(e) => e.preventDefault()}
@@ -1548,7 +1548,7 @@ export default function LandingPage() {
         <div className="border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} COMS - Mahembe Coffee Factory. All rights reserved.
+              &copy; {new Date().getFullYear()} Mahembe Coffee Factory. All rights reserved.
             </p>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Leaf className="w-4 h-4 text-secondary" />
